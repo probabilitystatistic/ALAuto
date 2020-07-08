@@ -673,13 +673,17 @@ class CombatModule(object):
                 continue
             if target_info == None:
                 target_info = self.get_closest_target(self.blacklist, mystery_node=(not self.config.combat["ignore_mystery_nodes"]))
+                continue
             if target_info:
                 #tap at target's coordinates
                 Utils.touch(target_info[0:2])
                 Utils.update_screen()
             else:
                 continue
-            if Utils.find("combat/alert_unable_reach", 0.8):
+# By me: it seems that lower similarity(0.8) actually make the bot unable to detect "unable to reach".
+#        but it should be easier when similarity is low. Not sure why                
+#            if Utils.find("combat/alert_unable_reach", 0.8):
+            if Utils.find("combat/alert_unable_reach"):
                 Logger.log_warning("Unable to reach the target.")
                 if self.config.combat['focus_on_mystery_nodes'] and target_info[2] == "mystery_node":
                     self.enemies_list.clear()
@@ -710,7 +714,10 @@ class CombatModule(object):
             Utils.touch(boss_info[0:2])
             Utils.update_screen()
 
-            if Utils.find("combat/alert_unable_reach", 0.8):
+# By me: it seems that lower similarity(0.8) actually make the bot unable to detect "unable to reach".
+#        but it should be easier when similarity is low. Not sure why
+#            if Utils.find("combat/alert_unable_reach", 0.8):
+            if Utils.find("combat/alert_unable_reach"):
                 Logger.log_msg("Unable to reach boss.")
                 #handle boss' coordinates
                 if not self.unable_handler(boss_info[0:2], boss=True):
