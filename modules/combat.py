@@ -129,7 +129,7 @@ class CombatModule(object):
                     self.exit = 0
                     Logger.log_msg("Repeating map {}.".format(self.chapter_map))
                     Utils.touch_randomly(map_region)
-                    continue                
+                    continue
             if self.exit > 2:
                 self.stats.increment_combat_attempted()
                 break
@@ -181,7 +181,7 @@ class CombatModule(object):
             if Utils.find("menu/button_confirm"):
                 Logger.log_msg("Found commission info message.")
                 Utils.touch_randomly(self.region["combat_com_confirm"])
-            
+
         Utils.script_sleep(1)
         Utils.menu_navigate("menu/button_battle")
 
@@ -193,7 +193,7 @@ class CombatModule(object):
         If the map isn't found, it navigates the map selection menu to get to the world where the specified map is located.
         Only works with standard maps up to worlds 13 and some event maps.
         Also checks if hard mode is enabled, and if it's legit to keep it so (event maps C and D).
-        If nothing is found even after menu navigation, it stops the bot workflow until the user moves to the right 
+        If nothing is found even after menu navigation, it stops the bot workflow until the user moves to the right
         screen or the map asset is substituted with the right one.
 
         Returns:
@@ -206,7 +206,7 @@ class CombatModule(object):
             Utils.touch_randomly(self.region["menu_button_battle"])
             Utils.wait_update_screen(2)
 
-        # correct map mode 
+        # correct map mode
         if not self.chapter_map[0].isdigit():
             letter = self.chapter_map[2]
             event_maps = ['A', 'B', 'S', 'C', 'D']
@@ -214,16 +214,18 @@ class CombatModule(object):
             Utils.touch_randomly(self.region['event_button'])
             Utils.wait_update_screen(1)
 
-            if event_maps.index(letter) < 3 and Utils.find("menu/button_normal_mode", 0.8) or \
-               event_maps.index(letter) > 2 and not Utils.find("menu/button_normal_mode", 0.8):
-                Utils.touch_randomly(self.region['normal_mode_button'])
-                Utils.wait_update_screen(1)
+#           By me: comment out the switching to normal mode for event map so I can farm D2 in Iris of light and dark.
+#           In practice, it successfully enter the map but frequently fails to find an enemy(especially siren).
+#            if event_maps.index(letter) < 3 and Utils.find("menu/button_normal_mode", 0.8) or \
+#               event_maps.index(letter) > 2 and not Utils.find("menu/button_normal_mode", 0.8):
+#                Utils.touch_randomly(self.region['normal_mode_button'])
+#                Utils.wait_update_screen(1)
         else:
             if Utils.find("menu/button_normal_mode"):
                 Logger.log_debug("Disabling hard mode.")
                 Utils.touch_randomly(self.region['normal_mode_button'])
                 Utils.wait_update_screen(1)
-        
+
         map_region = Utils.find('maps/map_{}'.format(self.chapter_map), 0.99)
         if map_region != None:
             Logger.log_msg("Found specified map.")
@@ -342,7 +344,7 @@ class CombatModule(object):
                     Logger.log_msg("Received new RARE ship as drop.")
                     Utils.touch_randomly(self.region['dismiss_ship_drop'])
                     Utils.script_sleep(2)
-                    continue                
+                    continue
                 elif Utils.find("menu/drop_ssr"):
                     Logger.log_msg("Received SSR ship as drop.")
                     Utils.touch_randomly(self.region['dismiss_ship_drop'])
@@ -477,18 +479,20 @@ class CombatModule(object):
             else:
                 if count != 0 and count % 3 == 0:
                     Utils.touch(location)
+                if (count > 9 and self.chapter_map[0] == '7' and self.chapter_map[2] == '2' and self.config.combat['retreat_after'] == 3 and self.config.combat['clearing_mode']):
+                    Logger.log_warning("Clicking on destination for too many times. Assuming target reached.")
+                    return 0
                 if count > 21:
                     Logger.log_msg("Blacklisting location and searching for another enemy.")
                     self.blacklist.append(location[0:2])
                     self.fleet_location = None
-
                     location = self.get_closest_target(self.blacklist, mystery_node=(not self.config.combat["ignore_mystery_nodes"]))
                     count = 0
                 count += 1
 
     def unable_handler(self, coords, boss=False):
         """
-        Method called when the path to the target (boss fleet or mystery node) is obstructed by mobs: 
+        Method called when the path to the target (boss fleet or mystery node) is obstructed by mobs:
         it procedes to switch targets to the mobs which are blocking the path.
 
         Args:
@@ -643,7 +647,7 @@ class CombatModule(object):
                     translation_module = 175 if boss_region.y > 300 else 75
                     horizontal_translation = translation_sign * translation_module
                     angular_coefficient = -1 * ((540 - boss_region.y)/(960 - boss_region.x))
-                    Utils.swipe(boss_region.x + horizontal_translation, boss_region.y + int(horizontal_translation * angular_coefficient), 
+                    Utils.swipe(boss_region.x + horizontal_translation, boss_region.y + int(horizontal_translation * angular_coefficient),
                         960 + horizontal_translation, 540 + int(horizontal_translation * angular_coefficient), 300)
                     Utils.wait_update_screen()
 
@@ -810,7 +814,7 @@ class CombatModule(object):
                 l7 = [x for x in l7 if (not self.filter_blacklist(x, blacklist))]
                 Logger.log_debug("L7 " +str(l7))
                 self.enemies_list.extend(l7)
-			
+
             sim -= 0.005
 
         if filter_coordinates:
@@ -835,6 +839,7 @@ class CombatModule(object):
                 Utils.update_screen()
 
                 l1 = list(map(lambda x:[x[0], x[1] + 140], Utils.find_all_with_resize('combat/question_mark', sim)))
+
                 # filter coordinates inside prohibited regions
                 for p_region in self.prohibited_region.values():
                     l1 = [x for x in l1 if (not p_region.contains(x))]
@@ -842,10 +847,10 @@ class CombatModule(object):
 
                 self.mystery_nodes_list = l1
                 sim -= 0.005
-        
+
             if filter_coordinates:
                 self.mystery_nodes_list = Utils.filter_similar_coords(self.mystery_nodes_list)
-            
+
             return self.mystery_nodes_list
 
     def filter_blacklist(self, coord, blacklist):
@@ -888,7 +893,7 @@ class CombatModule(object):
                     coords = [0, 0]
 
             self.fleet_location = coords
-                
+
         return self.fleet_location
 
     def get_closest_target(self, blacklist=[], location=[], mystery_node=False, boss=False):
@@ -907,7 +912,7 @@ class CombatModule(object):
         Returns:
             array: An array containing the x and y coordinates of the closest
             enemy to the specified location
-        """ 
+        """
         fleet_location = self.get_fleet_location()
 
         if location == []:
@@ -926,7 +931,7 @@ class CombatModule(object):
         else:
             # target only enemy mobs
             targets = self.get_enemies(blacklist, boss)
-            
+
         closest = targets[Utils.find_closest(targets, location)[1]]
 
         Logger.log_info('Current location is: {}'.format(fleet_location))
