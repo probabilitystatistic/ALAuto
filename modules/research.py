@@ -89,7 +89,9 @@ class ResearchModule(object):
                 return False
             if not self.config.research['AllowConsumingCoins'] and Utils.find("research/coins", 0.99):
                 return False
-            if not self.config.research['AllowConsumingCubes'] and Utils.find("research/cubes", 0.99):
+# By me: sometimes bot consume cubes so I lower the similarity down
+#           if not self.config.research['AllowConsumingCubes'] and Utils.find("research/cubes", 0.99):
+            if not self.config.research['AllowConsumingCubes'] and Utils.find("research/cubes", 0.95):
                 return False
             if self.config.research['AwardMustContainPRBlueprint'] and not Utils.find("research/PRBlueprint"):
                 return False
