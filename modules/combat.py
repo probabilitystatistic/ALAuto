@@ -596,6 +596,9 @@ class CombatModule(object):
             'E-B3': lambda: Utils.swipe(960, 540, 1060, 670, 300),
             'E-D3': lambda: Utils.swipe(960, 540, 1060, 670, 300),
             # needs to be updated
+# By me:
+# adding the swipe to fit the question mark of 5-1 on screen
+            '5-1': lambda: Utils.swipe(1000, 500, 1000, 600, 300),
             '12-2': lambda: Utils.swipe(1000, 570, 1300, 540, 300),
             '12-3': lambda: Utils.swipe(1250, 530, 1300, 540, 300),
             '12-4': lambda: Utils.swipe(960, 300, 960, 540, 300),
