@@ -258,9 +258,11 @@ class CombatModule(object):
                             Utils.touch_randomly(self.region['map_nav_left'])
                             Logger.log_debug("Swiping to the left")
                             Utils.script_sleep()
-        
+
         Utils.wait_update_screen()
-        map_region = Utils.find('maps/map_{}'.format(self.chapter_map), 0.99)
+# By me: lowering the similarity for map detection
+#        map_region = Utils.find('maps/map_{}'.format(self.chapter_map), 0.99)
+        map_region = Utils.find('maps/map_{}'.format(self.chapter_map), 0.95)
         if map_region == None:
             Logger.log_error("Cannot find the specified map, please move to the world where it's located.")
         while map_region == None:
