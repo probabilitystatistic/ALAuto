@@ -987,11 +987,17 @@ class CombatModule(object):
 
         if closest in self.enemies_list:
             x = self.enemies_list.index(closest)
-            del self.enemies_list[x]
+# By me:
+# clear the list such that the bot search enemy every turn
+#            del self.enemies_list[x]
+            self.enemies_list.clear()
             target_type = "enemy"
         else:
             x = self.mystery_nodes_list.index(closest)
-            del self.mystery_nodes_list[x]
+# By me:
+# clear the list such that the bot search mystery node every turn
+#            del self.mystery_nodes_list[x]
+            self.mystery_nodes_list.clear()
             target_type = "mystery_node"
 
         return [closest[0], closest[1], target_type]
