@@ -503,9 +503,15 @@ class CombatModule(object):
         else:
             Logger.log_debug("Unable to reach selected target function started.")
         self.blacklist.clear()
+
         closest_to_unreachable_target = self.get_closest_target(self.blacklist, coords, boss=boss)
 
+# By me:
+        Utils.script_sleep(1)
         Utils.touch(closest_to_unreachable_target)
+# if the target in above line is reachable and if the dialog "unbale to reach target" from a previous 
+# moving attemp has not yet disappeared, the update screen below will wrongly think the reachable target 
+# is unreachable. The solution is to ask the program to wait before clicking the target.
         Utils.update_screen()
 
         if Utils.find("combat/alert_unable_reach"):
@@ -514,6 +520,8 @@ class CombatModule(object):
 
             while True:
                 closest_enemy = self.get_closest_target(self.blacklist)
+# By me:
+                Utils.script_sleep(1)
                 Utils.touch(closest_enemy)
                 Utils.update_screen()
 
@@ -826,7 +834,8 @@ class CombatModule(object):
         """
         if len(blacklist) > 2:
             self.mystery_nodes_list.clear()
-        
+
+
         if len(self.mystery_nodes_list) == 0 and not Utils.find('combat/question_mark', 0.9):
             # if list is empty and a question mark is NOT found
             return self.mystery_nodes_list
