@@ -147,10 +147,17 @@ class CombatModule(object):
                 Utils.wait_update_screen(2)
             if Utils.find("combat/button_retreat"):
                 Logger.log_debug("Found retreat button, starting clear function.")
-                if not self.clear_map():
-                    self.stats.increment_combat_attempted()
-                    break
-                Utils.wait_update_screen()
+                if (self.chapter_map[0] == '7' and self.chapter_map[2] == '2' and self.config.combat['retreat_after'] == 3 and self.config.combat['clearing_mode'] and self.config.combat['focus_on_mystery_nodes']):
+                    Logger.log_debug("Started special 7-2 farming.")
+                    if not self.clear_map_special_7_2():
+                   	    self.stats.increment_combat_attempted()
+                   	    break
+                    Utils.wait_update_screen()
+                else:
+                    if not self.clear_map():
+                        self.stats.increment_combat_attempted()
+                        break
+                    Utils.wait_update_screen()
             if Utils.find("menu/button_sort"):
                 if self.config.enhancement['enabled'] and not enhancement_failed:
                     if not self.enhancement_module.enhancement_logic_wrapper(forced=True):
