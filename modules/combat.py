@@ -629,7 +629,8 @@ class CombatModule(object):
             if Utils.find("combat/alert_unable_battle"):
                 Utils.touch_randomly(self.region['close_info_dialog'])
                 self.exit = 5
-            if self.config.combat['retreat_after'] != 0 and self.combats_done >= self.config.combat['retreat_after']:
+            #if self.config.combat['retreat_after'] != 0 and self.combats_done >= self.config.combat['retreat_after']:
+            if self.config.combat['retreat_after'] != 0 and self.kills_count >= self.config.combat['retreat_after'] and (target_info != None and target_info[2] == 'enemy'):
                 Logger.log_msg("Retreating after defeating {} enemies".format(self.config.combat['retreat_after']))
                 self.exit = 2
             if self.exit != 0:
