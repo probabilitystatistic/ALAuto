@@ -732,8 +732,25 @@ class CombatModule(object):
                 #handle boss' coordinates
                 if not self.unable_handler(boss_info[0:2], boss=True):
                     return
+                swipes = {
+                    0: lambda: Utils.swipe(960, 240, 960, 940, 300),
+                    1: lambda: Utils.swipe(1560, 540, 260, 540, 300),
+                    2: lambda: Utils.swipe(960, 940, 960, 240, 300),
+                    3: lambda: Utils.swipe(260, 540, 1560, 540, 300)
+                }
+
 # By me: This should be a bug. It switch fleet no matter what.
 #                Utils.touch_randomly(self.region['button_switch_fleet'])
+                Utils.wait_update_screen(2)
+                boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
+                s = 0
+                while not boss_region:
+                    if s > 3: s = 0
+                    swipes.get(s)()
+                    Utils.wait_update_screen(0.5)
+                    boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
+                    s += 1
+                boss_info = [boss_region.x + 50, boss_region.y + 25, "boss"]
                 continue
             else:
                 self.movement_handler(boss_info)
