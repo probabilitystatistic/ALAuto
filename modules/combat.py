@@ -729,6 +729,8 @@ class CombatModule(object):
                 #handle boss' coordinates
                 if not self.unable_handler(boss_info[0:2], boss=True):
                     return
+# By me: This should be a bug. It switch fleet no matter what.
+#                Utils.touch_randomly(self.region['button_switch_fleet'])
                 continue
             else:
                 self.movement_handler(boss_info)
