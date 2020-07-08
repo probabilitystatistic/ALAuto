@@ -636,6 +636,20 @@ class CombatModule(object):
             if self.exit != 0:
                 self.retreat_handler()
                 return True
+# By me:
+# Solution when boss is hidden by player's fleet. This should work for map 5-1 and 6-1.
+# It's just moving one grid left(it's two to avoid further possible block).
+# The width of one grid is roughly 180 pixels.
+# Note that this will fail if the boss is hidden by the other fleet.
+            if self.kills_count >= self.kills_before_boss[self.chapter_map] and not Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9):
+                Logger.log_msg("Boss fleet is not found. Trying to uncover the boss.")
+                self.fleet_location = None
+                single_fleet_location = self.get_fleet_location()
+                location_left_of_fleet = [0, 0]
+                location_left_of_fleet[0] = single_fleet_location[0] - 180
+                location_left_of_fleet[1] = single_fleet_location[1]
+                Utils.touch(location_left_of_fleet)
+                continue
             if self.kills_count >= self.kills_before_boss[self.chapter_map] and Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9):
                 Logger.log_msg("Boss fleet was found.")
 
