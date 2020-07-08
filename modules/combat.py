@@ -618,7 +618,10 @@ class CombatModule(object):
             Utils.script_sleep()
             Utils.touch_randomly(self.region["close_strategy_menu"])
 
-        target_info = self.get_closest_target(self.blacklist)
+#By me:
+# allow the bot to collect question node at the first turn
+        #target_info = self.get_closest_target(self.blacklist)
+        target_info = self.get_closest_target(self.blacklist, mystery_node=(not self.config.combat["ignore_mystery_nodes"]))
 
         while True:
             Utils.update_screen()
