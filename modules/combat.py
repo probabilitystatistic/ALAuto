@@ -731,7 +731,197 @@ class CombatModule(object):
                 target_info = None
 
                 self.blacklist.clear()
+
+                Utils.script_sleep(3)
                 continue
+
+    def clear_map_special_7_2(self):
+        """ Framing 7-2 for 4 question marks with 3 or at most 4 battles. Only support one fleet!
+        """ 
+        question_mark_all_obtained = False
+        position_boss = [956, 538]
+        position_A3 = [378, 539]
+        position_B3 = [569, 538]
+        position_C4 = [752, 681]
+        region_question_mark_A2 =[327, 348, 481, 468]
+        region_question_mark_D4 =[861, 611, 1056, 754]
+
+        block_right_clear = False
+        block_left_clear = False
+        block_A3_clear = False
+        targeting_block_right = False
+        targeting_block_left = False
+        targeting_block_A3 = False
+
+        region_block_right = [[1230, 232, 1388, 543], [1432, 347, 1588, 468], [1449, 473, 1616, 603]] # corresponding to F1, G2, and G3 in [x1,y1,x2,y2] format.
+        region_block_left = [[467, 610, 642, 754], [677, 474, 853, 603], [649, 760, 843, 917]] # B4, C3, and C5
+        region_block_A3 = [296, 472, 460, 605]
+
+        #right_enemy_list = ['F1', 'G2', 'G3']
+        #right_enemy_region = {
+        #    'F1': Region(1230, 232, 1388, 543),
+        #    'G2': Region(1432, 347, 1588, 468),
+        #    'G3': Region(1449, 473, 1616, 603)
+        #}
+        #left_enemy_list = ['B4', 'C3', 'C5']
+        #left_enemy_region = {
+        #    'B4': Region(467, 610, 642, 754),
+        #    'C3': Region(677, 474, 853, 603),
+        #    'C5': Region(649, 760, 843, 917)
+        #}
+        #A3_region = {'A3': Region(296, 472, 460, 605)}
+
+
+        self.fleet_location = None
+        self.combats_done = 0
+        self.kills_count = 0
+        self.enemies_list.clear()
+        self.mystery_nodes_list.clear()
+        self.blacklist.clear()
+        self.swipe_counter = 0
+        Logger.log_msg("Started map clear.")
+        Utils.script_sleep(2.5)
+
+        while Utils.find("combat/fleet_lock", 0.99):
+            Utils.touch_randomly(self.region["fleet_lock"])
+            Logger.log_warning("Fleet lock is not supported, disabling it.")
+            Utils.wait_update_screen()
+
+        # move to the boss position to avoid blocking A3 enemy
+        # FIXME: This might fail if the initial spawns happen to block our fleet
+        Utils.touch(position_boss)
+        Utils.script_sleep(2.5)
+
+        target_info = None
+
+        while True:
+            Utils.update_screen()
+
+            if Utils.find("combat/alert_unable_battle"):
+                Utils.touch_randomly(self.region['close_info_dialog'])
+                self.exit = 5
+            if question_mark_all_obtained:
+                Logger.log_msg("Retreating after obtaining all question marks.")
+                self.exit = 2
+            if self.exit != 0:
+                self.retreat_handler()
+                return True
+            if self.kills_count >= 3 and target_info == None:
+                Logger.log_msg("Collecting question marks after 3 battles.")
+                target_info = self.get_closest_target(self.blacklist, [], True, False)
+                if target_info[2] == 'enemy': 
+                    Logger.log_msg("No more question marks.")
+                    question_mark_all_obtained = True
+                    continue
+                if target_info[2] == 'mystery_node' and not block_A3_clear and self.is_within_zone([target_info[0], target_info[1]], region_question_mark_A2):
+                    Logger.log_msg("Targeting A2. Switch to targeting A3 for clearing possible block.")
+                    target_info[0] = position_A3[0]
+                    target_info[1] = position_A3[1]
+                    target_info[2] = 'enemy'
+                    targeting_block_A3 = True
+            if target_info == None:
+                targeting_block_right, targeting_block_left, targeting_A3, target_info = \
+                self.get_special_target_for_7_2(block_right_clear, block_left_clear, block_A3_clear, region_block_right, region_block_left, region_block_A3, targeting_block_right, targeting_block_left, targeting_block_A3)
+                location_tmp = [target_info[0], target_info[1]]
+                target_info = self.get_closest_target(self.blacklist, location_tmp, False, False)
+                continue
+            if target_info:
+                #tap at target's coordinates
+                Utils.touch(target_info[0:2])
+                Utils.update_screen()
+            else:
+                continue
+            if Utils.find("combat/alert_unable_reach"):
+                Logger.log_warning("Unable to reach the target.")
+                if self.config.combat['focus_on_mystery_nodes'] and target_info[2] == "mystery_node":
+                    self.enemies_list.clear()
+                    self.unable_handler(target_info[0:2])
+                else:
+                    self.blacklist.append(target_info[0:2])
+                    target_info = None
+                continue
+            else:
+                movement_result = self.movement_handler(target_info)
+                if movement_result == 1:
+                    self.battle_handler()
+                    
+                if targeting_block_right:
+                    block_right_clear = True 
+                if targeting_block_left:
+                    block_left_clear = True 
+                if targeting_block_A3:
+                    block_A3_clear = True  
+
+                self.blacklist.clear()
+
+                Utils.script_sleep(2)
+
+                # Move the fleet a bit to avoid possible blocking.
+                fleet_location = self.get_fleet_location()
+                # leaving A3 for possible blocking of question mark at A2. Detection of own fleet at A3 sometimes does not work, so this one also use target_info.
+                if self.is_within_zone(fleet_location, region_question_mark_D4) or self.is_within_zone([target_info[0], target_info[1]], region_block_A3):
+                    Utils.touch(position_B3)
+
+                # leaving D4 for possible blocking of question mark at D2.
+                if self.is_within_zone(fleet_location, region_question_mark_D4):
+                    Utils.touch(position_C4)
+
+                target_info = None
+
+                continue
+
+    def is_within_zone(self, location, zone):
+        # Determine if the location is within the zone
+        # location: the array [x, y] for the position 
+        # zone: the area in [x1, y1, x2, y2]
+        if((location[0]-zone[0]) >= 0 and (location[0]-zone[2] <= 0) and (location[1]-zone[1]) >= 0 and (location[1]-zone[3] <= 0)):
+            return True
+        else:
+            return False   
+
+    def get_special_target_for_7_2(self, block_right_clear, block_left_clear, block_A3_clear, \
+                                         region_block_right, region_block_left, region_block_A3,\
+                                         targeting_block_right, targeting_block_left, targeting_block_A3): 
+
+        block_target_obtained = False
+
+        enemies = self.get_enemies([], False)
+        targets = enemies
+
+        if not block_right_clear:
+            for index_target in range(0, len(targets)):
+                for index_block in range(0,3):
+                    if self.is_within_zone(targets[index_target], region_block_right[index_block]):
+                        index_target_chosen = index_target
+                        Logger.log_info('Found right block enemy at: {}'.format(targets[index_target]))
+                        targeting_block_right = True
+                        block_target_obtained = True
+                        break
+                if block_target_obtained :
+                    break
+        if not block_left_clear and not block_target_obtained:
+            for index_target in range(0, len(targets)):
+                for index_block in range(0,3):
+                    if self.is_within_zone(targets[index_target], region_block_left[index_block]):
+                        index_target_chosen = index_target
+                        Logger.log_info('Found left block enemy at: {}'.format(targets[index_target]))
+                        targeting_block_left = True
+                        block_target_obtained = True
+                        break
+                if block_target_obtained :
+                    break
+        if not block_A3_clear and not block_target_obtained:
+            for index_target in range(0, len(targets)):
+                if self.is_within_zone(targets[index_target], region_block_A3):
+                    index_target_chosen = index_target
+                    Logger.log_info('Found A3 enemy at: {}'.format(targets[index_target]))
+                    targeting_block_A3 = True
+                    block_target_obtained = True
+                    break
+        if not block_target_obtained:
+            Logger.log_info('Found no block enemy, attacking the first one at: {}'.format(targets[0]))
+            index_target_chosen = 0
+        return targeting_block_right, targeting_block_left, targeting_block_A3, [targets[index_target_chosen][0], targets[index_target_chosen][1], 'enemy']
 
     def clear_boss(self, boss_info):
         Logger.log_debug("Started boss function.")
