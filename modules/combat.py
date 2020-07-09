@@ -147,7 +147,7 @@ class CombatModule(object):
                 Utils.wait_update_screen(2)
             if Utils.find("combat/button_retreat"):
                 Logger.log_debug("Found retreat button, starting clear function.")
-                if (self.chapter_map[0] == '7' and self.chapter_map[2] == '2' and self.config.combat['retreat_after'] == 3 and self.config.combat['clearing_mode'] and self.config.combat['focus_on_mystery_nodes']):
+                if (self.chapter_map[0] == '7' and self.chapter_map[2] == '2' and self.config.combat['clearing_mode'] and self.config.combat['focus_on_mystery_nodes']):
                     Logger.log_debug("Started special 7-2 farming.")
                     if not self.clear_map_special_7_2():
                    	    self.stats.increment_combat_attempted()
@@ -800,7 +800,7 @@ class CombatModule(object):
             if Utils.find("combat/alert_unable_battle"):
                 Utils.touch_randomly(self.region['close_info_dialog'])
                 self.exit = 5
-            if question_mark_all_obtained:
+            if question_mark_all_obtained and self.config.combat['retreat_after'] == 3:
                 Logger.log_msg("Retreating after obtaining all question marks.")
                 self.exit = 2
             if self.exit != 0:
@@ -819,6 +819,52 @@ class CombatModule(object):
                     target_info[1] = position_A3[1]
                     target_info[2] = 'enemy'
                     targeting_block_A3 = True
+            if self.kills_count >= self.kills_before_boss[self.chapter_map] and Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9):
+                Logger.log_msg("Boss fleet was found.")
+
+                if self.config.combat['boss_fleet']:
+                    if self.chapter_map == 'E-B3' or self.chapter_map == 'E-D3':
+                        s = 3
+                    else:
+                        s = 0
+                    swipes = {
+                        0: lambda: Utils.swipe(960, 240, 960, 940, 300),
+                        1: lambda: Utils.swipe(1560, 540, 260, 540, 300),
+                        2: lambda: Utils.swipe(960, 940, 960, 240, 300),
+                        3: lambda: Utils.swipe(260, 540, 1560, 540, 300)
+                    }
+
+                    Utils.touch_randomly(self.region['button_switch_fleet'])
+                    Utils.wait_update_screen(2)
+                    boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
+
+                    while not boss_region:
+                        if s > 3: s = 0
+                        swipes.get(s)()
+                        Utils.wait_update_screen(0.5)
+                        boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
+                        s += 1
+
+                    # swipe to center the boss fleet on the screen
+                    # first calculate the translation vector coordinates
+                    translation_sign = 1 if boss_region.x < 960 else -1
+                    translation_module = 175 if boss_region.y > 300 else 75
+                    horizontal_translation = translation_sign * translation_module
+                    angular_coefficient = -1 * ((540 - boss_region.y)/(960 - boss_region.x))
+                    Utils.swipe(boss_region.x + horizontal_translation, boss_region.y + int(horizontal_translation * angular_coefficient),
+                        960 + horizontal_translation, 540 + int(horizontal_translation * angular_coefficient), 300)
+                    Utils.wait_update_screen()
+
+                boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
+                while not boss_region:
+                    # refreshing screen to deal with mist
+                    Utils.wait_update_screen(1)
+                    boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
+
+                #extrapolates boss_info(x,y,enemy_type) from the boss_region found
+                boss_info = [boss_region.x + 50, boss_region.y + 25, "boss"]
+                self.clear_boss(boss_info)
+                continue
             if target_info == None:
                 targeting_block_right, targeting_block_left, targeting_A3, target_info = \
                 self.get_special_target_for_7_2(block_right_clear, block_left_clear, block_A3_clear, region_block_right, region_block_left, region_block_A3, targeting_block_right, targeting_block_left, targeting_block_A3)
