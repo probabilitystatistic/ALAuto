@@ -472,7 +472,10 @@ class Utils(object):
 
     @classmethod
     def find_with_cropped(cls, image, similarity=DEFAULT_SIMILARITY, color=False):
-        """Finds the specified image on the screen
+        """Finds the specified image on the cropped screen. This function takes exactly the same input as the function find.
+        Therefore updating "find" to "find_with_cropped" is straightforward. This funtion utilizes the specified region written
+        in crop_region.py to crop the captured screen. Cropping a screen before search generally make search much faster. For 
+        example, find_with_cropped("menu/button_battle") is around 20 times faster than find("menu/button_battle").
 
         Args:
             image (string): [description]
