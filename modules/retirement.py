@@ -20,6 +20,8 @@ class RetirementModule(object):
         self.retirement_done = False
         self.previous_call_place = "combat"
         self.last_retire = 0
+        self.sleep_time_long = 0.1 # default = 1
+        self.sleep_time_short = 0.0 # default =0.5
         self.region = {
             'combat_sort_button': Region(550, 750, 215, 64),
             'build_menu': Region(1452, 1007, 198, 52),
@@ -72,20 +74,20 @@ class RetirementModule(object):
                 if Utils.find_with_cropped("menu/button_sort"):
                     # Tap menu retire button
                     Utils.touch_randomly(self.region['combat_sort_button'])
-                    Utils.script_sleep(1)
+                    Utils.script_sleep(self.sleep_time_long)
                     continue
                 # In case function is called from menu
                 if Utils.find_with_cropped("menu/button_battle"):
                     self.called_from_menu = True
                     Utils.touch_randomly(self.region['build_menu'])
-                    Utils.script_sleep(1)
+                    Utils.script_sleep(self.sleep_time_long)
                     continue
                 if Utils.find_with_cropped("menu/build"):
                     if Utils.find("event/build_limited"):
                         Utils.touch_randomly(self.region['retire_tab_2'])
                     else:
                         Utils.touch_randomly(self.region['retire_tab_1'])
-                    Utils.script_sleep(1)
+                    Utils.script_sleep(self.sleep_time_long)
                     continue
                 if Utils.find_with_cropped("retirement/selected_none", similarity=0.9):
                     self.set_sort()
@@ -133,18 +135,18 @@ class RetirementModule(object):
         while not self.sorted:
             Logger.log_debug("Retirement: Opening sorting menu.")
             Utils.touch_randomly(self.region['sort_filters_button'])
-            Utils.script_sleep(0.5)
+            Utils.script_sleep(self.sleep_time_short)
             # Touch the All button to clear any current filter
             Utils.touch_randomly(self.region['rarity_all_ship_filter'])
-            Utils.script_sleep(0.5)
+            Utils.script_sleep(self.sleep_time_short)
             Utils.touch_randomly(self.region['extra_all_ship_filter'])
-            Utils.script_sleep(0.5)
+            Utils.script_sleep(self.sleep_time_short)
             if self.config.retirement['commons']:
                 Utils.touch_randomly(self.region['common_ship_filter'])
-                Utils.script_sleep(0.5)
+                Utils.script_sleep(self.sleep_time_short)
             if self.config.retirement['rares']:
                 Utils.touch_randomly(self.region['rare_ship_filter'])
-                Utils.script_sleep(0.5)
+                Utils.script_sleep(self.sleep_time_short)
             
             # check if correct options are enabled
             # get the regions of enabled options
@@ -173,7 +175,7 @@ class RetirementModule(object):
                     Logger.log_debug("Retirement: Sorting options confirmed")
                     self.sorted = True
             Utils.touch_randomly(self.region['confirm_filter_button'])
-            Utils.script_sleep(1)
+            Utils.script_sleep(self.sleep_time_long)
             
     def retire_ships(self):
         while True:
@@ -212,22 +214,22 @@ class RetirementModule(object):
 
             if Utils.find_with_cropped("retirement/alert_bonus"):
                 Utils.touch_randomly(self.region['confirm_selected_ships_button'])
-                Utils.script_sleep(1)
+                Utils.script_sleep(self.sleep_time_long)
                 continue
             if Utils.find_with_cropped("menu/item_found"):
                 Utils.touch_randomly(self.region['tap_to_continue'])
-                Utils.script_sleep(1)
+                Utils.script_sleep(self.sleep_time_long)
                 items_found += 1
                 if items_found > 1:
                     return
                 continue
             if Utils.find_with_cropped("menu/alert_info"):
                 Utils.touch_randomly(self.region['confirm_selected_equipment_button'])
-                Utils.script_sleep(1)
+                Utils.script_sleep(self.sleep_time_long)
                 continue
             if Utils.find_with_cropped("retirement/button_disassemble"):
                 Utils.touch_randomly(self.region['disassemble_button'])
-                Utils.script_sleep(1)
+                Utils.script_sleep(self.sleep_time_long)
                 continue
 
     @property
