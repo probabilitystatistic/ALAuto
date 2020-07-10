@@ -18,7 +18,7 @@ data = {
     "combat/commander": [100, 250, 1000, 400],
     "combat/defeat_close_button": [750, 850, 1150, 1000],
     "combat/menu_loading": [1560, 960, 1920, 1080],
-    "combat/menu_touch2continue": [],
+    "combat/menu_touch2continue": [800, 650, 1100, 880],
     "commission/alert_completed": [1660, 400, 1760, 500],
     "menu/alert_info": [0, 0, 960, 540], # Just a rough estimation!
     "menu/build": [100, 0, 350, 100],
