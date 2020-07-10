@@ -285,9 +285,9 @@ class CombatModule(object):
         # enhancecement and retirement flags
         enhancement_failed = False
         retirement_failed = False
-        while not (Utils.find("combat/menu_loading", 0.8)):
+        while not (Utils.find_with_cropped("combat/menu_loading", 0.8)):
             Utils.update_screen()
-            if Utils.find("menu/button_sort"):
+            if Utils.find_with_cropped("menu/button_sort"):
                 if self.config.enhancement['enabled'] and not enhancement_failed:
                     if not self.enhancement_module.enhancement_logic_wrapper(forced=True):
                         enhancement_failed = True
@@ -298,14 +298,14 @@ class CombatModule(object):
                     self.exit = 4
                     Utils.touch_randomly(self.region['close_info_dialog'])
                     return False
-            elif Utils.find("combat/alert_morale_low"):
+            elif Utils.find_with_cropped("combat/alert_morale_low"):
                 if self.config.combat['ignore_morale']:
                     Utils.find_and_touch("menu/button_confirm")
                 else:
                     self.exit = 3
                     Utils.touch_randomly(self.region['close_info_dialog'])
                     return False
-            elif Utils.find("combat/combat_pause", 0.7):
+            elif Utils.find_with_cropped("combat/combat_pause", 0.7):
                 Logger.log_warning("Loading screen was not found but combat pause is present, assuming combat is initiated normally.")
                 break
             else:
@@ -324,65 +324,65 @@ class CombatModule(object):
         while True:
             Utils.update_screen()
 
-            if in_battle and Utils.find("combat/combat_pause", 0.7):
+            if in_battle and Utils.find_with_cropped("combat/combat_pause", 0.7):
                 Logger.log_debug("In battle.")
                 Utils.script_sleep(2.5)
                 continue
             if not items_received:
-                if Utils.find("combat/menu_touch2continue"):
+                if Utils.find_with_cropped("combat/menu_touch2continue"):
                     Logger.log_debug("Combat ended: tap to continue")
                     Utils.touch_randomly(self.region['tap_to_continue'])
                     in_battle = False
                     continue
-                if Utils.find("menu/item_found"):
+                if Utils.find_with_cropped("menu/item_found"):
                     Logger.log_debug("Combat ended: items received screen")
                     Utils.touch_randomly(self.region['tap_to_continue'])
                     Utils.script_sleep(1)
                     continue
-                if (not locked_ship) and Utils.find("combat/alert_lock"):
+                if (not locked_ship) and Utils.find_with_cropped("combat/alert_lock"):
                     Logger.log_msg("Locking received ship.")
                     Utils.touch_randomly(self.region['lock_ship_button'])
                     locked_ship = True
                     continue
-                if Utils.find("menu/drop_elite"):
+                if Utils.find_with_cropped("menu/drop_elite"):
                     Logger.log_msg("Received ELITE ship as drop.")
                     Utils.touch_randomly(self.region['dismiss_ship_drop'])
                     Utils.script_sleep(2)
                     continue
-                elif Utils.find("menu/drop_rare"):
+                elif Utils.find_with_cropped("menu/drop_rare"):
                     Logger.log_msg("Received new RARE ship as drop.")
                     Utils.touch_randomly(self.region['dismiss_ship_drop'])
                     Utils.script_sleep(2)
                     continue
-                elif Utils.find("menu/drop_ssr"):
+                elif Utils.find_with_cropped("menu/drop_ssr"):
                     Logger.log_msg("Received SSR ship as drop.")
                     Utils.touch_randomly(self.region['dismiss_ship_drop'])
                     Utils.script_sleep(2)
                     continue
-                elif Utils.find("menu/drop_common"):
+                elif Utils.find_with_cropped("menu/drop_common"):
                     Logger.log_msg("Received new COMMON ship as drop.")
                     Utils.touch_randomly(self.region['dismiss_ship_drop'])
                     Utils.script_sleep(2)
                     continue
             if not in_battle:
-                if (not confirmed_fight) and Utils.find("combat/button_confirm"):
+                if (not confirmed_fight) and Utils.find_with_cropped("combat/button_confirm"):
                     Logger.log_msg("Combat ended.")
                     items_received = True
                     confirmed_fight = True
                     Utils.touch_randomly(self.region["combat_end_confirm"])
                     Utils.wait_update_screen(3)
-                if (not confirmed_fight) and Utils.find("combat/commander"):
+                if (not confirmed_fight) and Utils.find_with_cropped("combat/commander"):
                     items_received = True
                     # prevents fleet with submarines from getting stuck at combat end screen
                     Utils.touch_randomly(self.region["combat_dismiss_surface_fleet_summary"])
                     continue
                 if defeat and not confirmed_fleet_switch:
-                    if Utils.find("combat/alert_unable_battle"):
+                    if Utils.find_with_cropped("combat/alert_unable_battle"):
                         Utils.touch_randomly(self.region['close_info_dialog'])
                         Utils.script_sleep(3)
                         self.exit = 5
                         return False
-                    if Utils.find("combat/alert_fleet_cannot_be_formed"):
+                    if Utils.find_with_cropped("combat/alert_fleet_cannot_be_formed"):
                         # fleet will be automatically switched
                         Utils.touch_randomly(self.region['close_info_dialog'])
                         confirmed_fleet_switch = True
@@ -400,11 +400,11 @@ class CombatModule(object):
                         Utils.script_sleep(3)
                         self.exit = 5
                         return False
-                if confirmed_fight and Utils.find("menu/button_confirm"):
+                if confirmed_fight and Utils.find_with_cropped("menu/button_confirm"):
                     Logger.log_msg("Found commission info message.")
                     Utils.touch_randomly(self.region["combat_com_confirm"])
                     continue
-                if confirmed_fight and (not boss) and Utils.find("combat/button_retreat"):
+                if confirmed_fight and (not boss) and Utils.find_with_cropped("combat/button_retreat"):
                     #Utils.touch_randomly(self.region["hide_strat_menu"])
                     if confirmed_fleet_switch:
                         # if fleet was defeated and it has now been switched
@@ -416,7 +416,7 @@ class CombatModule(object):
                         if self.kills_count >= self.kills_before_boss[self.chapter_map]:
                             Utils.script_sleep(2.5)
                         return True
-                if confirmed_fight and Utils.find_and_touch("combat/defeat_close_button"):
+                if confirmed_fight and Utils.find_and_touch_with_cropped("combat/defeat_close_button"):
                     Logger.log_debug("Fleet was defeated.")
                     defeat = True
                     Utils.script_sleep(3)
