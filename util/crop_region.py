@@ -8,27 +8,27 @@
 #	def __init__(self):
 # form: x1, y1, x2, y2
 data = {
-    "combat/alert_fleet_cannot_be_formed": [],
-    "combat/alert_lock": [],
-    "combat/alert_morale_low": [],
-    "combat/alert_unable_battle": [],
-    "combat/button_confirm": [],
-    "combat/button_retreat": [], 
-    "combat/combat_pause": [],
-    "combat/commander": [],
-    "combat/defeat_close_button": [],
-    "menu/button_confirm": [],
-    "menu/drop_common": [],
-    "menu/drop_elite": [],
-    "menu/drop_rare": [],
-    "menu/drop_ssr": [],
+    "combat/alert_fleet_cannot_be_formed": [500, 400, 1400, 800],
+    "combat/alert_lock": [1750, 725, 1920, 800],
+    "combat/alert_morale_low": [500, 200, 1500, 900], # Just a rough estimation!
+    "combat/alert_unable_battle": [700, 450, 1250, 650], 
+    "combat/button_confirm": [1480, 920, 1800, 1080],
+    "combat/button_retreat": [1100, 950, 1400, 1080], 
+    "combat/combat_pause": [1600, 0, 1920, 150],
+    "combat/commander": [100, 250, 1000, 400],
+    "combat/defeat_close_button": [750, 850, 1150, 1000],
+    "combat/menu_loading": [1560, 960, 1920, 1080],
     "combat/menu_touch2continue": [],
-    "combat/menu_loading": [],
     "commission/alert_completed": [1660, 400, 1760, 500],
     "menu/alert_info": [0, 0, 960, 540], # Just a rough estimation!
-	"menu/build": [100, 0, 350, 100],
+    "menu/build": [100, 0, 350, 100],
     "menu/button_battle": [1500, 420, 1700, 600],
+    "menu/button_confirm": [500, 540, 1920, 1080], # Just a rough estimation!
     "menu/button_sort": [500, 700, 800, 850], # This is perhaps the sort button when port is full before starting a combat.
+    "menu/drop_common": [1000, 250, 1920, 880], # Just a rough estimation!
+    "menu/drop_elite": [1000, 250, 1920, 880], # Just a rough estimation!
+    "menu/drop_rare": [1000, 250, 1920, 880], # Just a rough estimation!
+    "menu/drop_ssr": [1000, 250, 1920, 880], # Just a rough estimation!
     "menu/item_found": [700, 100, 1200, 550],
     "retirement/alert_bonus": [200, 900, 450, 1050],
     "retirement/bonus": [460, 960, 620, 1060],
