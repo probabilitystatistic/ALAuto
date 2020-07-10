@@ -9,7 +9,7 @@
 # form: x1, y1, x2, y2
 data = {
     "combat/alert_fleet_cannot_be_formed": [500, 400, 1400, 800],
-    "combat/alert_lock": [1750, 725, 1920, 800],
+    "combat/alert_lock": [500, 200, 1500, 900], # Just a rough estimation!
     "combat/alert_morale_low": [500, 200, 1500, 900], # Just a rough estimation!
     "combat/alert_unable_battle": [700, 450, 1250, 650], 
     "combat/button_confirm": [1480, 920, 1800, 1080],
