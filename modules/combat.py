@@ -30,6 +30,8 @@ class CombatModule(object):
         self.mystery_nodes_list = []
         self.blacklist = []
         self.movement_event = {}
+        self.sleep_short = 0
+        self.sleep_long = 0
 
         self.kills_count = 0
         self.kills_before_boss = {
@@ -326,7 +328,7 @@ class CombatModule(object):
 
             if in_battle and Utils.find_with_cropped("combat/combat_pause", 0.7):
                 Logger.log_debug("In battle.")
-                Utils.script_sleep(2.5)
+                Utils.script_sleep(1)
                 continue
             if not items_received:
                 if Utils.find_with_cropped("combat/menu_touch2continue"):
@@ -337,9 +339,9 @@ class CombatModule(object):
                 if Utils.find_with_cropped("menu/item_found"):
                     Logger.log_debug("Combat ended: items received screen")
                     Utils.touch_randomly(self.region['tap_to_continue'])
-                    Utils.script_sleep(1)
+                    Utils.script_sleep(self.sleep_short)
                     continue
-                if (not locked_ship) and Utils.find_with_cropped("combat/alert_lock"):
+                if (not locked_ship) and Utils.find_with_cropped("combat/alert_lock"): 
                     Logger.log_msg("Locking received ship.")
                     Utils.touch_randomly(self.region['lock_ship_button'])
                     locked_ship = True
@@ -347,22 +349,22 @@ class CombatModule(object):
                 if Utils.find_with_cropped("menu/drop_elite"):
                     Logger.log_msg("Received ELITE ship as drop.")
                     Utils.touch_randomly(self.region['dismiss_ship_drop'])
-                    Utils.script_sleep(2)
+                    Utils.script_sleep(self.sleep_short)
                     continue
                 elif Utils.find_with_cropped("menu/drop_rare"):
                     Logger.log_msg("Received new RARE ship as drop.")
                     Utils.touch_randomly(self.region['dismiss_ship_drop'])
-                    Utils.script_sleep(2)
+                    Utils.script_sleep(self.sleep_short)
                     continue
                 elif Utils.find_with_cropped("menu/drop_ssr"):
                     Logger.log_msg("Received SSR ship as drop.")
                     Utils.touch_randomly(self.region['dismiss_ship_drop'])
-                    Utils.script_sleep(2)
+                    Utils.script_sleep(self.sleep_short)
                     continue
                 elif Utils.find_with_cropped("menu/drop_common"):
                     Logger.log_msg("Received new COMMON ship as drop.")
                     Utils.touch_randomly(self.region['dismiss_ship_drop'])
-                    Utils.script_sleep(2)
+                    Utils.script_sleep(self.sleep_short)
                     continue
             if not in_battle:
                 if (not confirmed_fight) and Utils.find_with_cropped("combat/button_confirm"):
@@ -379,7 +381,7 @@ class CombatModule(object):
                 if defeat and not confirmed_fleet_switch:
                     if Utils.find_with_cropped("combat/alert_unable_battle"):
                         Utils.touch_randomly(self.region['close_info_dialog'])
-                        Utils.script_sleep(3)
+                        Utils.script_sleep(self.sleep_long)
                         self.exit = 5
                         return False
                     if Utils.find_with_cropped("combat/alert_fleet_cannot_be_formed"):
@@ -389,7 +391,7 @@ class CombatModule(object):
                         self.enemies_list.clear()
                         self.mystery_nodes_list.clear()
                         self.blacklist.clear()
-                        Utils.script_sleep(3)
+                        Utils.script_sleep(self.sleep_long)
                         if boss:
                             self.exit = 5
                             return False
@@ -397,7 +399,7 @@ class CombatModule(object):
                     else:
                         # flagship sunk, but part of backline still remains
                         # proceed to retreat
-                        Utils.script_sleep(3)
+                        Utils.script_sleep(self.sleep_long)
                         self.exit = 5
                         return False
                 if confirmed_fight and Utils.find_with_cropped("menu/button_confirm"):
@@ -414,12 +416,13 @@ class CombatModule(object):
                         self.combats_done += 1
                         self.kills_count += 1
                         if self.kills_count >= self.kills_before_boss[self.chapter_map]:
-                            Utils.script_sleep(2.5)
+                            # waiting the appearance of boss
+                            Utils.script_sleep(2)
                         return True
                 if confirmed_fight and Utils.find_and_touch_with_cropped("combat/defeat_close_button"):
                     Logger.log_debug("Fleet was defeated.")
                     defeat = True
-                    Utils.script_sleep(3)
+                    Utils.script_sleep(self.sleep_long)
                 if boss and confirmed_fight:
                     if not defeat:
                         return True
