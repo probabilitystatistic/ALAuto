@@ -4,6 +4,7 @@ import traceback
 import argparse
 import os.path
 import time
+#import uiautomator2 as u2
 from modules.combat import CombatModule
 from modules.commission import CommissionModule
 from modules.enhancement import EnhancementModule
@@ -193,6 +194,7 @@ script.run_update_check()
 Adb.service = config.network['service']
 Adb.tcp = False if (Adb.service.find(':') == -1) else True
 adb = Adb()
+#u2device = u2.connect(config.network['service'])
 
 if adb.init():
     Logger.log_msg('Successfully connected to the service with transport_id({}).'.format(Adb.transID))
@@ -239,7 +241,8 @@ try:
             start_time = time.perf_counter()
             for i in range(0, number_of_loop):
                 #BOO=Utils.find_with_cropped(template_name)
-                Utils.touch_randomly(region_tmp)
+                Utils.touch([region_tmp.x, region_tmp.y])
+                #u2device.click(region_tmp.x, region_tmp.y)
             elapsed_time_find_with_cropped = time.perf_counter() - start_time
 
             if BOO==None: 
