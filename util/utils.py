@@ -4,6 +4,7 @@ import time
 import struct
 import os
 import lz4.block
+import util.crop_region as cr
 from imutils import contours, grab_contours
 from datetime import datetime, timedelta
 from random import uniform, gauss, randint
@@ -467,6 +468,35 @@ class Utils(object):
         value, location = cv2.minMaxLoc(match)[1], cv2.minMaxLoc(match)[3]
         if value >= similarity:
             return Region(location[0], location[1], width, height)
+        return None
+
+    @classmethod
+    def find_with_cropped(cls, image, similarity=DEFAULT_SIMILARITY, color=False):
+        """Finds the specified image on the screen
+
+        Args:
+            image (string): [description]
+            similarity (float, optional): Defaults to DEFAULT_SIMILARITY.
+                Percentage in similarity that the image should at least match.
+            color (boolean): find the image in color screen
+
+        Returns:
+            Region: region object containing the location and size of the image
+        """
+
+        if color:
+            color_screen_tmp = cls.color_screen[cr.data[image][1]:cr.data[image][3], cr.data[image][0]:cr.data[image][2]]
+            template = cv2.imread('assets/{}/{}.png'.format(cls.assets, image), cv2.IMREAD_COLOR)
+            match = cv2.matchTemplate(color_screen_tmp, template, cv2.TM_CCOEFF_NORMED)
+        else:
+            screen_tmp = cls.screen[cr.data[image][1]:cr.data[image][3], cr.data[image][0]:cr.data[image][2]]
+            template = cv2.imread('assets/{}/{}.png'.format(cls.assets, image), 0)
+            match = cv2.matchTemplate(screen_tmp, template, cv2.TM_CCOEFF_NORMED)
+
+        height, width = template.shape[:2]
+        value, location = cv2.minMaxLoc(match)[1], cv2.minMaxLoc(match)[3]
+        if value >= similarity:
+            return Region(cr.data[image][0] + location[0], cr.data[image][1] + location[1], width, height)
         return None
 
     @classmethod
