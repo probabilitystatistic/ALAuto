@@ -759,6 +759,25 @@ class Utils(object):
         return False
 
     @classmethod
+    def find_and_touch_with_cropped(cls, image, similarity=DEFAULT_SIMILARITY, color=False):
+        """Finds the image on the screen and touches it if it exists
+
+        Args:
+            image (string): Name of the image.
+            similarity (float, optional): Defaults to DEFAULT_SIMILARITY.
+                Percentage in similarity that the image should at least match.
+            color (boolean): find the image in color screen
+
+        Returns:
+            bool: True if the image was found and touched, false otherwise
+        """
+        region = cls.find_with_cropped(image, similarity, color)
+        if region is not None:
+            cls.touch_randomly(region)
+            return True
+        return False
+
+    @classmethod
     def random_coord(cls, min_val, max_val):
         """Wrapper method that calls cls._randint() or cls._random_coord() to
         generate the random coordinate between min_val and max_val, depending
