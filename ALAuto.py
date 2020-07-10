@@ -216,7 +216,7 @@ try:
         Utils.update_screen()
 
         # This is a small time comparison for find and find_with_cropped
-        while True:
+        while False:
             template_name = "menu/button_battle"
             number_of_loop = 10
             start_time = time.perf_counter()
