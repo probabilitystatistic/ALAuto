@@ -217,14 +217,17 @@ try:
 
 
         # This is a small time comparison for find and find_with_cropped
-        while False:
+        while True:
             template_name = "menu/button_battle"
             Logger.log_msg("Comparison for execution time for the image '{}'.".format('%s' % (template_name)))
             number_of_loop = 10
+            region_tmp = Region(500, 500, 100, 100)
+            BOO = None
 
             start_time = time.perf_counter()
             for i in range(0, number_of_loop):
-                BOO=Utils.find(template_name)
+                #BOO=Utils.find(template_name)
+                Utils.touch_randomly(region_tmp)
             elapsed_time_find = time.perf_counter() - start_time
 
             if BOO==None: 
@@ -235,7 +238,8 @@ try:
 
             start_time = time.perf_counter()
             for i in range(0, number_of_loop):
-                BOO=Utils.find_with_cropped(template_name)
+                #BOO=Utils.find_with_cropped(template_name)
+                Utils.touch_randomly(region_tmp)
             elapsed_time_find_with_cropped = time.perf_counter() - start_time
 
             if BOO==None: 
