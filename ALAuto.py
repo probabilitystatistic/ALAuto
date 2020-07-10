@@ -215,23 +215,39 @@ try:
     while True:
         Utils.update_screen()
 
+
         # This is a small time comparison for find and find_with_cropped
-        while False:
+        while True:
             template_name = "menu/button_battle"
+            Logger.log_msg("Comparison for execution time for the image '{}'.".format('%s' % (template_name)))
             number_of_loop = 10
+
             start_time = time.perf_counter()
             for i in range(0, number_of_loop):
                 BOO=Utils.find(template_name)
             elapsed_time_find = time.perf_counter() - start_time
 
+            if BOO==None: 
+                Logger.log_msg("Find did not see the template!")
+            else:
+                Logger.log_msg("Find matches the template at x1, y1, x2, y2:")
+                print(BOO.x, BOO.y, BOO.x+BOO.w, BOO.y+BOO.h)
+
             start_time = time.perf_counter()
             for i in range(0, number_of_loop):
                 BOO=Utils.find_with_cropped(template_name)
             elapsed_time_find_with_cropped = time.perf_counter() - start_time
-            Logger.log_msg("Comparison for execution time for the image '{}'.".format('%s' % (template_name)))
+
+            if BOO==None: 
+                Logger.log_msg("Find_with_cropped did not see the template!")
+            else:
+                Logger.log_msg("Find_with_cropped matches the template at x1, y1, x2, y2:")
+                print(BOO.x, BOO.y, BOO.x+BOO.w, BOO.y+BOO.h)
+
             Logger.log_msg("Find              = {} ms per loop.".format('%.2f' % (elapsed_time_find * 1000/number_of_loop)))
             Logger.log_msg("Find_with_cropped = {} ms per loop.".format('%.2f' % (elapsed_time_find_with_cropped * 1000/number_of_loop)))
             exit()
+
 
         # temporal solution to event alerts
         if not Utils.find("menu/button_battle"):
