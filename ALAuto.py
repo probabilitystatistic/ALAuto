@@ -228,8 +228,8 @@ try:
 
             start_time = time.perf_counter()
             for i in range(0, number_of_loop):
-                #BOO=Utils.find(template_name)
-                Utils.touch_randomly(region_tmp)
+                BOO=Utils.find(template_name)
+                #Utils.touch_randomly(region_tmp)
             elapsed_time_find = time.perf_counter() - start_time
 
             if BOO==None: 
@@ -240,9 +240,10 @@ try:
 
             start_time = time.perf_counter()
             for i in range(0, number_of_loop):
-                #BOO=Utils.find_with_cropped(template_name)
-                Utils.touch([region_tmp.x, region_tmp.y])
+                BOO=Utils.find_with_cropped(template_name)
+                #Utils.touch([region_tmp.x, region_tmp.y])
                 #u2device.click(region_tmp.x, region_tmp.y)
+                #Utils.touch_UIautomator([region_tmp.x, region_tmp.y])
             elapsed_time_find_with_cropped = time.perf_counter() - start_time
 
             if BOO==None: 
