@@ -200,7 +200,7 @@ class RetirementModule(object):
     def select_ships(self):
         Logger.log_msg("Selecting ships for retirement.")
         Utils.touch_randomly(self.region['button_batch_retire'])
-        Utils.wait_update_screen(0.7)
+        Utils.wait_update_screen(self.sleep_time_long)
         if Utils.find_with_cropped("retirement/no_batch", similarity=0.9):
             for i in range(0, 7):
                 Utils.touch_randomly(self.region['select_ship_{}'.format(i)])
