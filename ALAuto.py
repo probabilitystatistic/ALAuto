@@ -217,7 +217,7 @@ try:
 
 
         # This is a small time comparison for find and find_with_cropped
-        while True:
+        while False:
             template_name = "menu/button_battle"
             Logger.log_msg("Comparison for execution time for the image '{}'.".format('%s' % (template_name)))
             number_of_loop = 10
