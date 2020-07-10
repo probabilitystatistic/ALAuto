@@ -69,25 +69,25 @@ class RetirementModule(object):
             while True:
                 Utils.update_screen()
 
-                if Utils.find("menu/button_sort"):
+                if Utils.find_with_cropped("menu/button_sort"):
                     # Tap menu retire button
                     Utils.touch_randomly(self.region['combat_sort_button'])
                     Utils.script_sleep(1)
                     continue
                 # In case function is called from menu
-                if Utils.find("menu/button_battle"):
+                if Utils.find_with_cropped("menu/button_battle"):
                     self.called_from_menu = True
                     Utils.touch_randomly(self.region['build_menu'])
                     Utils.script_sleep(1)
                     continue
-                if Utils.find("menu/build"):
+                if Utils.find_with_cropped("menu/build"):
                     if Utils.find("event/build_limited"):
                         Utils.touch_randomly(self.region['retire_tab_2'])
                     else:
                         Utils.touch_randomly(self.region['retire_tab_1'])
                     Utils.script_sleep(1)
                     continue
-                if Utils.find("retirement/selected_none", similarity=0.9):
+                if Utils.find_with_cropped("retirement/selected_none", similarity=0.9):
                     self.set_sort()
                     self.retire_ships()
                     if self.called_from_menu:
@@ -179,15 +179,15 @@ class RetirementModule(object):
         while True:
             Utils.update_screen()
 
-            if Utils.find("retirement/empty"):
+            if Utils.find_with_cropped("retirement/empty"):
                 Logger.log_msg("No ships left to retire.")
                 #Utils.touch_randomly(self.region['menu_nav_back'])
                 return
-            if Utils.find("retirement/bonus", similarity=0.9):
+            if Utils.find_with_cropped("retirement/bonus", similarity=0.9):
                 self.handle_retirement()
                 self.retirement_done = True
                 continue
-            if Utils.find("retirement/selected_none", similarity=0.9):
+            if Utils.find_with_cropped("retirement/selected_none", similarity=0.9):
                 self.select_ships()
                 continue
 
@@ -195,7 +195,7 @@ class RetirementModule(object):
         Logger.log_msg("Selecting ships for retirement.")
         Utils.touch_randomly(self.region['button_batch_retire'])
         Utils.wait_update_screen(0.7)
-        if Utils.find("retirement/no_batch", similarity=0.9):
+        if Utils.find_with_cropped("retirement/no_batch", similarity=0.9):
             for i in range(0, 7):
                 Utils.touch_randomly(self.region['select_ship_{}'.format(i)])
         else:
@@ -210,22 +210,22 @@ class RetirementModule(object):
         while True:
             Utils.update_screen()
 
-            if Utils.find("retirement/alert_bonus"):
+            if Utils.find_with_cropped("retirement/alert_bonus"):
                 Utils.touch_randomly(self.region['confirm_selected_ships_button'])
                 Utils.script_sleep(1)
                 continue
-            if Utils.find("menu/item_found"):
+            if Utils.find_with_cropped("menu/item_found"):
                 Utils.touch_randomly(self.region['tap_to_continue'])
                 Utils.script_sleep(1)
                 items_found += 1
                 if items_found > 1:
                     return
                 continue
-            if Utils.find("menu/alert_info"):
+            if Utils.find_with_cropped("menu/alert_info"):
                 Utils.touch_randomly(self.region['confirm_selected_equipment_button'])
                 Utils.script_sleep(1)
                 continue
-            if Utils.find("retirement/button_disassemble"):
+            if Utils.find_with_cropped("retirement/button_disassemble"):
                 Utils.touch_randomly(self.region['disassemble_button'])
                 Utils.script_sleep(1)
                 continue
