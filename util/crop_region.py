@@ -35,5 +35,6 @@ data = {
     "retirement/button_disassemble": [1050, 800, 1380, 940], # The "confirm" when showing money earned from disassembling equipment.
     "retirement/empty": [50, 450, 650, 650],
     "retirement/no_batch": [300, 400, 1700, 550],
-    "retirement/selected_none": [650, 950, 800, 1080]
+    "retirement/selected_none": [650, 950, 800, 1080],
+    "retirement/setting_quick_retire": [350, 180, 700, 280]
 }
