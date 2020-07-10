@@ -488,7 +488,7 @@ class CombatModule(object):
             else:
                 if count != 0 and count % 3 == 0:
                     Utils.touch(location)
-                if (count > 9 and self.chapter_map[0] == '7' and self.chapter_map[2] == '2' and self.config.combat['retreat_after'] == 3 and self.config.combat['clearing_mode']):
+                if (count > 9 and self.chapter_map[0] == '7' and self.chapter_map[2] == '2' and self.config.combat['clearing_mode']):
                     Logger.log_warning("Clicking on the destination for too many times. Assuming target reached.")
                     return 0
                 if count > 21:
