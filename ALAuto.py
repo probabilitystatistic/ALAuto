@@ -3,6 +3,7 @@ import re
 import traceback
 import argparse
 import os.path
+import time
 from modules.combat import CombatModule
 from modules.commission import CommissionModule
 from modules.enhancement import EnhancementModule
@@ -213,6 +214,24 @@ else:
 try:
     while True:
         Utils.update_screen()
+
+        # This is a small time comparison for find and find_with_cropped
+        while True:
+            template_name = "menu/button_battle"
+            number_of_loop = 10
+            start_time = time.perf_counter()
+            for i in range(0, number_of_loop):
+                BOO=Utils.find(template_name)
+            elapsed_time_find = time.perf_counter() - start_time
+
+            start_time = time.perf_counter()
+            for i in range(0, number_of_loop):
+                BOO=Utils.find_with_cropped(template_name)
+            elapsed_time_find_with_cropped = time.perf_counter() - start_time
+            Logger.log_msg("Comparison for execution time for the image '{}'.".format('%s' % (template_name)))
+            Logger.log_msg("Find              = {} ms per loop.".format('%.2f' % (elapsed_time_find * 1000/number_of_loop)))
+            Logger.log_msg("Find_with_cropped = {} ms per loop.".format('%.2f' % (elapsed_time_find_with_cropped * 1000/number_of_loop)))
+            exit()
 
         # temporal solution to event alerts
         if not Utils.find("menu/button_battle"):
