@@ -220,6 +220,8 @@ class RetirementModule(object):
         items_found = 0
 
         while True:
+            # This sleep time must be long enough to avoid capturing old screen.
+            Utils.script_sleep(0.5)
             Utils.update_screen()
 
             if Utils.find_with_cropped("retirement/alert_bonus"):
@@ -235,7 +237,7 @@ class RetirementModule(object):
                 continue
             if Utils.find_with_cropped("menu/alert_info"):
                 Utils.touch_randomly(self.region['confirm_selected_equipment_button'])
-                Utils.script_sleep(self.sleep_time_long)
+                Utils.script_sleep(2.5)
                 continue
             if Utils.find_with_cropped("retirement/button_disassemble"):
                 Utils.touch_randomly(self.region['disassemble_button'])
