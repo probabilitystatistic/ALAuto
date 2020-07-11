@@ -88,12 +88,14 @@ class RetirementModule(object):
                         Utils.touch_randomly(self.region['retire_tab_2'])
                     else:
                         Utils.touch_randomly(self.region['retire_tab_1'])
-                    Utils.script_sleep(self.sleep_time_long)
+                    # This sleep must be long enough to avoid touching the quick retire setting button.
+                    Utils.script_sleep(1)
                     continue
                 # In case bot wrongly touches the setting button for quick retire due to repeating touching retire_tab_1
-                if Utils.find_with_cropped("retirement/setting_quick_retire"):
-                    Utils.find_and_touch_with_cropped("menu_alert_close")
-                    continue
+                # not yet tested
+                #if Utils.find_with_cropped("retirement/setting_quick_retire"):
+                #    Utils.find_and_touch_with_cropped("menu/alert_close")
+                #    continue
                 if Utils.find_with_cropped("retirement/selected_none", similarity=0.9):
                     self.set_sort()
                     self.retire_ships()
