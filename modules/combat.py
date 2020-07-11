@@ -983,6 +983,15 @@ class CombatModule(object):
         while True:
             #tap at boss' coordinates
             Utils.touch(boss_info[0:2])
+            # This sleep cannot be short, otherwise the screen capture right below may capture a screen 
+            # immediately after clock while the same has not yet reponded. This could be the true reason 
+            # why bot sometimes stuck when path to boss is blocked: if the game has not yet response to show 
+            # "unable to reach..." and the screen is captured, bot would think there is no blocking! Bot then
+            # blacklist boss by the movement_handler, attacking another fleet, and believe it defeat the boss.
+            #
+            # This issue is a reflection of the fact that the game cannot response infinitely fast. Therefore, 
+            # the sleeping time here should be the time for the game to finish its response due to the touch. 
+            Utils.script_sleep(1)
             Utils.update_screen()
 
 # By me: it seems that lower similarity(0.8) actually make the bot unable to detect "unable to reach".
