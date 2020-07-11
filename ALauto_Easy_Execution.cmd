@@ -1,7 +1,7 @@
 @ECHO OFF
 
 ::Setting default path
-SET ALPATH=C:\Marsspi\Repository\ALAuto
+SET ALPATH=Path to ALAuto.py
 
 ::Define the default map and mode
 SET PreviousMap=2-3
