@@ -21,7 +21,7 @@ data = {
     "combat/menu_touch2continue": [100, 900, 900, 1000],
     "commission/alert_completed": [1660, 400, 1760, 500],
     "menu/alert_info": [0, 0, 960, 540], # Just a rough estimation!
-    "menu/alert_info": [960, 0, 1920, 540], # Just a rough estimation!
+    "menu/alert_close": [960, 0, 1920, 540], # Just a rough estimation!
     "menu/build": [100, 0, 350, 100],
     "menu/button_battle": [1500, 420, 1700, 600],
     "menu/button_confirm": [500, 540, 1920, 1080], # Just a rough estimation!
