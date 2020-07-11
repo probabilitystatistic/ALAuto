@@ -731,6 +731,19 @@ class Utils(object):
 #        cls.script_sleep(0,0)
 
     @classmethod
+    def touch_UIautomator(cls, coords):
+        """Sends an input command to touch the device screen at the specified
+        coordinates via ADB
+
+        Args:
+            coords (array): An array containing the x and y coordinate of
+                where to touch the screen
+        """
+        u2device.click(coords[0], coords[1])
+        
+        cls.script_sleep(0,0)
+
+    @classmethod
     def touch_randomly(cls, region=Region(0, 0, 1920, 1080)):
         """Touches a random coordinate in the specified region
 
