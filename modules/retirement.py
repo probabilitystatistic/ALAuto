@@ -80,7 +80,8 @@ class RetirementModule(object):
                 if Utils.find_with_cropped("menu/button_battle"):
                     self.called_from_menu = True
                     Utils.touch_randomly(self.region['build_menu'])
-                    Utils.script_sleep(self.sleep_time_long)
+                    # This sleep must be long enough to avoid touching the "start building" button in the build menu.
+                    Utils.script_sleep(1)
                     continue
                 if Utils.find_with_cropped("menu/build"):
                     if Utils.find("event/build_limited"):
