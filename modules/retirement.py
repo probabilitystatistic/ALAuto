@@ -153,9 +153,13 @@ class RetirementModule(object):
                 Utils.touch_randomly(self.region['rare_ship_filter'])
                 Utils.script_sleep(self.sleep_time_short)
             
+            # This sleep must be long enough such that the game can finish responding to the actions above. 
+            # This is important as we have screen capture right bellow(inside Utils.get_enabled_ship_filters). 
+            Utils.script_sleep(0.5)
             # check if correct options are enabled
             # get the regions of enabled options
             options = Utils.get_enabled_ship_filters(filter_categories="rarity;extra")
+
             if len(options) == 0:
                 # if the list is empty it probably means that there was an ui update
                 # pausing and requesting for user confirmation
@@ -183,9 +187,9 @@ class RetirementModule(object):
             Utils.script_sleep(self.sleep_time_long)
             
     def retire_ships(self):
+
         while True:
             Utils.update_screen()
-
             if Utils.find_with_cropped("retirement/empty"):
                 Logger.log_msg("No ships left to retire.")
                 #Utils.touch_randomly(self.region['menu_nav_back'])
@@ -201,7 +205,8 @@ class RetirementModule(object):
     def select_ships(self):
         Logger.log_msg("Selecting ships for retirement.")
         Utils.touch_randomly(self.region['button_batch_retire'])
-        Utils.wait_update_screen(self.sleep_time_long)
+        # This wait right below should be long enough for the bot to capture "no_batch" dialog if no ship satisfies the quick retire condition.
+        Utils.wait_update_screen(1)
         if Utils.find_with_cropped("retirement/no_batch", similarity=0.9):
             for i in range(0, 7):
                 Utils.touch_randomly(self.region['select_ship_{}'.format(i)])
