@@ -913,8 +913,8 @@ class CombatModule(object):
 
                 # Move the fleet a bit to avoid possible blocking.
                 fleet_location = self.get_fleet_location()
-                # leaving A3 for possible blocking of question mark at A2.
-                if self.is_within_zone(fleet_location, region_block_A3):
+                # leaving A3 for possible blocking of question mark at A2. Detection of own fleet at A3 sometimes does not work, so this one also use target_info.
+                if self.is_within_zone(fleet_location, region_block_A3) or self.is_within_zone([target_info[0], target_info[1]], region_block_A3):
                     Utils.touch(position_B3)
 
                 # leaving D4 for possible blocking of question mark at D2.
