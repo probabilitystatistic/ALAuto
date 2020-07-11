@@ -715,7 +715,7 @@ class Utils(object):
         #u2device.click(coords[0], coords[1]) # somehow not working after entering  a map.
 
         #cls.script_sleep()
-        cls.script_sleep(0.1,0)
+        cls.script_sleep(0.4,0)
 
 #    @classmethod
 #    def touch_UIautomator(cls, coords):
