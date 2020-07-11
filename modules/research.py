@@ -93,7 +93,7 @@ class ResearchModule(object):
 #           if not self.config.research['AllowConsumingCubes'] and Utils.find("research/cubes", 0.99):
             if not self.config.research['AllowConsumingCubes'] and Utils.find("research/cubes", 0.95):
                 return False
-            if self.config.research['AwardMustContainPRBlueprint'] and not Utils.find("research/PRBlueprint"):
+            if self.config.research['AwardMustContainPRBlueprint'] and not Utils.find("research/PRBlueprint", 0.9):
                 return False
             if not self.config.research['AllowFreeProjects'] and Utils.find("research/free", 0.99):
                 return False
