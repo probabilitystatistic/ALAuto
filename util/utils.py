@@ -5,6 +5,7 @@ import struct
 import os
 import lz4.block
 import util.crop_region as cr
+#import uiautomator2 as u2
 from imutils import contours, grab_contours
 from datetime import datetime, timedelta
 from random import uniform, gauss, randint
@@ -13,6 +14,7 @@ from util.adb import Adb
 from util.logger import Logger
 from util.config_consts import UtilConsts
 from threading import Thread
+
 
 
 class Region(object):
@@ -87,7 +89,7 @@ class Region(object):
 screen = None
 last_ocr = ''
 bytepointer = 0
-
+#u2device = u2.connect('127.0.0.1:5555') # for bluestacks
 
 class Utils(object):
     screen = None
@@ -710,7 +712,23 @@ class Utils(object):
                 where to touch the screen
         """
         Adb.shell("input swipe {} {} {} {} {}".format(coords[0], coords[1], coords[0], coords[1], randint(50, 120)))
-        cls.script_sleep()
+        #u2device.click(coords[0], coords[1]) # somehow not working after entering  a map.
+
+        #cls.script_sleep()
+        cls.script_sleep(0,0)
+
+#    @classmethod
+#    def touch_UIautomator(cls, coords):
+        """Sends an input command to touch the device screen at the specified
+        coordinates via ADB
+
+        Args:
+            coords (array): An array containing the x and y coordinate of
+                where to touch the screen
+        """
+#        u2device.click(coords[0], coords[1])
+        
+#        cls.script_sleep(0,0)
 
     @classmethod
     def touch_randomly(cls, region=Region(0, 0, 1920, 1080)):
