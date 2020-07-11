@@ -659,6 +659,8 @@ class CombatModule(object):
                 location_left_of_fleet[0] = single_fleet_location[0] - 180
                 location_left_of_fleet[1] = single_fleet_location[1]
                 Utils.touch(location_left_of_fleet)
+                # We must give some time for the fleet to move, otherwise the screen update right after continue will still fail to see boss.
+                Utils.script_sleep(1.5)
                 continue
             if self.kills_count >= self.kills_before_boss[self.chapter_map] and Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9):
                 Logger.log_msg("Boss fleet was found.")
@@ -712,6 +714,8 @@ class CombatModule(object):
             if target_info:
                 #tap at target's coordinates
                 Utils.touch(target_info[0:2])
+                # This sleep must be long to avoid capturing the screen before game responds.
+                Utils.script_sleep(1)
                 Utils.update_screen()
             else:
                 continue
@@ -877,6 +881,8 @@ class CombatModule(object):
             if target_info:
                 #tap at target's coordinates
                 Utils.touch(target_info[0:2])
+                # This sleep must be long to avoid capturing the screen before game responds.
+                Utils.script_sleep(1)
                 Utils.update_screen()
             else:
                 continue
@@ -984,7 +990,7 @@ class CombatModule(object):
             #tap at boss' coordinates
             Utils.touch(boss_info[0:2])
             # This sleep cannot be short, otherwise the screen capture right below may capture a screen 
-            # immediately after clock while the same has not yet reponded. This could be the true reason 
+            # immediately after clicking while the game has not yet reponded. This could be the true reason 
             # why bot sometimes stuck when path to boss is blocked: if the game has not yet response to show 
             # "unable to reach..." and the screen is captured, bot would think there is no blocking! Bot then
             # blacklist boss by the movement_handler, attacking another fleet, and believe it defeat the boss.
