@@ -192,7 +192,7 @@ class RetirementModule(object):
 
         while True:
             Utils.update_screen()
-            if Utils.find_with_cropped("retirement/empty"):
+            if Utils.find_with_cropped("retirement/empty", similarity=0.9):
                 Logger.log_msg("No ships left to retire.")
                 #Utils.touch_randomly(self.region['menu_nav_back'])
                 return
