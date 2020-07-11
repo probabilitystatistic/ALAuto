@@ -20,7 +20,7 @@ class RetirementModule(object):
         self.retirement_done = False
         self.previous_call_place = "combat"
         self.last_retire = 0
-        self.sleep_time_long = 0.1 # default = 1
+        self.sleep_time_long = 0.0 # default = 1
         self.sleep_time_short = 0.0 # default =0.5
         self.region = {
             'combat_sort_button': Region(550, 750, 215, 64),
