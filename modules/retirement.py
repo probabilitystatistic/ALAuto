@@ -239,11 +239,12 @@ class RetirementModule(object):
                 continue
             if Utils.find_with_cropped("menu/alert_info"):
                 Utils.touch_randomly(self.region['confirm_selected_equipment_button'])
-                Utils.script_sleep(2.5)
+                Utils.script_sleep(self.sleep_time_long)
                 continue
             if Utils.find_with_cropped("retirement/button_disassemble"):
                 Utils.touch_randomly(self.region['disassemble_button'])
-                Utils.script_sleep(self.sleep_time_long)
+                Utils.script_sleep(2.5)
+                
                 continue
 
     @property
