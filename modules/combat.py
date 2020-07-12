@@ -100,6 +100,7 @@ class CombatModule(object):
 
         self.swipe_counter = 0
         self.fleet_switch_due_to_morale= False
+        self.fleet_switch_index = -1
 
 
     def combat_logic_wrapper(self):
@@ -116,7 +117,6 @@ class CombatModule(object):
         # enhancecement and retirement flags
         enhancement_failed = False
         retirement_failed = False
-        fleet_switch_index = -1
         fleet_switch_candidate_for_morale= self.config.combat['low_mood_rotation_fleet']
         first_fleet_slot_position = [1650, 393]
         fleet_slot_separation = 64
@@ -157,11 +157,18 @@ class CombatModule(object):
                 # Rotating fleet due to low morale
                 if(self.fleet_switch_due_to_morale):
                     Logger.log_warning("Switching fleet due to low morale.")
-                    fleet_switch_index += 1
+                    self.fleet_switch_index = self.fleet_switch_index + 1
                     self.fleet_switch_due_to_morale= False
+
+
+                    print(self.fleet_switch_index)
+                    print(len(fleet_switch_candidate_for_morale))
+                    print(self.fleet_switch_index % len(fleet_switch_candidate_for_morale))
+
+
                     Utils.touch_randomly(self.region["upper_choose_in_fleet_select_menu"])
                     Utils.script_sleep(1)
-                    target_fleet_vertical_position = first_fleet_slot_position[1] + fleet_slot_separation*(fleet_switch_candidate_for_morale[fleet_switch_index % len(fleet_switch_candidate_for_morale)] - 1)
+                    target_fleet_vertical_position = first_fleet_slot_position[1] + fleet_slot_separation*(fleet_switch_candidate_for_morale[self.fleet_switch_index % len(fleet_switch_candidate_for_morale)] - 1)
                     Utils.touch([first_fleet_slot_position[0], target_fleet_vertical_position])
                     Utils.script_sleep(1)
                 Utils.touch_randomly(self.region["fleet_menu_go"])
