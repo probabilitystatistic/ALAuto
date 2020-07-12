@@ -30,8 +30,8 @@ class CombatModule(object):
         self.mystery_nodes_list = []
         self.blacklist = []
         self.movement_event = {}
-        self.sleep_short = 0
-        self.sleep_long = 0
+        self.sleep_short = 0.5
+        self.sleep_long = 1
 
         self.kills_count = 0
         self.kills_before_boss = {
