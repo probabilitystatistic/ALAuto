@@ -861,12 +861,16 @@ class CombatModule(object):
                     Logger.log_msg("No more question marks.")
                     question_mark_all_obtained = True
                     continue
+                # When blocked by A3 enemy, sometime the unable_handler fail to attack A3. Therefore we explicitely do attacking A3 here.
                 if target_info[2] == 'mystery_node' and not block_A3_clear and self.is_within_zone([target_info[0], target_info[1]], region_question_mark_A2):
-                    Logger.log_msg("Targeting A2. Switch to targeting A3 for clearing possible block.")
-                    target_info[0] = position_A3[0]
-                    target_info[1] = position_A3[1]
-                    target_info[2] = 'enemy'
-                    targeting_block_A3 = True
+                    self.enemies_list.clear()
+                    enemies = self.get_enemies([], False)
+                    for index in range(0, len(enemies)):
+                        if self.is_within_zone([enemies[index][0], enemies[index][1]], region_block_A3):
+                            Logger.log_warning("Targeting A2 but enemy appears at A3. Switching to targeting A3 for clearing the block.")
+                            target_info = enemies[index]
+                            targeting_block_A3 = True
+                            break
             if self.kills_count >= self.kills_before_boss[self.chapter_map] and Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9):
                 Logger.log_msg("Boss fleet was found.")
 
@@ -980,7 +984,8 @@ class CombatModule(object):
                                          targeting_block_right, targeting_block_left, targeting_block_A3): 
 
         block_target_obtained = False
-
+        # Must clean enemies_list before using get_enemies, otherwise it will not scan for enemies.
+        self.enemies_list = []
         enemies = self.get_enemies([], False)
         targets = enemies
 
