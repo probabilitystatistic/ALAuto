@@ -419,7 +419,7 @@ class CombatModule(object):
                             # waiting the appearance of boss
                             Utils.script_sleep(2)
                         return True
-                if confirmed_fight and Utils.find_and_touch_with_cropped("combat/defeat_close_button"):
+                if confirmed_fight and Utils.find_and_touch_with_cropped("combat/defeat_close_button",0.9):
                     Logger.log_debug("Fleet was defeated.")
                     defeat = True
                     Utils.script_sleep(self.sleep_long)
