@@ -21,7 +21,7 @@ class HeadquartersModule(object):
             'hq_tab': Region(745, 1000, 205, 65),
             'tap_out': Region(760, 865, 380, 105),
             'dorm_tab': Region(845, 390, 260, 295),
-            'academy_tab': Region(500, 500, 200, 200), 
+            'academy_tab': Region(255, 390, 260, 295),
             'dorm_back_button': Region(21, 47, 65, 65),
             'dorm_eye_button': Region(27, 223, 50, 47),
             'supplies_bar': Region(310, 975, 215, 65),
@@ -222,7 +222,7 @@ class HeadquartersModule(object):
 
     def get_dorm_bar_color(self, percentage, corner_bar):
         if corner_bar:
-            x_coord = 45 + int(780 * percentage)
+            x_coord = 40 + int(625 * percentage)
             y_coord = 1025
         else:
             x_coord = 630 + int(880 * percentage)
@@ -230,16 +230,16 @@ class HeadquartersModule(object):
         return Utils.get_region_color_average(Region(x_coord, y_coord, 10, 10))
 
     def get_dorm_bar_filled(self, percentage, corner_bar=False):
-        return not self.get_dorm_bar_empty(percentage, corner_bar)
-
-    def get_dorm_bar_empty(self, percentage, corner_bar=False):
-        low = np.array([0, 0, 0])
-        high = np.array([255, 20, 128])
+        low = np.array([0, 0, 220])
+        high = np.array([255, 255, 255])
         col = self.get_dorm_bar_color(percentage, corner_bar)
         if np.all((low <= col) & (col <= high)):
             return True
         else:
             return False
+
+    def get_dorm_bar_empty(self, percentage, corner_bar=False):
+        return not self.get_dorm_bar_filled(percentage, corner_bar)
 
     def skill_levelling(self):
         """
