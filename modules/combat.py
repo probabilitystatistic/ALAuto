@@ -946,7 +946,7 @@ class CombatModule(object):
 
                 self.blacklist.clear()
 
-                Utils.script_sleep(2)
+                Utils.script_sleep(3)
 
                 # Move the fleet a bit to avoid possible blocking.
                 fleet_location = self.get_fleet_location()
