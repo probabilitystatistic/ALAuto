@@ -82,7 +82,9 @@ class CombatModule(object):
             'lock_ship_button': Region(1086, 739, 200, 55),
             'clear_second_fleet': Region(1690, 473, 40, 40),
             'button_switch_fleet': Region(1430, 985, 240, 60),
-            'menu_nav_back': Region(54, 57, 67, 67)
+            'menu_nav_back': Region(54, 57, 67, 67),
+            'upper_choose_in_fleet_select_menu': Region(1550, 270, 70, 60),
+            'lower_choose_in_fleet_select_menu': Region(1550, 460, 70, 60)
         }
 
         self.prohibited_region = {
@@ -97,6 +99,7 @@ class CombatModule(object):
         }
 
         self.swipe_counter = 0
+        self.fleet_switch_due_to_morale= False
 
     def combat_logic_wrapper(self):
         """Method that fires off the necessary child methods that encapsulates
@@ -112,6 +115,10 @@ class CombatModule(object):
         # enhancecement and retirement flags
         enhancement_failed = False
         retirement_failed = False
+        fleet_switch_index = -1
+        fleet_switch_candidate_for_morale= [5, 6]
+        first_fleet_slot_position = [1650, 393]
+        fleet_slot_separation = 64
 
         # get to map
         map_region = self.reach_map()
@@ -120,7 +127,7 @@ class CombatModule(object):
         while True:
             Utils.wait_update_screen()
 
-            if self.exit == 1 or self.exit == 2:
+            if self.exit == 1 or self.exit == 2 or self.exit == 6:
                 self.stats.increment_combat_done()
                 time_passed = datetime.now() - self.start_time
                 if self.stats.combat_done % self.config.combat['retire_cycle'] == 0 or ((self.config.commissions['enabled'] or \
@@ -145,6 +152,16 @@ class CombatModule(object):
                     Utils.touch_randomly(self.region["clear_second_fleet"])
             if Utils.find("combat/menu_select_fleet"):
                 Logger.log_debug("Found fleet select go button.")
+                # Rotating fleet due to low morale
+                if(self.fleet_switch_due_to_morale):
+                    Logger.log_msg("Switching fleet due to low morale.")
+                    fleet_switch_index += 1
+                    self.fleet_switch_due_to_morale= False
+                    Utils.touch_randomly(self.region["upper_choose_in_fleet_select_menu"])
+                    Utils.script_sleep(1)
+                    target_fleet_vertical_position = first_fleet_slot_position[1] + fleet_slot_separation*(fleet_switch_candidate_for_morale[fleet_switch_index % len(fleet_switch_candidate_for_morale)] - 1)
+                    Utils.touch([first_fleet_slot_position[0], target_fleet_vertical_position])
+                    Utils.script_sleep(1)
                 Utils.touch_randomly(self.region["fleet_menu_go"])
                 Utils.wait_update_screen(2)
             if Utils.find("combat/button_retreat"):
@@ -183,10 +200,22 @@ class CombatModule(object):
             if Utils.find("combat/alert_morale_low"):
                 if self.config.combat['ignore_morale']:
                     Utils.find_and_touch("menu/button_confirm")
+                #else:
+                #    Utils.touch_randomly(self.region['close_info_dialog'])
+                #    self.exit = 3
+                #    break
                 else:
                     Utils.touch_randomly(self.region['close_info_dialog'])
-                    self.exit = 3
-                    break
+                    # Currently not supporting two fleets, so bot will rest when two fleets are used.
+                    if(self.config.combat['boss_fleet']):
+                        self.exit = 3
+                        break
+                    # Issue fleet rotation
+                    else:
+                        self.exit = 6
+                        self.fleet_switch_due_to_morale= True
+                        Logger.log_warning("Low morale detected. Will switch to a different fleet.")
+                        break
             if Utils.find("menu/button_confirm"):
                 Logger.log_msg("Found commission info message.")
                 Utils.touch_randomly(self.region["combat_com_confirm"])
@@ -306,7 +335,15 @@ class CombatModule(object):
                 else:
                     self.exit = 3
                     Utils.touch_randomly(self.region['close_info_dialog'])
-                    return False
+                    # Currently not supporting two fleets, so bot will rest when two fleets are used.
+                    if(self.config.combat['boss_fleet']):
+                        return False
+                    # Issue fleet rotation
+                    else:
+                        self.exit = 6
+                        self.fleet_switch_due_to_morale= True
+                        Logger.log_msg("Low morale detected. Will switch to a different fleet.")
+                        return False
             elif Utils.find_with_cropped("combat/combat_pause", 0.7):
                 Logger.log_warning("Loading screen was not found but combat pause is present, assuming combat is initiated normally.")
                 break
@@ -381,7 +418,7 @@ class CombatModule(object):
                 if defeat and not confirmed_fleet_switch:
                     if Utils.find_with_cropped("combat/alert_unable_battle"):
                         Utils.touch_randomly(self.region['close_info_dialog'])
-                        Utils.script_sleep(self.sleep_long)
+                        Utils.script_sleep(1)
                         self.exit = 5
                         return False
                     if Utils.find_with_cropped("combat/alert_fleet_cannot_be_formed"):
