@@ -101,6 +101,7 @@ class CombatModule(object):
         self.swipe_counter = 0
         self.fleet_switch_due_to_morale= False
 
+
     def combat_logic_wrapper(self):
         """Method that fires off the necessary child methods that encapsulates
         the entire action of sortieing combat fleets and resolving combat.
@@ -154,7 +155,7 @@ class CombatModule(object):
                 Logger.log_debug("Found fleet select go button.")
                 # Rotating fleet due to low morale
                 if(self.fleet_switch_due_to_morale):
-                    Logger.log_msg("Switching fleet due to low morale.")
+                    Logger.log_warning("Switching fleet due to low morale.")
                     fleet_switch_index += 1
                     self.fleet_switch_due_to_morale= False
                     Utils.touch_randomly(self.region["upper_choose_in_fleet_select_menu"])
@@ -342,7 +343,7 @@ class CombatModule(object):
                     else:
                         self.exit = 6
                         self.fleet_switch_due_to_morale= True
-                        Logger.log_msg("Low morale detected. Will switch to a different fleet.")
+                        Logger.log_warning("Low morale detected. Will switch to a different fleet.")
                         return False
             elif Utils.find_with_cropped("combat/combat_pause", 0.7):
                 Logger.log_warning("Loading screen was not found but combat pause is present, assuming combat is initiated normally.")
