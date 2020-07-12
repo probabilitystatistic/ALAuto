@@ -459,7 +459,7 @@ class CombatModule(object):
                 if confirmed_fight and Utils.find_and_touch_with_cropped("combat/defeat_close_button",0.9):
                     Logger.log_debug("Fleet was defeated.")
                     defeat = True
-                    Utils.script_sleep(self.sleep_long)
+                    Utils.script_sleep(3)
                 if boss and confirmed_fight:
                     if not defeat:
                         return True
@@ -951,11 +951,11 @@ class CombatModule(object):
                 # Move the fleet a bit to avoid possible blocking.
                 fleet_location = self.get_fleet_location()
                 # leaving A3 for possible blocking of question mark at A2. Detection of own fleet at A3 sometimes does not work, so this one also use target_info.
-                if self.is_within_zone(fleet_location, region_block_A3) or self.is_within_zone([target_info[0], target_info[1]], region_block_A3):
+                if self.exit == 0 and self.is_within_zone(fleet_location, region_block_A3) or self.is_within_zone([target_info[0], target_info[1]], region_block_A3):
                     Utils.touch(position_B3)
 
                 # leaving D4 for possible blocking of question mark at D2.
-                if self.is_within_zone(fleet_location, region_question_mark_D4):
+                if self.exit == 0 and self.is_within_zone(fleet_location, region_question_mark_D4):
                     Utils.touch(position_C4)
 
                 target_info = None
