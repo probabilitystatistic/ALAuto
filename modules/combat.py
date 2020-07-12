@@ -802,6 +802,7 @@ class CombatModule(object):
         region_block_left = [[467, 610, 642, 754], [677, 474, 853, 603], [649, 760, 843, 917]] # B4, C3, and C5
         region_block_A3 = [296, 472, 460, 605]
 
+
         #right_enemy_list = ['F1', 'G2', 'G3']
         #right_enemy_region = {
         #    'F1': Region(1230, 232, 1388, 543),
@@ -911,7 +912,7 @@ class CombatModule(object):
                 self.clear_boss(boss_info)
                 continue
             if target_info == None:
-                targeting_block_right, targeting_block_left, targeting_A3, target_info = \
+                targeting_block_right, targeting_block_left, targeting_block_A3, target_info = \
                 self.get_special_target_for_7_2(block_right_clear, block_left_clear, block_A3_clear, region_block_right, region_block_left, region_block_A3, targeting_block_right, targeting_block_left, targeting_block_A3)
                 location_tmp = [target_info[0], target_info[1]]
                 target_info = self.get_closest_target(self.blacklist, location_tmp, False, False)
