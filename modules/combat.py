@@ -117,9 +117,10 @@ class CombatModule(object):
         enhancement_failed = False
         retirement_failed = False
         fleet_switch_index = -1
-        fleet_switch_candidate_for_morale= [5, 6]
+        fleet_switch_candidate_for_morale= self.config.combat['low_mood_rotation_fleet']
         first_fleet_slot_position = [1650, 393]
         fleet_slot_separation = 64
+
 
         # get to map
         map_region = self.reach_map()
@@ -207,16 +208,17 @@ class CombatModule(object):
                 #    break
                 else:
                     Utils.touch_randomly(self.region['close_info_dialog'])
-                    # Currently not supporting two fleets, so bot will rest when two fleets are used.
-                    if(self.config.combat['boss_fleet']):
-                        self.exit = 3
-                        break
-                    # Issue fleet rotation
-                    else:
+                    # Issue fleet rotation(currently not supporting for two fleets so bot rest when two fleets are used)
+                    if self.config.combat['low_mood_rotation'] and not self.config.combat['boss_fleet']:
                         self.exit = 6
                         self.fleet_switch_due_to_morale= True
                         Logger.log_warning("Low morale detected. Will switch to a different fleet.")
                         break
+                    # bot rest by default
+                    else:
+                        self.exit = 3
+                        break
+
             if Utils.find("menu/button_confirm"):
                 Logger.log_msg("Found commission info message.")
                 Utils.touch_randomly(self.region["combat_com_confirm"])
@@ -334,16 +336,16 @@ class CombatModule(object):
                 if self.config.combat['ignore_morale']:
                     Utils.find_and_touch("menu/button_confirm")
                 else:
-                    self.exit = 3
                     Utils.touch_randomly(self.region['close_info_dialog'])
-                    # Currently not supporting two fleets, so bot will rest when two fleets are used.
-                    if(self.config.combat['boss_fleet']):
-                        return False
-                    # Issue fleet rotation
-                    else:
+                    # Issue fleet rotation(currently not supporting for two fleets so bot rest when two fleets are used)
+                    if self.config.combat['low_mood_rotation'] and not self.config.combat['boss_fleet']:
                         self.exit = 6
                         self.fleet_switch_due_to_morale= True
                         Logger.log_warning("Low morale detected. Will switch to a different fleet.")
+                        return False
+                    # bot rest by default
+                    else:
+                        self.exit = 3
                         return False
             elif Utils.find_with_cropped("combat/combat_pause", 0.7):
                 Logger.log_warning("Loading screen was not found but combat pause is present, assuming combat is initiated normally.")
