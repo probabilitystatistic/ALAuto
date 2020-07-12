@@ -167,6 +167,10 @@ class Config(object):
         self.combat['ignore_morale'] = config.getboolean('Combat', 'IgnoreMorale')
         self.combat['low_mood_sleep_time'] = self.try_cast_to_float(config.get('Combat', 'LowMoodSleepTime'))
         self.combat['search_mode'] = self.try_cast_to_int(config.get('Combat', 'SearchMode'))
+        self.combat['low_mood_rotation'] = config.getboolean('Combat', 'LowMoodRotation')
+        self.combat['low_mood_rotation_fleet'] = self._validate_list(config.get('Combat', 'LowMoodRotationFleet'),
+                                                                     valid_vals=[1, 2, 3, 4, 5, 6],
+                                                                     min_len=1, max_len=6, cast=int, unique=True)
 
     def _read_headquarters(self, config):
         """Method to parse the Headquarters settings passed in config.
