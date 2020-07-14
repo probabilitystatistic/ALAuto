@@ -21,7 +21,7 @@ class HeadquartersModule(object):
             'hq_tab': Region(745, 1000, 205, 65),
             'tap_out': Region(760, 865, 380, 105),
             'dorm_tab': Region(845, 390, 260, 295),
-            'academy_tab': Region(255, 390, 260, 295),
+            'academy_tab': Region(500, 400, 260, 295),
             'dorm_back_button': Region(21, 47, 65, 65),
             'dorm_eye_button': Region(27, 223, 50, 47),
             'supplies_bar': Region(310, 975, 215, 65),
