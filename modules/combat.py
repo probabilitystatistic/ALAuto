@@ -754,8 +754,8 @@ class CombatModule(object):
             if target_info:
                 #tap at target's coordinates
                 Utils.touch(target_info[0:2])
-                # This sleep must be long to avoid capturing the screen before game responds.
-                Utils.script_sleep(1)
+                # This sleep must be long to avoid capturing the screen before game responds but also short enough to capture the "unable to reach..." dialog before it disappears.
+                Utils.script_sleep(0.5)
                 Utils.update_screen()
             else:
                 continue
@@ -926,8 +926,8 @@ class CombatModule(object):
             if target_info:
                 #tap at target's coordinates
                 Utils.touch(target_info[0:2])
-                # This sleep must be long to avoid capturing the screen before game responds.
-                Utils.script_sleep(1)
+                # This sleep must be long to avoid capturing the screen before game responds but also short enough to capture the "unable to reach..." dialog before it disappears.
+                Utils.script_sleep(0.5)
                 Utils.update_screen()
             else:
                 continue
