@@ -755,7 +755,7 @@ class CombatModule(object):
                 #tap at target's coordinates
                 Utils.touch(target_info[0:2])
                 # This sleep must be long to avoid capturing the screen before game responds but also short enough to capture the "unable to reach..." dialog before it disappears.
-                Utils.script_sleep(0.5)
+                #Utils.script_sleep(1)
                 Utils.update_screen()
             else:
                 continue
@@ -927,7 +927,7 @@ class CombatModule(object):
                 #tap at target's coordinates
                 Utils.touch(target_info[0:2])
                 # This sleep must be long to avoid capturing the screen before game responds but also short enough to capture the "unable to reach..." dialog before it disappears.
-                Utils.script_sleep(0.5)
+                #Utils.script_sleep(0.5)
                 Utils.update_screen()
             else:
                 continue
@@ -1043,7 +1043,7 @@ class CombatModule(object):
             #
             # This issue is a reflection of the fact that the game cannot response infinitely fast. Therefore, 
             # the sleeping time here should be the time for the game to finish its response due to the touch. 
-            Utils.script_sleep(1)
+            Utils.script_sleep(0.5)
             Utils.update_screen()
 
 # By me: it seems that lower similarity(0.8) actually make the bot unable to detect "unable to reach".
@@ -1083,7 +1083,18 @@ class CombatModule(object):
                     self.exit = 5
                     Logger.log_warning("Fleet defeated by boss.")
                 Utils.script_sleep(3)
-                return
+
+                # A temporary solution if bot fails to capture "enable to reach..." dialog so the actual boss is not cleared.
+                Utils.update_screen()
+                boss_region = None
+                boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
+                if boss_region:
+                    Logger.log_warning("Boss is still found after attacking boss. Re-targeting the boss.")
+                    #extrapolates boss_info(x,y,enemy_type) from the boss_region found
+                    boss_info = [boss_region.x + 50, boss_region.y + 25, "boss"]
+                    continue
+                else:
+                    return
 
     def get_enemies(self, blacklist=[], boss=False):
         sim = 0.99
