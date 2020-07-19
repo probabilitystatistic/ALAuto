@@ -267,7 +267,7 @@ class CombatModule(object):
                 Utils.touch_randomly(self.region['normal_mode_button'])
                 Utils.wait_update_screen(1)
 
-        map_region = Utils.find('maps/map_{}'.format(self.chapter_map), 0.99)
+        map_region = Utils.find('maps/map_{}'.format(self.chapter_map), 0.9)
         if map_region != None:
             Logger.log_msg("Found specified map.")
             return map_region
@@ -303,11 +303,11 @@ class CombatModule(object):
         Utils.wait_update_screen()
 # By me: lowering the similarity for map detection
 #        map_region = Utils.find('maps/map_{}'.format(self.chapter_map), 0.99)
-        map_region = Utils.find('maps/map_{}'.format(self.chapter_map), 0.95)
+        map_region = Utils.find('maps/map_{}'.format(self.chapter_map), 0.9)
         if map_region == None:
             Logger.log_error("Cannot find the specified map, please move to the world where it's located.")
         while map_region == None:
-            map_region = Utils.find('maps/map_{}'.format(self.chapter_map), 0.99)
+            map_region = Utils.find('maps/map_{}'.format(self.chapter_map), 0.9)
             Utils.wait_update_screen(1)
 
         Logger.log_msg("Found specified map.")
@@ -1067,7 +1067,10 @@ class CombatModule(object):
                 boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
                 s = 0
                 while not boss_region:
-                    if s > 3: s = 0
+                    if s > 15: 
+                        Logger.log_error("Searching boss for too many times. Start retreating... ")
+                        self.exit = 5
+                        return
                     swipes.get(s)()
                     Utils.wait_update_screen(0.5)
                     boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
@@ -1086,11 +1089,19 @@ class CombatModule(object):
 
                 # A temporary solution if bot fails to capture "enable to reach..." dialog so the actual boss is not cleared.
                 Utils.update_screen()
-                boss_region = None
-                boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
-                if boss_region:
-                    Logger.log_warning("Boss is still found after attacking boss. Re-targeting the boss.")
-                    #extrapolates boss_info(x,y,enemy_type) from the boss_region found
+                if Utils.find_with_cropped("combat/button_retreat"):
+                    Logger.log_warning("Still in battle map after attacking the boss. Re-targeting the boss.")
+                    boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
+                    s = 0
+                    while not boss_region:
+                        if s > 15: 
+                            Logger.log_error("Searching boss for too many times. Start retreating... ")
+                            self.exit = 5
+                            return
+                        swipes.get(s % 3)()
+                        Utils.wait_update_screen(0.5)
+                        boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
+                        s += 1
                     boss_info = [boss_region.x + 50, boss_region.y + 25, "boss"]
                     continue
                 else:
