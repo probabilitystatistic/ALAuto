@@ -257,7 +257,10 @@ try:
             exit()
 
 
-        # temporal solution to event alerts
+
+        if Utils.find_and_touch_with_cropped("menu/alert_close", 0.9):
+            Logger.log_msg('Found annoucement.')
+            continue
         if not Utils.find("menu/button_battle"):
             Utils.touch_randomly(Region(54, 57, 67, 67))
             Utils.script_sleep(1)
