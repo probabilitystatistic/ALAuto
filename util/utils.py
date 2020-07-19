@@ -154,6 +154,13 @@ class Utils(object):
             thread.join()
 
     @staticmethod
+    def restart_game()
+        app_name = 'com.hkmanjuu.azurlane.gp'
+        Adb.shell('am force-stop {}'.format(app_name))
+        Utils.script_sleep(5)
+        Adb.shell('monkey -p {} 1'.format(app_name))
+
+    @staticmethod
     def script_sleep(base=None, flex=None):
         """Method for putting the program to sleep for a random amount of time.
         If base is not provided, defaults to somewhere along with 0.3 and 0.7
