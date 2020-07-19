@@ -154,11 +154,27 @@ class Utils(object):
             thread.join()
 
     @staticmethod
-    def restart_game()
+    def restart_game():
         app_name = 'com.hkmanjuu.azurlane.gp'
         Adb.shell('am force-stop {}'.format(app_name))
         Utils.script_sleep(5)
         Adb.shell('monkey -p {} 1'.format(app_name))
+        while True:
+            Utils.script_sleep(5)
+            Utils.update_screen()
+            if Utils.find_and_touch('menu/login'):
+                Logger.log_msg('Game restarted and login screen found')
+                continue
+            if Utils.find_and_touch('menu/button_confirm'):
+                Logger.log_warning('Game restarted and update prompt found.')
+                Utils.script_sleep(60)
+                continue
+            if(Utils.find_with_cropped('menu/button_battle') or 
+               Utils.find_with_cropped('menu/alert_close', 0.9) or 
+               Utils.find_with_cropped('menu/item_found', 0.9) or 
+               Utils.find('menu/event_list', 0.9) ):
+                Logger.log_msg('Game restarted with successful login.')
+                return
 
     @staticmethod
     def script_sleep(base=None, flex=None):
