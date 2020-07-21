@@ -464,6 +464,8 @@ class Utils(object):
 
         while not cls.find(image, 0.85):
             if image == "menu/button_battle":
+                if cls.find_and_touch_with_cropped("menu/alert_close", 0.9):
+                    Logger.log_msg("Annoucement detected.")
                 cls.touch_randomly(Region(54, 57, 67, 67))
                 cls.wait_update_screen(1)
 
