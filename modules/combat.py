@@ -32,6 +32,7 @@ class CombatModule(object):
         self.movement_event = {}
         self.sleep_short = 0.5
         self.sleep_long = 1
+        self.map_similarity = 0.85
 
         self.kills_count = 0
         self.kills_before_boss = {
@@ -267,7 +268,7 @@ class CombatModule(object):
                 Utils.touch_randomly(self.region['normal_mode_button'])
                 Utils.wait_update_screen(1)
 
-        map_region = Utils.find('maps/map_{}'.format(self.chapter_map), 0.9)
+        map_region = Utils.find('maps/map_{}'.format(self.chapter_map), self.map_similarity)
         if map_region != None:
             Logger.log_msg("Found specified map.")
             return map_region
@@ -303,11 +304,11 @@ class CombatModule(object):
         Utils.wait_update_screen()
 # By me: lowering the similarity for map detection
 #        map_region = Utils.find('maps/map_{}'.format(self.chapter_map), 0.99)
-        map_region = Utils.find('maps/map_{}'.format(self.chapter_map), 0.9)
+        map_region = Utils.find('maps/map_{}'.format(self.chapter_map), self.map_similarity)
         if map_region == None:
             Logger.log_error("Cannot find the specified map, please move to the world where it's located.")
         while map_region == None:
-            map_region = Utils.find('maps/map_{}'.format(self.chapter_map), 0.9)
+            map_region = Utils.find('maps/map_{}'.format(self.chapter_map), self.map_similarity)
             Utils.wait_update_screen(1)
 
         Logger.log_msg("Found specified map.")
