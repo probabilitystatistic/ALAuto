@@ -1,5 +1,6 @@
 from util.logger import Logger
 from util.utils import Utils, Region
+from datetime import datetime, timedelta
 
 
 class RetirementModule(object):
@@ -20,6 +21,7 @@ class RetirementModule(object):
         self.retirement_done = False
         self.previous_call_place = "combat"
         self.last_retire = 0
+        self.forced_quit = False
         self.sleep_time_long = 0.0 # default = 1
         self.sleep_time_short = 0.0 # default =0.5
         self.region = {
@@ -62,6 +64,7 @@ class RetirementModule(object):
         Returns:
             retirement_done (bool): whether at least one retirement was completed.
         """
+
         if self.need_to_retire or forced:
             self.last_retire = self.stats.combat_done
             self.called_from_menu = False
@@ -192,6 +195,9 @@ class RetirementModule(object):
 
         while True:
             Utils.update_screen()
+            if self.forced_quit:
+                self.retirement_done = True
+                return
             if Utils.find_with_cropped("retirement/empty", similarity=0.9):
                 Logger.log_msg("No ships left to retire.")
                 #Utils.touch_randomly(self.region['menu_nav_back'])
@@ -221,11 +227,18 @@ class RetirementModule(object):
         Utils.touch_randomly(self.region['confirm_retire_button'])
         items_found = 0
 
+        start_time = datetime.now()
+
         while True:
             # This sleep time must be long enough to avoid capturing old screen.
             Utils.script_sleep(0.5)
             Utils.update_screen()
+            time = datetime.now()
 
+            if timedelta(minutes=5) < time - start_time:
+                Logger.log_error('Time spent on handle_retirement exceeds 5 minutes. Assume completed retirement and force quit.')
+                self.forced_quit = True
+                return
             if Utils.find_with_cropped("retirement/alert_bonus"):
                 Utils.touch_randomly(self.region['confirm_selected_ships_button'])
                 Utils.script_sleep(self.sleep_time_long)
@@ -244,8 +257,8 @@ class RetirementModule(object):
             if Utils.find_with_cropped("retirement/button_disassemble"):
                 Utils.touch_randomly(self.region['disassemble_button'])
                 Utils.script_sleep(2.5)
-                
                 continue
+
 
     @property
     def need_to_retire(self):
