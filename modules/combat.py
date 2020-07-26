@@ -32,7 +32,7 @@ class CombatModule(object):
         self.movement_event = {}
         self.sleep_short = 0.5
         self.sleep_long = 1
-        self.map_similarity = 0.85
+        self.map_similarity = 0.95
 
         self.kills_count = 0
         self.kills_before_boss = {
