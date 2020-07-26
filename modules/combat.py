@@ -773,9 +773,15 @@ class CombatModule(object):
                     target_info = None
                 continue
             else:
+                target_info_tmp = target_info
                 movement_result = self.movement_handler(target_info)
                 if movement_result == 1:
                     self.battle_handler()
+                # This swipe for map 2-3 makes bot more likely to target key enemies blocking the boss
+                if self.chapter_map == '2-3' and target_info_tmp[2] == 'mystery_node':
+                    Logger.log_msg("Relocating screen of 2-3 after picking the mystery node.")
+                    Utils.swipe(1000, 350, 1000, 700, 1500)
+
                 target_info = None
 
                 self.blacklist.clear()
