@@ -640,7 +640,7 @@ class CombatModule(object):
 
 # By me:
 # adding this just to switch the default fleet 
-#        Utils.touch_randomly(self.region['button_switch_fleet'])
+        Utils.touch_randomly(self.region['button_switch_fleet'])
 
         #swipe map to fit everything on screen
         swipes = {
