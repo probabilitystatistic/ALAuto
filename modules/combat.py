@@ -382,7 +382,7 @@ class CombatModule(object):
                     Utils.touch_randomly(self.region['tap_to_continue'])
                     Utils.script_sleep(self.sleep_short)
                     continue
-                if (not locked_ship) and Utils.find_with_cropped("combat/alert_lock"): 
+                if (not locked_ship) and Utils.find_with_cropped("combat/alert_lock", 0.9): 
                     Logger.log_msg("Locking received ship.")
                     Utils.touch_randomly(self.region['lock_ship_button'])
                     locked_ship = True
