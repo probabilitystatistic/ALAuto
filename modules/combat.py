@@ -638,9 +638,8 @@ class CombatModule(object):
             Logger.log_warning("Fleet lock is not supported, disabling it.")
             Utils.wait_update_screen()
 
-# By me:
-# adding this just to switch the default fleet 
-        Utils.touch_randomly(self.region['button_switch_fleet'])
+        if self.combat['fleet_switch_at_beinning']:
+            Utils.touch_randomly(self.region['button_switch_fleet'])
 
         #swipe map to fit everything on screen
         swipes = {

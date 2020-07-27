@@ -167,6 +167,7 @@ class Config(object):
         self.combat['ignore_morale'] = config.getboolean('Combat', 'IgnoreMorale')
         self.combat['low_mood_sleep_time'] = self.try_cast_to_float(config.get('Combat', 'LowMoodSleepTime'))
         self.combat['search_mode'] = self.try_cast_to_int(config.get('Combat', 'SearchMode'))
+        self.combat['fleet_switch_at_beinning'] = config.getboolean('Combat', 'FleetSwitchAtBeginning')
         self.combat['low_mood_rotation'] = config.getboolean('Combat', 'LowMoodRotation')
         self.combat['low_mood_rotation_fleet'] = self._validate_list(config.get('Combat', 'LowMoodRotationFleet'),
                                                                      valid_vals=[1, 2, 3, 4, 5, 6],
