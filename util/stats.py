@@ -20,6 +20,7 @@ class Stats(object):
         self.start_time = datetime.now()
         self.commissions_started = 0
         self.commissions_received = 0
+        self.commissions_occurance = 0
         self.combat_attempted = 0
         self.combat_done = 0
         self.offensive_skillbook = 0
@@ -70,6 +71,11 @@ class Stats(object):
 
         if oil != 0:
             Logger.log_success("Current oil: " + str(oil))
+
+        Logger.log_success(
+            "Commissions occurance: {}".format(
+                self._pretty_perhour(self.commissions_occurance, hours)))
+
         if self.config.commissions['enabled']:
             Logger.log_success(
                 "Commissions sent: {} / received: {}".format(
@@ -101,6 +107,11 @@ class Stats(object):
         """Increments the number of commissions received
         """
         self.commissions_received += 1
+
+    def increment_commissions_occurance(self):
+        """INcrements the number of commissions triggered by spending oil
+        """
+        self.commissions_occurance += 1
 
     def increment_combat_attempted(self):
         """Increments the number of sorties attempted

@@ -221,7 +221,8 @@ class CombatModule(object):
                         break
 
             if Utils.find("menu/button_confirm"):
-                Logger.log_success("Found commission info message.")
+                Logger.log_msg("Found commission info message.")
+                self.stats.increment_commissions_occurance()
                 Utils.touch_randomly(self.region["combat_com_confirm"])
 
         Utils.script_sleep(1)
@@ -444,7 +445,8 @@ class CombatModule(object):
                         self.exit = 5
                         return False
                 if confirmed_fight and Utils.find_with_cropped("menu/button_confirm"):
-                    Logger.log_success("Found commission info message.")
+                    Logger.log_msg("Found commission info message.")
+                    self.stats.increment_commissions_occurance()
                     Utils.touch_randomly(self.region["combat_com_confirm"])
                     continue
                 if confirmed_fight and (not boss) and Utils.find_with_cropped("combat/button_retreat"):
