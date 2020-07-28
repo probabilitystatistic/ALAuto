@@ -1,3 +1,4 @@
+import copy
 from util.utils import Region, Utils
 from util.logger import Logger
 from util.stats import Stats
@@ -18,6 +19,7 @@ class CommissionModule(object):
         self.stats = stats
         self.attempts_count = 0
         self.commission_start_attempts = 0
+        self.commission_is_full = False
         self.region = {
             'left_menu': Region(0, 203, 57, 86),
             'collect_oil': Region(206, 105, 98, 58),
@@ -73,8 +75,7 @@ class CommissionModule(object):
                     Utils.wait_update_screen(1)
                     if Utils.find_and_touch("menu/alert_close"):
                         Utils.script_sleep(1)
-
-                if self.urgent_handler():
+                if self.urgent_handler_selective():
                     self.daily_handler()
                 Utils.touch_randomly(self.region["button_back"])
                 continue
@@ -120,6 +121,8 @@ class CommissionModule(object):
                 return
 
     def urgent_handler(self):
+        """ Return true if there are remaining fleets for more commissions.
+        """
         Utils.touch_randomly(self.region["urgent_tab"])
 
         while True:
@@ -140,6 +143,73 @@ class CommissionModule(object):
 
         Utils.script_sleep(1)
         return True
+
+    def urgent_handler_selective(self):
+        """ Return true and move to daily commission menu if commission is not yet full.
+        """   
+        Utils.touch_randomly(self.region["urgent_tab"])
+        scroll_bottom_reached = True
+
+        Utils.update_screen()
+        if Utils.find("commission/scroll_bar_exist"):
+            scroll_bottom_reached = False
+            Logger.log_debug("Scroll bar detected.")
+        else:
+            Logger.log_debug("No scroll bar detected.")
+
+        while True:   
+            Utils.script_sleep(1)
+
+            if not self.commission_is_full:
+                Utils.update_screen() 
+                commission_list = self.find_filtered_commission()
+                if not commission_list:
+                    Logger.log_info("Found no non-driller commissions on current screen.")
+                if commission_list:
+                    Logger.log_info("Found {} non-driller commission(s).".format(len(commission_list)))
+                    for i in range(len(commission_list)):
+                        Utils.touch(commission_list[i])
+                        if not self.start_commission():
+                            if self.commission_start_attempts > 10:
+                                Logger.log_warning("Going back to main menu and retrying.")
+                            else:
+                                Logger.log_msg("No more commissions to start.")
+                            return False
+                    continue
+                elif scroll_bottom_reached:
+                    Utils.touch_randomly(self.region["daily_tab"])
+                    Logger.log_msg("No urgent commissions left.")
+                    Utils.script_sleep(1)
+                    return True
+                else:
+                    Utils.swipe_commission_slot(4)
+                    Utils.update_screen()
+                    if Utils.find("commission/scroll_bar_reaching_end"):
+                        scroll_bottom_reached = True
+                        Logger.log_debug("Scroll bottom reached.")
+            else:
+                return False
+
+    @classmethod
+    def find_filtered_commission(self):
+        same_slot_determination_separtion = 90 # separation for status_indicator and driller is around 80
+        driller_list = []
+        commission_list = []
+        list_tmp = []
+        Utils.update_screen()
+        list_tmp = Utils.find_all("commission/commission_status")
+        driller_list = Utils.find_all("commission/driller")
+        commission_list = copy.deepcopy(list_tmp)
+
+        if list_tmp:        
+            if driller_list:
+                for i in range(0, len(list_tmp)):
+                    for j in range(0, len(driller_list)):
+                        if same_slot_determination_separtion >= (list_tmp[i][1] - driller_list[j][1]) > 0:
+                            commission_list.remove(list_tmp[i])
+                            break
+        return commission_list
+
 
     def start_commission(self):
         Logger.log_debug("Starting commission.")
@@ -174,4 +244,5 @@ class CommissionModule(object):
                 continue
 
         Utils.wait_update_screen(1)
-        return not (Utils.find("commission/commissions_full") or self.commission_start_attempts > 10)
+        self.commission_is_full = Utils.find("commission/commissions_full")
+        return not (self.commission_is_full or self.commission_start_attempts > 10)

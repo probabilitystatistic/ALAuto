@@ -20,6 +20,8 @@ data = {
     "combat/menu_loading": [1560, 960, 1920, 1080],
     "combat/menu_touch2continue": [100, 900, 900, 1000],
     "commission/alert_completed": [1660, 400, 1760, 500],
+    "commission/scroll_bar_exist": [1860, 80, 1920, 180],
+    "commission/scroll_bar_reaching_end": [1860, 980, 1920, 1080],
     "menu/alert_info": [0, 0, 960, 540], # Just a rough estimation!
     "menu/alert_close": [960, 0, 1920, 540], # Just a rough estimation!
     "menu/build": [100, 0, 350, 100],

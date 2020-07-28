@@ -796,6 +796,22 @@ class Utils(object):
         cls.update_screen()
 
     @classmethod
+    def swipe_commission_slot(cls, number):
+        """ This swipe the screen in commissioin for the distance of 1 or 4 slots 
+        """
+        if number == 1:
+            cls.swipe(960, 683, 960, 500, 1500)
+            # Wait until the brush effect fade away
+            cls.script_sleep(1.5)
+        elif number == 4:
+            cls.swipe(960, 920, 960, 200, 2000)
+            # Wait until the brush effect fade away
+            cls.script_sleep(2)
+        else:
+            Logger.log_error("Invalid number of slots in Utils.swipe_commission_slot.")
+            exit()
+
+    @classmethod
     def find_and_touch(cls, image, similarity=DEFAULT_SIMILARITY, color=False):
         """Finds the image on the screen and touches it if it exists
 
