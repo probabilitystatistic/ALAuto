@@ -168,7 +168,7 @@ class CommissionModule(object):
                 if commission_list:
                     Logger.log_msg("Found {} non-driller commission(s).".format(len(commission_list)))
                     # Only touch the first commission in the list because the game resets the screen after clicking on one, rendering the position in the list wrong.
-                    i = 1
+                    i = 0
                     Utils.touch(commission_list[i])
                     if not self.start_commission():
                         if self.commission_start_attempts > 10:
