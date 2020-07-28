@@ -164,17 +164,18 @@ class CommissionModule(object):
                 Utils.update_screen() 
                 commission_list = self.find_filtered_commission()
                 if not commission_list:
-                    Logger.log_info("Found no non-driller commissions on current screen.")
+                    Logger.log_msg("Found no non-driller commissions on current screen.")
                 if commission_list:
-                    Logger.log_info("Found {} non-driller commission(s).".format(len(commission_list)))
-                    for i in range(len(commission_list)):
-                        Utils.touch(commission_list[i])
-                        if not self.start_commission():
-                            if self.commission_start_attempts > 10:
-                                Logger.log_warning("Going back to main menu and retrying.")
-                            else:
-                                Logger.log_msg("No more commissions to start.")
-                            return False
+                    Logger.log_msg("Found {} non-driller commission(s).".format(len(commission_list)))
+                    # Only touch the first commission in the list because the game resets the screen after clicking on one, rendering the position in the list wrong.
+                    i = 1
+                    Utils.touch(commission_list[i])
+                    if not self.start_commission():
+                        if self.commission_start_attempts > 10:
+                            Logger.log_warning("Going back to main menu and retrying.")
+                        else:
+                            Logger.log_msg("No more commissions to start.")
+                        return False
                     continue
                 elif scroll_bottom_reached:
                     Utils.touch_randomly(self.region["daily_tab"])
