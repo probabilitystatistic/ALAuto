@@ -61,6 +61,7 @@ class CommissionModule(object):
                 self.completed_handler()
             if Utils.find("commission/alert_available", 0.9) and (lambda x:x > 332 and x < 511)(Utils.find("commission/alert_available", 0.9).y):
                 Logger.log_debug("Found commission available indicator.")
+                self.commission_is_full = False
                 if self.attempts_count > 2:
                     Logger.log_msg("Exceeded number of tries allowed. Resuming with other tasks.")
                     Utils.touch_randomly(self.region["dismiss_side_tab"])
