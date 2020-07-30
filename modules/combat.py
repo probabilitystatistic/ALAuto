@@ -140,7 +140,11 @@ class CombatModule(object):
                 else:
                     self.exit = 0
                     Logger.log_msg("Repeating map {}.".format(self.chapter_map))
-                    Utils.touch_randomly(map_region)
+                    while True
+                        Utils.touch_randomly(map_region)
+                        Utils.wait_update_screen()
+                        if Utils.find("combat/button_go"):
+                            break
                     continue
             if self.exit > 2:
                 self.stats.increment_combat_attempted()
