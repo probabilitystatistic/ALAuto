@@ -228,33 +228,41 @@ class RetirementModule(object):
         items_found = 0
 
         start_time = datetime.now()
+        Logger.log_warning('Beginning of handle_retirement. Start_time:{}'.format(start_time))
 
         while True:
             # This sleep time must be long enough to avoid capturing old screen.
             Utils.script_sleep(0.5)
             Utils.update_screen()
             time = datetime.now()
+            Logger.log_warning('Beginning of while loop. Time:{}'.format(time))
 
             if timedelta(minutes=5) < time - start_time:
+                Logger.log_warning('Time limit triggered')
                 Logger.log_error('Time spent on handle_retirement exceeds 5 minutes. Assume completed retirement and force quit.')
                 self.forced_quit = True
                 return
             if Utils.find_with_cropped("retirement/alert_bonus"):
+                Logger.log_warning('retirement/alert_bonus triggered')
                 Utils.touch_randomly(self.region['confirm_selected_ships_button'])
                 Utils.script_sleep(self.sleep_time_long)
                 continue
             if Utils.find_with_cropped("menu/item_found"):
+                Logger.log_warning('menu/item_found triggered. item_found={}'.format(items_found))
                 Utils.touch_randomly(self.region['tap_to_continue'])
                 Utils.script_sleep(self.sleep_time_long)
                 items_found += 1
                 if items_found > 1:
+                    Logger.log_warning('Leaving handle_retirement')
                     return
                 continue
             if Utils.find_with_cropped("menu/alert_info"):
+                Logger.log_warning('menu/item_alert_info triggered')
                 Utils.touch_randomly(self.region['confirm_selected_equipment_button'])
                 Utils.script_sleep(self.sleep_time_long)
                 continue
             if Utils.find_with_cropped("retirement/button_disassemble"):
+                Logger.log_warning('retirement/button_disassemble triggered')
                 Utils.touch_randomly(self.region['disassemble_button'])
                 Utils.script_sleep(2.5)
                 continue
