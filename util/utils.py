@@ -742,18 +742,65 @@ class Utils(object):
         #cls.script_sleep()
         cls.script_sleep(0.9,0)
 
-#    @classmethod
-#    def touch_UIautomator(cls, coords):
-        """Sends an input command to touch the device screen at the specified
-        coordinates via ADB
+    @classmethod
+    def touch_ensured(cls, coords, ref_before_touch, ref_after_touch, response_time=1, first_screen_needed=False, trial=10, similarity_before=DEFAULT_SIMILARITY, similarity_after=DEFAULT_SIMILARITY):
+        """Touch with ensurance check and return True if touch is successful
 
         Args:
             coords (array): An array containing the x and y coordinate of
                 where to touch the screen
-        """
-#        u2device.click(coords[0], coords[1])
+
+            ref_before_touch (string): a reference image appearing before 
+                touch to ensure the present screen is the right one to 
+                execute touch. It is OK if this reference image still appears
+                after the touch.
         
-#        cls.script_sleep(0,0)
+            ref_after_touch (string): a reference image appearing only after 
+                the touch to verify if the touch is successful
+
+            response_time (integer): time in seconds to wait between each 
+                touch trial
+
+            first_screen_needed (boolean): determine if a screen capture is
+                needed before executing this ensured touch
+
+            trial (integer) : the maximum number of times to perform the touch
+
+            similarity_before (float): the similarity for detecting reference 
+                before touch
+
+            similarity_after (float): the similarity for detecting reference
+                after touch
+
+        Return:
+            boolean: True if the touch is successful(found reference after touch)
+                and False otherwise
+        """
+        if first_screen_needed:
+            cls.update_screen()
+
+        count = 0
+
+        while True:
+            if not cls.find(ref_before_touch):
+                if count == 0: 
+                    Logger.log_error("Touch failure: not in the desired screen(before first touch).")
+                else:
+                    Logger.log_error("Touch failure: not in the desired screen(after first touch).")
+                return False
+            Adb.shell("input tap {} {}".format(coords[0], coords[1]))
+            cls.script_sleep(response_time)
+            cls.update_screen()
+            count += 1
+            if cls.find(ref_after_touch):
+                return True
+            if count > trial:
+                Logger.log_error("Touch failure after {} times at: [{}, {}].".format(trial, coords[0], coords[1]))
+                return False
+            Logger.log_warning("Touch failure at [{},{}] will try again.".format(coords[0], coords[1]))
+            
+
+
 
     @classmethod
     def touch_UIautomator(cls, coords):
@@ -779,6 +826,44 @@ class Utils(object):
         x = cls.random_coord(region.x, region.x + region.w)
         y = cls.random_coord(region.y, region.y + region.h)
         cls.touch([x, y])
+
+    @classmethod
+    def touch_randomly_ensured(cls, region, ref_before_touch, ref_after_touch, response_time=1, first_screen_needed=False, trial=10, similarity_before=DEFAULT_SIMILARITY, similarity_after=DEFAULT_SIMILARITY):
+        """Touch with ensurance check and return True if touch is successful
+
+        Args:
+            region (Region): specified region in which to randomly touch the screen
+
+            ref_before_touch (string): a reference image appearing before 
+                touch to ensure the present screen is the right one to 
+                execute touch. It is OK if this reference image still appears
+                after the touch.
+        
+            ref_after_touch (string): a reference image appearing only after 
+                the touch to verify if the touch is successful
+
+            response_time (integer): time in seconds to wait between each 
+                touch trial
+
+            first_screen_needed (boolean): determine if a screen capture is
+                needed before executing this ensured touch
+
+            trial (integer) : the maximum number of times to perform the touch
+
+            similarity_before (float): the similarity for detecting reference 
+                before touch
+
+            similarity_after (float): the similarity for detecting reference
+                after touch
+
+        Return:
+            boolean: True if the touch is successful(found reference after touch)
+                and False otherwise
+        """
+        x = cls.random_coord(region.x, region.x + region.w)
+        y = cls.random_coord(region.y, region.y + region.h)
+        return cls.touch_ensured([x, y], ref_before_touch, ref_after_touch, response_time, first_screen_needed, trial, similarity_before, similarity_after)
+         
 
     @classmethod
     def swipe(cls, x1, y1, x2, y2, ms):
