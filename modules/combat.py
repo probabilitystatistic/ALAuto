@@ -999,7 +999,7 @@ class CombatModule(object):
                     3: lambda: Utils.swipe(260, 540, 1560, 540, 300)
                 }
         if self.chapter_map == "7-2":
-            anchor_position = [1486, 629]
+            anchor_position = [1564, 629]
             anchor_tolerance = [10, 10]
         else:
             Logger.log_error('No anchor point is set for map {}.'.format(self.chapter_map))
