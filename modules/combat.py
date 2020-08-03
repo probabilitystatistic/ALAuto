@@ -214,7 +214,7 @@ class CombatModule(object):
                 else:
                     Utils.touch_randomly(self.region['close_info_dialog'])
                     # Issue fleet rotation(currently not supporting for two fleets so bot rest when two fleets are used)
-                    if self.config.combat['low_mood_rotation'] and not self.config.combat['boss_fleet']:
+                    if self.config.combat['low_mood_rotation']:
                         self.exit = 6
                         self.fleet_switch_due_to_morale= True
                         Logger.log_warning("Low morale detected. Will switch to a different fleet.")
@@ -344,7 +344,7 @@ class CombatModule(object):
                 else:
                     Utils.touch_randomly(self.region['close_info_dialog'])
                     # Issue fleet rotation(currently not supporting for two fleets so bot rest when two fleets are used)
-                    if self.config.combat['low_mood_rotation'] and not self.config.combat['boss_fleet']:
+                    if self.config.combat['low_mood_rotation']:
                         self.exit = 6
                         self.fleet_switch_due_to_morale= True
                         Logger.log_warning("Low morale detected. Will switch to a different fleet.")
