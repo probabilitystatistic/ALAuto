@@ -378,7 +378,6 @@ class CombatModule(object):
                 continue
             if not items_received:
                 if Utils.find_with_cropped("combat/menu_touch2continue"):
-                    Utils.script_sleep(1)
                     Logger.log_debug("Combat ended: tap to continue")
                     Utils.touch_randomly_ensured(self.region['tap_to_continue'], "combat/menu_touch2continue", ["menu/item_found", "combat/button_confirm"])
                     in_battle = False
@@ -386,7 +385,7 @@ class CombatModule(object):
                 if Utils.find_with_cropped("menu/item_found"):
                     Logger.log_debug("Combat ended: items received screen")
                     Utils.touch_randomly_ensured(self.region['tap_to_continue'], "menu/item_found", ["combat/button_confirm", "menu/drop_elite", "menu/drop_rare", "menu/drop_ssr", "menu/drop_common", "combat/alert_lock"], similarity_after=0.9)
-                    Utils.script_sleep(self.sleep_short)
+                    Utils.script_sleep(0)
                     continue
                 if (not locked_ship) and Utils.find_with_cropped("combat/alert_lock", 0.9): 
                     Logger.log_msg("Locking received ship.")
