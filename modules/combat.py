@@ -874,7 +874,7 @@ class CombatModule(object):
             if self.exit != 0:
                 self.retreat_handler()
                 return True
-            if self.kills_count >= 3 and target_info == None:
+            if self.kills_count >= 3 and target_info == None and not question_mark_all_obtained:
                 Logger.log_msg("Collecting question marks after 3 battles.")
                 target_info = self.get_closest_target(self.blacklist, [], True, False)
                 if target_info[2] == 'enemy': 
