@@ -846,6 +846,15 @@ class CombatModule(object):
             Logger.log_warning("Fleet lock is not supported, disabling it.")
             Utils.wait_update_screen()
 
+        if self.config.combat['fleet_switch_at_beinning']:
+            Utils.touch_randomly(self.region['button_switch_fleet'])
+            if not self.reset_screen_by_anchor_point():
+                Logger.log_warning("Fail to reset the screen by anchor. Force retreat and try again.")
+                self.exit = 5
+                self.retreat_handler()
+                return True
+            Utils.script_sleep(1)     
+
         # move to the boss position to avoid blocking A3 enemy
         # FIXME: This might fail if the initial spawns happen to block our fleet
         Utils.touch(position_boss)
@@ -980,6 +989,54 @@ class CombatModule(object):
                 target_info = None
 
                 continue
+
+    def reset_screen_by_anchor_point(self):
+        screen_is_reset = False
+        swipes = {
+                    0: lambda: Utils.swipe(960, 240, 960, 940, 300),
+                    1: lambda: Utils.swipe(1560, 540, 260, 540, 300),
+                    2: lambda: Utils.swipe(960, 940, 960, 240, 300),
+                    3: lambda: Utils.swipe(260, 540, 1560, 540, 300)
+                }
+        if self.chapter_map == "7-2":
+            anchor_position = [1486, 629]
+            anchor_tolerance = [10, 10]
+        else:
+            Logger.log_error('No anchor point is set for map {}.'.format(self.chapter_map))
+            return False
+
+        swipe_reset = 0
+        Utils.update_screen()
+        anchor = Utils.find_in_scaling_range("map_anchors/map_{}".format(self.chapter_map), similarity=0.95)
+        while not screen_is_reset:
+            s = 0
+            while not anchor:
+                swipes.get(s % 3)()
+                Utils.wait_update_screen(0.5)
+                anchor = Utils.find_in_scaling_range("map_anchors/map_{}".format(self.chapter_map), similarity=0.95)
+                s += 1
+                if s > 15:
+                    Logger.log_error("Swipe too many times for searching anchor point.")
+                    return False
+            Utils.swipe(1920/2, 1080/2, 1920/2 + anchor_position[0] - anchor.x, 1080/2 + anchor_position[1] - anchor.y, 1500)
+            swipe_reset += 1
+            if swipe_reset > 15:
+                Logger.log_error("Swipe too many times for resetting screen.")
+                return False
+            Utils.wait_update_screen(1)
+            # check if resetiing screen is really successful
+            anchor = Utils.find_in_scaling_range("map_anchors/map_{}".format(self.chapter_map), similarity=0.95)
+            if not anchor:
+                Logger.log_warning("Anchor found but cannot find anchor after swipe. Retrying...")
+                continue
+            if abs(anchor.x - anchor_position[0]) <= anchor_tolerance[0] and abs(anchor.y - anchor_position[1]) <= anchor_tolerance[1]:
+                Logger.log_msg("Screen successfully reset.")
+                screen_is_reset = True
+        return True
+        
+
+
+
 
     def is_within_zone(self, location, zone):
         # Determine if the location is within the zone
