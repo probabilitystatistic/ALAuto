@@ -261,9 +261,6 @@ class CombatModule(object):
             Utils.wait_update_screen(1)
 
 #           By me: comment out the switching to normal mode for event map so I can farm D2 in Iris of light and dark.
-#           In practice, it successfully enter the map but frequently fails to find an enemy(especially siren).
-#            if event_maps.index(letter) < 3 and Utils.find("menu/button_normal_mode", 0.8) or \
-#               event_maps.index(letter) > 2 and not Utils.find("menu/button_normal_mode", 0.8):
 #                Utils.touch_randomly(self.region['normal_mode_button'])
 #                Utils.wait_update_screen(1)
         else:
