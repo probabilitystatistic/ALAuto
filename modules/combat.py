@@ -169,8 +169,7 @@ class CombatModule(object):
                     target_fleet_vertical_position = first_fleet_slot_position[1] + fleet_slot_separation*(fleet_switch_candidate_for_morale[self.fleet_switch_index % len(fleet_switch_candidate_for_morale)] - 1)
                     Utils.touch([first_fleet_slot_position[0], target_fleet_vertical_position])
                     Utils.script_sleep(1)
-                Utils.touch_randomly(self.region["fleet_menu_go"])
-                Utils.wait_update_screen(2)
+                Utils.touch_randomly_ensured(self.region["fleet_menu_go"], "combat/menu_select_fleet", ["combat/button_retreat"], response_time=3)
             if Utils.find("combat/button_retreat"):
                 Logger.log_debug("Found retreat button, starting clear function.")
                 if (self.chapter_map[0] == '7' and self.chapter_map[2] == '2' and self.config.combat['clearing_mode'] and self.config.combat['focus_on_mystery_nodes']):
