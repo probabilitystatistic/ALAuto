@@ -887,6 +887,7 @@ class CombatModule(object):
                         if self.is_within_zone([enemies[index][0], enemies[index][1]], region_block_A3):
                             Logger.log_warning("Targeting A2 but enemy appears at A3. Switching to targeting A3 for clearing the block.")
                             target_info = enemies[index]
+                            target_info[2] = 'enemy'
                             targeting_block_A3 = True
                             break
             if self.kills_count >= self.kills_before_boss[self.chapter_map] and Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9):
