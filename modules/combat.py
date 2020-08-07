@@ -266,7 +266,8 @@ class CombatModule(object):
         else:
             if Utils.find("menu/button_normal_mode"):
                 Logger.log_debug("Disabling hard mode.")
-                Utils.touch_randomly(self.region['normal_mode_button'])
+                # disable the check for normal mode so as to do daily hard runs
+                #Utils.touch_randomly(self.region['normal_mode_button'])
                 Utils.wait_update_screen(1)
 
         map_region = Utils.find('maps/map_{}'.format(self.chapter_map), self.map_similarity)
