@@ -391,6 +391,7 @@ class CombatModule(object):
                     continue
                 if Utils.find_with_cropped("menu/drop_elite"):
                     Logger.log_msg("Received ELITE ship as drop.")
+                    # sometimes this ensured touch fails after 10 clicks(but still keep going to continue). It successes the next time after the continue.
                     Utils.touch_randomly_ensured(self.region['dismiss_ship_drop'], "menu/drop_elite", ["combat/button_confirm", "combat/alert_lock"])
                     Utils.script_sleep(self.sleep_short)
                     continue
