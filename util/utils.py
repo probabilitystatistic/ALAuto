@@ -787,7 +787,7 @@ class Utils(object):
         count = 0
 
         while True:
-            if check_ref_before !=0 and not cls.find(ref_before_touch):
+            if check_ref_before !=0 and not cls.find(ref_before_touch, similarity=similarity_before):
                 if count == 0: 
                     Logger.log_error("Touch failure: not in the desired screen(before first touch).")
                 elif check_ref_before == 2:
@@ -798,7 +798,7 @@ class Utils(object):
             cls.update_screen()
             count += 1
             for i in range(len(ref_after_touch)):
-                if cls.find(ref_after_touch[i]):
+                if cls.find(ref_after_touch[i], similarity = similarity_after):
                     return True
             if count > trial:
                 Logger.log_error("Touch failure after {} times at: [{}, {}].".format(trial, coords[0], coords[1]))
