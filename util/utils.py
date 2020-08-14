@@ -98,7 +98,7 @@ class Utils(object):
     screencap_mode = None
 
     DEFAULT_SIMILARITY = 0.95
-    DEFAULT_RESPONSE_TIME = 1
+    DEFAULT_RESPONSE_TIME = 0.1
     assets = ''
     locations = ()
 
