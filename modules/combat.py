@@ -991,6 +991,7 @@ class CombatModule(object):
                 movement_result = self.movement_handler(target_info)
                 if movement_result == 1:
                     self.battle_handler()
+                    Utils.script_sleep(3)
                     
                 if targeting_block_right:
                     block_right_clear = True 
@@ -999,9 +1000,7 @@ class CombatModule(object):
                 if targeting_block_A3:
                     block_A3_clear = True  
 
-                self.blacklist.clear()
-
-                Utils.script_sleep(3)
+                self.blacklist.clear()                 
 
                 # Move the fleet a bit to avoid possible blocking.
                 fleet_location = self.get_fleet_location()
