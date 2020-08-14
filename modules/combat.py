@@ -992,13 +992,13 @@ class CombatModule(object):
     def reset_screen_by_anchor_point(self):
         screen_is_reset = False
         swipes = {
-                    0: lambda: Utils.swipe(960, 240, 960, 940, 300),
-                    1: lambda: Utils.swipe(1560, 540, 260, 540, 300),
-                    2: lambda: Utils.swipe(960, 940, 960, 240, 300),
+                    2: lambda: Utils.swipe(960, 240, 960, 940, 300),
+                    0: lambda: Utils.swipe(1560, 540, 260, 540, 300),
+                    1: lambda: Utils.swipe(960, 940, 960, 240, 300),
                     3: lambda: Utils.swipe(260, 540, 1560, 540, 300)
                 }
         if self.chapter_map == "7-2":
-            anchor_position = [1564, 629]
+            anchor_position = [1564, 677]
             anchor_tolerance = [10, 10]
         else:
             Logger.log_error('No anchor point is set for map {}.'.format(self.chapter_map))
