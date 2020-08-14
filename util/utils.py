@@ -809,7 +809,8 @@ class Utils(object):
                 elif check_ref_before == 2:
                     Logger.log_error("Touch failure: not in the desired screen(after first touch).")
                 return False
-            Adb.shell("input tap {} {}".format(coords[0], coords[1]))
+            #Adb.shell("input tap {} {}".format(coords[0], coords[1]))
+            Adb.shell("input swipe {} {} {} {} {}".format(coords[0], coords[1], coords[0], coords[1], 0))
             cls.script_sleep(response_time)
             cls.update_screen()
             count += 1
