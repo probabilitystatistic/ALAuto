@@ -535,7 +535,7 @@ class CombatModule(object):
             else:
                 if count != 0 and count % 3 == 0:
                     Utils.touch(location)
-                if (count > 11 and self.chapter_map[0] == '7' and self.chapter_map[2] == '2' and self.config.combat['clearing_mode']):
+                if (count > 11 and (self.chapter_map == '7-2' or self.chapter_map == '5-1') and self.config.combat['clearing_mode']):
                     Logger.log_warning("Clicking on the destination for too many times. Assuming target reached.")
                     return 0
                 if count > 21:
@@ -671,6 +671,18 @@ class CombatModule(object):
             Utils.script_sleep()
             Utils.touch_randomly(self.region["close_strategy_menu"])
 
+        # special switch for special farming
+        if self.chapter_map=="5-1":
+            # Special farming for 5-1:
+            # Setup: fleet 1 = boss fleet; another fleet = mob fleet; enable boss fleet = True; prioritize mystery node = True
+            # 1. boss fleet move to obtain the mystery node at the beginning(this also ensure no boss blocking by boss fleet)
+            # 2. switch to mob fleet, and let it clear 4 enemies(boss block by mob fleet can be handled by the default left/right disclosing)
+            # 3. switch back to boss fleet, and clear the boss
+            target_info = self.get_closest_target(self.blacklist, mystery_node=True)
+            Utils.touch(target_info[0:2])
+            self.movement_handler(target_info)
+            Utils.touch_randomly(self.region['button_switch_fleet'])
+            Utils.update_screen()
 #By me:
 # allow the bot to collect question node at the first turn
         #target_info = self.get_closest_target(self.blacklist)
