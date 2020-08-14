@@ -264,7 +264,7 @@ class RetirementModule(object):
             if Utils.find_with_cropped("retirement/button_disassemble"):
                 Logger.log_debug('retirement/button_disassemble triggered')
                 Utils.touch_randomly(self.region['disassemble_button'])
-                Utils.script_sleep(2.5)
+                Utils.script_sleep(1)
                 continue
 
 
