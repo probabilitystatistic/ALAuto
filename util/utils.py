@@ -210,6 +210,7 @@ class Utils(object):
         global screen
         screen = None
         color_screen = None
+        count = 0
         while color_screen is None:
             if Adb.legacy:
                 color_screen = cv2.imdecode(
@@ -265,6 +266,19 @@ class Utils(object):
             screen = cv2.cvtColor(color_screen, cv2.COLOR_BGR2GRAY)
             cls.color_screen = color_screen
             cls.screen = screen
+
+            # for debug the infinite screen capture loop
+            count += 1
+            if count > 1:
+                Logger.log_error("Screen capture takes more than one attempt!")
+                Logger.log_error("Attempts: {}.".format(count))
+                Logger.log_error("color_screen is: {}.".format(color_screen))
+                if count >= 10:
+                    Logger.log_error("Too many screen capture attempt({}), quitting.".format(count))             
+                    exit()
+            if color_screen is None:
+                Logger.log_error("Color_screen is none after one screen capture!")
+                Logger.log_error("color_screen is: {}.".format(color_screen))
 
     @classmethod
     def wait_update_screen(cls, time=None):
