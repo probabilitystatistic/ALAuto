@@ -529,19 +529,35 @@ class Utils(object):
             Region: region object containing the location and size of the image
         """
 
+        crop_data_exist = True
+        try:
+            cr.data[image]
+        except:
+            Logger.log_error("Crop data for searching {} does not exist. Switch to full screen search.".format(image))
+            crop_data_exist = False
+            search_region_x1 = 0
+            search_region_y1 = 0
+            search_region_x2 = 1920
+            search_region_y2 = 1080
+        else:
+            search_region_x1 = cr.data[image][0]
+            search_region_y1 = cr.data[image][1]
+            search_region_x2 = cr.data[image][2]
+            search_region_y2 = cr.data[image][3]
+
         if color:
-            color_screen_tmp = cls.color_screen[cr.data[image][1]:cr.data[image][3], cr.data[image][0]:cr.data[image][2]]
+            color_screen_tmp = cls.color_screen[search_region_y1:search_region_y2, search_region_x1:search_region_x2]
             template = cv2.imread('assets/{}/{}.png'.format(cls.assets, image), cv2.IMREAD_COLOR)
             match = cv2.matchTemplate(color_screen_tmp, template, cv2.TM_CCOEFF_NORMED)
         else:
-            screen_tmp = cls.screen[cr.data[image][1]:cr.data[image][3], cr.data[image][0]:cr.data[image][2]]
+            screen_tmp = cls.screen[search_region_y1:search_region_y2, search_region_x1:search_region_x2]
             template = cv2.imread('assets/{}/{}.png'.format(cls.assets, image), 0)
             match = cv2.matchTemplate(screen_tmp, template, cv2.TM_CCOEFF_NORMED)
 
         height, width = template.shape[:2]
         value, location = cv2.minMaxLoc(match)[1], cv2.minMaxLoc(match)[3]
         if value >= similarity:
-            return Region(cr.data[image][0] + location[0], cr.data[image][1] + location[1], width, height)
+            return Region(search_region_x1 + location[0], search_region_y1 + location[1], width, height)
         return None
 
     @classmethod
