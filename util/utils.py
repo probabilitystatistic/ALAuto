@@ -767,7 +767,7 @@ class Utils(object):
             results_list.append(Region(location[0], location[1], width, height))
 
     @classmethod
-    def touch(cls, coords):
+    def touch(cls, coords, sleep=0.9):
         """Sends an input command to touch the device screen at the specified
         coordinates via ADB
 
@@ -781,7 +781,7 @@ class Utils(object):
         #u2device.click(coords[0], coords[1]) # somehow not working after entering  a map.
 
         #cls.script_sleep()
-        cls.script_sleep(0.9,0)
+        cls.script_sleep(sleep,0)
 
     @classmethod
     def touch_ensured(cls, coords, ref_before_touch, ref_after_touch, response_time=DEFAULT_RESPONSE_TIME, 
