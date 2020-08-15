@@ -528,6 +528,8 @@ class Utils(object):
         Returns:
             Region: region object containing the location and size of the image
         """
+        
+        start_time = time.perf_counter()
 
         crop_data_exist = True
         try:
@@ -557,7 +559,13 @@ class Utils(object):
         height, width = template.shape[:2]
         value, location = cv2.minMaxLoc(match)[1], cv2.minMaxLoc(match)[3]
         if value >= similarity:
+            elapsed_time = time.perf_counter() - start_time
+            Logger.log_debug("Find_with_cropped took {} ms to search {}. Match.".format('%.2f' % (elapsed_time * 1000), image))
+            #print("Find_with_cropped took {} ms to search {}. Match.".format('%.2f' % (elapsed_time * 1000), image))
             return Region(search_region_x1 + location[0], search_region_y1 + location[1], width, height)
+        elapsed_time = time.perf_counter() - start_time
+        Logger.log_debug("Find_with_cropped took {} ms to search {}. No match.".format('%.2f' % (elapsed_time * 1000), image))
+        #print("Find_with_cropped took {} ms to search {}. No match.".format('%.2f' % (elapsed_time * 1000), image))
         return None
 
     @classmethod
