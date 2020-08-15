@@ -73,7 +73,7 @@ class CombatModule(object):
             'menu_combat_start': Region(1578, 921, 270, 70),
             'tap_to_continue': Region(661, 840, 598, 203),
             'close_info_dialog': Region(1326, 274, 35, 35),
-            'dismiss_ship_drop': Region(1228, 103, 692, 735),
+            'dismiss_ship_drop': Region(1228, 103, 692, 500),
             'retreat_button': Region(1130, 985, 243, 60),
             'dismiss_commission_dialog': Region(1065, 732, 235, 68),
             'normal_mode_button': Region(88, 990, 80, 40),
@@ -125,7 +125,7 @@ class CombatModule(object):
 
         # get to map
         map_region = self.reach_map()
-        Utils.touch_randomly_ensured(map_region, "menu/attack", ["combat/button_go"] , need_initial_screen=True)
+        Utils.touch_randomly_ensured(map_region, "menu/attack", ["combat/button_go"] , need_initial_screen=True, response_time=0.5)
 
         while True:
             Utils.wait_update_screen()
