@@ -403,9 +403,12 @@ class CombatModule(object):
                     continue
                 if Utils.find_with_cropped("menu/item_found"):
                     Logger.log_debug("Combat ended: items received screen")
+                    # the reference for combat/alert_lock is for possible mis-clicking here in the ship drop screen(screen change to
+                    # ship drop screen but the previous screen is captured).
                     Utils.touch_randomly_ensured(self.region['tap_to_continue'], "menu/item_found", 
                                                 ["combat/button_confirm", "menu/drop_elite", "menu/drop_rare", 
                                                  "menu/drop_ssr", "menu/drop_common", "combat/alert_lock"],
+                                                 response_time=0.5,
                                                 similarity_after=0.9)
                     Utils.script_sleep(0)
                     continue
