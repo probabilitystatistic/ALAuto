@@ -821,8 +821,10 @@ class Utils(object):
                 after touch
 
         Return:
-            boolean: True if the touch is successful(found reference after touch)
-                and False otherwise
+            Integer: an integer STARTING FROM 1 to len(ref_after_touch) indicating which
+                reference after touch is found(namely successful touch); return 0 if no 
+                match for reference after touch is found or the reference before touch
+                cannot be found.
         """
         if need_initial_screen:
             cls.update_screen()
@@ -835,16 +837,16 @@ class Utils(object):
                 if count == 0:
                     if not cls.find_with_cropped(ref_before_touch, similarity=similarity_before):
                         Logger.log_error("Ensured touch failure: refernce {} before touch not found(before first touch).".format(ref_before_touch))
-                        return False
+                        return 0
             elif check_level_for_ref_before == 2:
                 if count == 1:
                     if not cls.find_with_cropped(ref_before_touch, similarity=similarity_before):
                         Logger.log_error("Ensured touch failure: refernce {} before touch not found(before second touch).".format(ref_before_touch))
-                        return False
+                        return 0
             elif check_level_for_ref_before == 3:
                 if not cls.find_with_cropped(ref_before_touch, similarity=similarity_before):
                     Logger.log_error("Ensured touch failure: refernce {} before {}th touch not found.".format(ref_before_touch, count))
-                    return False
+                    return 0
 
             #Adb.shell("input tap {} {}".format(coords[0], coords[1]))
             Adb.shell("input swipe {} {} {} {} {}".format(coords[0], coords[1], coords[0], coords[1], 0))
@@ -854,11 +856,12 @@ class Utils(object):
 
             for i in range(len(ref_after_touch)):
                 if cls.find_with_cropped(ref_after_touch[i], similarity = similarity_after):
-                    return True
+                    Logger.log_debug("Ensured touch successfull at [{},{}] for {}.".format(coords[0], coords[1], ref_after_touch[i]))
+                    return i+1
             if count > trial:
-                Logger.log_error("Ensured touch failure after {} times at: [{}, {}].".format(trial, coords[0], coords[1]))
-                return False
-            Logger.log_debug("Ensured touch failure at [{},{}] for {} time, will try again.".format(coords[0], coords[1], count))      
+                Logger.log_error("Ensured touch failure at [{}, {}] after {} trials .".format(coords[0], coords[1], trial))
+                return 0
+            Logger.log_debug("Ensured touch failure at [{},{}] for the {}th time, will try again.".format(coords[0], coords[1], count))      
 
     @classmethod
     def touch_UIautomator(cls, coords):
