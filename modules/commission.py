@@ -46,10 +46,8 @@ class CommissionModule(object):
         Utils.touch_randomly(self.region["left_menu"])
 
         Utils.script_sleep(1)
-        Utils.touch_randomly(self.region["collect_oil"])
-        Utils.script_sleep(0.5)
-        Utils.touch_randomly(self.region["collect_gold"])
-        Utils.script_sleep(0.5)
+        Utils.touch_randomly(self.region["collect_oil"], sleep=0.1)
+        Utils.touch_randomly(self.region["collect_gold"], sleep=0.1)
 
         self.attempts_count = 0
 
