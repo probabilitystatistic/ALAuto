@@ -98,7 +98,8 @@ class Utils(object):
     screencap_mode = None
 
     DEFAULT_SIMILARITY = 0.95
-    DEFAULT_RESPONSE_TIME = 0.1
+    DEFAULT_SLEEP_TIME = 0.9 # for touch and touch_randomly
+    DEFAULT_RESPONSE_TIME = 0.1 # for touch_ensured and touch_randomly_ensured
     assets = ''
     locations = ()
 
@@ -767,7 +768,7 @@ class Utils(object):
             results_list.append(Region(location[0], location[1], width, height))
 
     @classmethod
-    def touch(cls, coords, sleep=0.9):
+    def touch(cls, coords, sleep=DEFAULT_SLEEP_TIME):
         """Sends an input command to touch the device screen at the specified
         coordinates via ADB
 
@@ -877,7 +878,7 @@ class Utils(object):
         cls.script_sleep(0,0)
 
     @classmethod
-    def touch_randomly(cls, region=Region(0, 0, 1920, 1080)):
+    def touch_randomly(cls, region=Region(0, 0, 1920, 1080), sleep=DEFAULT_SLEEP_TIME):
         """Touches a random coordinate in the specified region
 
         Args:
@@ -886,7 +887,7 @@ class Utils(object):
         """
         x = cls.random_coord(region.x, region.x + region.w)
         y = cls.random_coord(region.y, region.y + region.h)
-        cls.touch([x, y])
+        cls.touch([x, y], sleep)
 
     @classmethod
     def touch_randomly_ensured(cls, region, ref_before_touch, ref_after_touch, response_time=DEFAULT_RESPONSE_TIME, 
