@@ -853,10 +853,12 @@ class Utils(object):
         cls.touch([x, y])
 
     @classmethod
-    def touch_randomly_ensured(cls, region, ref_before_touch, ref_after_touch, response_time=DEFAULT_RESPONSE_TIME, first_screen_needed=False, check_ref_before=1, trial=10, similarity_before=DEFAULT_SIMILARITY, similarity_after=DEFAULT_SIMILARITY):
+    def touch_randomly_ensured(cls, region, ref_before_touch, ref_after_touch, response_time=DEFAULT_RESPONSE_TIME, 
+                      need_initial_screen=False, check_level_for_ref_before=1, trial=10, 
+                      similarity_before=DEFAULT_SIMILARITY, similarity_after=DEFAULT_SIMILARITY):
         x = cls.random_coord(region.x, region.x + region.w)
         y = cls.random_coord(region.y, region.y + region.h)
-        return cls.touch_ensured([x, y], ref_before_touch, ref_after_touch, response_time, first_screen_needed, check_ref_before, trial, similarity_before, similarity_after)
+        return cls.touch_ensured([x, y], ref_before_touch, ref_after_touch, response_time, need_initial_screen, check_level_for_ref_before, trial, similarity_before, similarity_after)
          
 
     @classmethod
