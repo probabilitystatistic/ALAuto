@@ -84,8 +84,8 @@ class CombatModule(object):
             'clear_second_fleet': Region(1690, 473, 40, 40),
             'button_switch_fleet': Region(1430, 985, 240, 60),
             'menu_nav_back': Region(54, 57, 67, 67),
-            'upper_choose_in_fleet_select_menu': Region(1550, 270, 70, 60),
-            'lower_choose_in_fleet_select_menu': Region(1550, 460, 70, 60)
+            'first_slot_choose': Region(1550, 270, 70, 60),
+            'second_slot_choose': Region(1550, 460, 70, 60)
         }
 
         self.prohibited_region = {
@@ -164,7 +164,12 @@ class CombatModule(object):
                     Logger.log_warning("Switching fleet due to low morale.")
                     self.fleet_switch_index = self.fleet_switch_index + 1
                     self.fleet_switch_due_to_morale= False
-                    Utils.touch_randomly(self.region["upper_choose_in_fleet_select_menu"])
+                    #if not self.config.combat['boss_fleet']:
+                    #    self.select_fleet(first_slot_fleet = fleet_switch_candidate_for_morale[self.fleet_switch_index % len(fleet_switch_candidate_for_morale)])
+                    #else:
+                    #    if not self.select_fleet(first_slot_fleet = fleet_switch_candidate_for_morale[self.fleet_switch_index % len(fleet_switch_candidate_for_morale)], second_slot_fleet=??):
+                    #       Logger.log_warning("Abnormal fleet order.")
+                    Utils.touch_randomly(self.region["first_slot_choose"])
                     Utils.script_sleep(1)
                     target_fleet_vertical_position = first_fleet_slot_position[1] + fleet_slot_separation*(fleet_switch_candidate_for_morale[self.fleet_switch_index % len(fleet_switch_candidate_for_morale)] - 1)
                     Utils.touch([first_fleet_slot_position[0], target_fleet_vertical_position])
@@ -232,6 +237,23 @@ class CombatModule(object):
         Utils.menu_navigate("menu/button_battle")
 
         return self.exit
+
+    def select_fleet(self, first_slot_fleet=1, second_slot_fleet=None):
+        """ Select the fleets
+            Return True if first_slot_fleet < second_slot_fleet (fleets in each slots will not be automatically changed )
+        """
+        first_slot_fleet1_position = [1650, 393]
+        second_slot_fleet1_position = [1650, 593]
+        fleet_slot_separation = 64
+        Utils.touch_randomly(self.region["clear_second_fleet"])
+        if second_slot_fleet ==None:
+            Utils.touch_randomly(self.region["first_slot_choose"])
+            Utils.touch(first_slot_fleet1_position[0], first_slot_fleet1_position[1]+fleet_slot_separation*(first_slot_fleet - 1))
+        else:
+            Utils.touch_randomly(self.region["first_slot_choose"])
+            Utils.touch(first_slot_fleet1_position[0], first_slot_fleet1_position[1]+fleet_slot_separation*(first_slot_fleet - 1))
+            Utils.touch_randomly(self.region["second_slot_choose"])
+            Utils.touch(second_slot_fleet1_position[0], second_slot_fleet1_position[1]+fleet_slot_separation*(second_slot_fleet - 1))
 
     def reach_map(self):
         """
