@@ -125,7 +125,7 @@ class CombatModule(object):
 
         # get to map
         map_region = self.reach_map()
-        Utils.touch_randomly_ensured(map_region, "menu/attack", ["combat/button_go"] , first_screen_needed=True)
+        Utils.touch_randomly_ensured(map_region, "menu/attack", ["combat/button_go"] , need_initial_screen=True)
 
         while True:
             Utils.wait_update_screen()
