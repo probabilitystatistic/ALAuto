@@ -13,12 +13,14 @@ SET PreviousMode=
 
 
 :: choosing map
-SET /P Map= Which map?(2-3;5-1;6-1;7-2)
+SET /P Map= Which map?(2-3;5-1;6-1;7-2;s;h;e)
 
 IF "%Map%"=="2" (SET MAP=2-3)
 IF "%Map%"=="5" (SET MAP=5-1)
 IF "%Map%"=="6" (SET MAP=6-1)
 IF "%Map%"=="7" (SET MAP=7-2)
+IF "%Map%"=="s" (SET MAP=special)
+IF "%Map%"=="h" (SET MAP=hard)
 IF "%Map%"==""  (SET MAP=%PreviousMap%)
 IF "%Map%"=="e" (GOTO :edit_by_hand)
 
