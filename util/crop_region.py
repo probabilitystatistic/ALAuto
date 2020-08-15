@@ -13,17 +13,20 @@ data = {
     "combat/alert_morale_low": [500, 200, 1500, 900], # Just a rough estimation!
     "combat/alert_unable_battle": [700, 450, 1250, 650], 
     "combat/button_confirm": [1480, 920, 1800, 1080],
+    "combat/button_go": [1200, 700, 1800, 980],
     "combat/button_retreat": [1100, 950, 1400, 1080], 
     "combat/combat_pause": [1600, 0, 1920, 150],
     "combat/commander": [100, 250, 1000, 400],
     "combat/defeat_close_button": [750, 850, 1150, 1000],
     "combat/menu_loading": [1560, 960, 1920, 1080],
+    "combat/menu_select_fleet": [160, 80, 600, 200],
     "combat/menu_touch2continue": [100, 900, 900, 1000],
     "commission/alert_completed": [1660, 400, 1760, 500],
     "commission/scroll_bar_exist": [1860, 80, 1920, 180],
     "commission/scroll_bar_reaching_end": [1860, 980, 1920, 1080],
     "menu/alert_info": [0, 0, 960, 540], # Just a rough estimation!
     "menu/alert_close": [960, 0, 1920, 540], # Just a rough estimation!
+    "menu/attack": [140, 0, 420, 100],
     "menu/build": [100, 0, 350, 100],
     "menu/button_battle": [1500, 420, 1700, 600],
     "menu/button_confirm": [500, 540, 1920, 1080], # Just a rough estimation!
