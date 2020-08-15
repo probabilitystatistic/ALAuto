@@ -836,16 +836,16 @@ class Utils(object):
             if check_level_for_ref_before == 1:
                 if count == 0:
                     if not cls.find_with_cropped(ref_before_touch, similarity=similarity_before):
-                        Logger.log_error("Ensured touch failure: refernce {} before touch not found(before first touch).".format(ref_before_touch))
+                        Logger.log_error("Ensured touch failure: reference {} before touch not found(before first touch).".format(ref_before_touch))
                         return 0
             elif check_level_for_ref_before == 2:
                 if count == 1:
                     if not cls.find_with_cropped(ref_before_touch, similarity=similarity_before):
-                        Logger.log_error("Ensured touch failure: refernce {} before touch not found(before second touch).".format(ref_before_touch))
+                        Logger.log_error("Ensured touch failure: reference {} before touch not found(before second touch).".format(ref_before_touch))
                         return 0
             elif check_level_for_ref_before == 3:
                 if not cls.find_with_cropped(ref_before_touch, similarity=similarity_before):
-                    Logger.log_error("Ensured touch failure: refernce {} before {}th touch not found.".format(ref_before_touch, count))
+                    Logger.log_error("Ensured touch failure: reference {} before {}th touch not found.".format(ref_before_touch, count))
                     return 0
 
             #Adb.shell("input tap {} {}".format(coords[0], coords[1]))
