@@ -226,27 +226,36 @@ class RetirementModule(object):
 
     def handle_retirement(self):
         Utils.touch_randomly_ensured(self.region['confirm_retire_button'], "retirement/bonus", ["retirement/alert_bonus"])
+        count = 0
         items_found = 0
-        start_time = datetime.now()
-        Logger.log_debug('Beginning of handle_retirement. Start_time:{}'.format(start_time))
 
         while True:
-            time = datetime.now()
+            count += 1
 
-            if timedelta(minutes=5) < time - start_time:
-                Logger.log_error('Time spent on handle_retirement exceeds 5 minutes. Assume completed retirement and force quit.')
+            if count > 40:
+                Logger.log_error('Too many loop in handle_retirement(normally only 5 loop per retire cycle). Force quit.')
                 self.forced_quit = True
                 return
-            if Utils.find_with_cropped("retirement/alert_bonus"): #
+            if Utils.find_with_cropped("retirement/alert_bonus"): 
+                # The response time must be long to avoid dismissing the item screen, resulting in item_found never > 1 and never
+                # leaving the loop.
+                # The ensurance policy is to have an exit triggered by loop count.
                 Utils.touch_randomly_ensured(self.region['confirm_selected_ships_button'], 
                                              "retirement/alert_bonus", ["menu/item_found"], 
                                              response_time=0.5, check_level_for_ref_before=2)
                 continue
             if Utils.find_with_cropped("menu/item_found"): #
                 Logger.log_debug('menu/item_found triggered. item_found={}'.format(items_found))
+                # The response time must be long here because:
+                # When bot executes the touch in touch_randomly_ensured, there is a flash in the screen showing the dock menu. If
+                # this flash screen is captured then the touch_randomly_ensured will mistakenly believe it succeeds in the click.
+                # And the screen stored in Utils.screen now is the blink screen, which matches nothing in the while loop, causing
+                # infinite loop.
+                # The ensurance policy is to have an exit triggered by loop count.
+                # It is checked that the flash of dock menu only occurs when dismissing the menu/item_found.
                 Utils.touch_randomly_ensured(self.region['tap_to_continue'], 
                                              "menu/item_found", ["menu/alert_info", "menu/dock"], 
-                                             response_time=0.1, check_level_for_ref_before=2)
+                                             response_time=0.5, check_level_for_ref_before=2)
                 items_found += 1
                 if items_found > 1:
                     Logger.log_debug('Leaving handle_retirement')
