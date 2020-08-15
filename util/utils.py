@@ -808,7 +808,7 @@ class Utils(object):
             if check_level_for_ref_before !=0 and not cls.find(ref_before_touch, similarity=similarity_before):
                 if count == 0: 
                     Logger.log_error("Touch failure: not in the desired screen(before first touch).")
-                elif check_ref_before == 2:
+                elif check_level_for_ref_before == 2:
                     Logger.log_error("Touch failure: not in the desired screen(after first touch).")
                 return False
             #Adb.shell("input tap {} {}".format(coords[0], coords[1]))
