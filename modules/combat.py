@@ -403,7 +403,10 @@ class CombatModule(object):
                     continue
                 if Utils.find_with_cropped("menu/item_found"):
                     Logger.log_debug("Combat ended: items received screen")
-                    Utils.touch_randomly_ensured(self.region['tap_to_continue'], "menu/item_found", ["combat/button_confirm", "menu/drop_elite", "menu/drop_rare", "menu/drop_ssr", "menu/drop_common", "combat/alert_lock"], similarity_after=0.9)
+                    Utils.touch_randomly_ensured(self.region['tap_to_continue'], "menu/item_found", 
+                                                ["combat/button_confirm", "menu/drop_elite", "menu/drop_rare", 
+                                                 "menu/drop_ssr", "menu/drop_common", "combat/alert_lock"],
+                                                similarity_after=0.9)
                     Utils.script_sleep(0)
                     continue
                 if (not locked_ship) and Utils.find_with_cropped("combat/alert_lock", 0.9): 
