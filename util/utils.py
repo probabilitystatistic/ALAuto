@@ -760,7 +760,9 @@ class Utils(object):
         cls.script_sleep(0.9,0)
 
     @classmethod
-    def touch_ensured(cls, coords, ref_before_touch, ref_after_touch, response_time=DEFAULT_RESPONSE_TIME, first_screen_needed=False, check_ref_before=1, trial=10, similarity_before=DEFAULT_SIMILARITY, similarity_after=DEFAULT_SIMILARITY):
+    def touch_ensured(cls, coords, ref_before_touch, ref_after_touch, response_time=DEFAULT_RESPONSE_TIME, 
+                      need_initial_screen=False, check_level_for_ref_before=1, trial=10, 
+                      similarity_before=DEFAULT_SIMILARITY, similarity_after=DEFAULT_SIMILARITY):
         """Touch with ensurance check and return True if touch is successful
 
         Args:
@@ -778,10 +780,10 @@ class Utils(object):
             response_time (integer): time in seconds to wait between each 
                 touch trial
 
-            first_screen_needed (boolean): determine if a screen capture is
+            need_initial_screen (boolean): determine if a screen capture is
                 needed before executing this ensured touch
 
-            check_ref_before (integer): determine how strickly to check the 
+            check_level_for_ref_before (integer): determine how strickly to check the 
                 reference before executing touch. O=no check; 1=check only before
                 first touch; 2=check before every touch.
 
@@ -797,13 +799,13 @@ class Utils(object):
             boolean: True if the touch is successful(found reference after touch)
                 and False otherwise
         """
-        if first_screen_needed:
+        if need_initial_screen:
             cls.update_screen()
 
         count = 0
 
         while True:
-            if check_ref_before !=0 and not cls.find(ref_before_touch, similarity=similarity_before):
+            if check_level_for_ref_before !=0 and not cls.find(ref_before_touch, similarity=similarity_before):
                 if count == 0: 
                     Logger.log_error("Touch failure: not in the desired screen(before first touch).")
                 elif check_ref_before == 2:
