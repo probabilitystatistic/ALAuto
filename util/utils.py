@@ -845,10 +845,10 @@ class Utils(object):
             count += 1
 
             for i in range(len(ref_after_touch)):
-                if cls.find(ref_after_touch[i], similarity = similarity_after):
+                if cls.find_with_cropped(ref_after_touch[i], similarity = similarity_after):
                     return True
             if count > trial:
-                Logger.log_error("Touch failure after {} times at: [{}, {}].".format(trial, coords[0], coords[1]))
+                Logger.log_error("Ensured touch failure after {} times at: [{}, {}].".format(trial, coords[0], coords[1]))
                 return False
             Logger.log_debug("Ensured touch failure at [{},{}] for {} time, will try again.".format(coords[0], coords[1], count))      
 
