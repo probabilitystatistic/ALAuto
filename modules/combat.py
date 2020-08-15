@@ -437,7 +437,7 @@ class CombatModule(object):
                     Logger.log_msg("Combat ended.")
                     items_received = True
                     confirmed_fight = True
-                    Utils.touch_randomly_ensured(self.region["combat_end_confirm"], "combat/button_confirm", ["combat/button_retreat", "menu/button_confirm", "combat/defeat_close_button"], response_time=3, similarity_after=0.9)
+                    Utils.touch_randomly_ensured(self.region["combat_end_confirm"], "combat/button_confirm", ["combat/button_retreat", "menu/button_confirm", "combat/defeat_close_button", "menu/attack"], response_time=3, similarity_after=0.9)
                 if (not confirmed_fight) and Utils.find_with_cropped("combat/commander"):
                     items_received = True
                     # prevents fleet with submarines from getting stuck at combat end screen
