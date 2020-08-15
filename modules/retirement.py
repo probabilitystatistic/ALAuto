@@ -145,22 +145,23 @@ class RetirementModule(object):
         while not self.sorted:
             Logger.log_debug("Retirement: Opening sorting menu.")
             Utils.touch_randomly(self.region['sort_filters_button'])
-            Utils.script_sleep(self.sleep_time_short)
             # Touch the All button to clear any current filter
-            Utils.touch_randomly(self.region['rarity_all_ship_filter'])
-            Utils.script_sleep(self.sleep_time_short)
-            Utils.touch_randomly(self.region['extra_all_ship_filter'])
-            Utils.script_sleep(self.sleep_time_short)
+            Utils.touch_randomly(self.region['rarity_all_ship_filter'], sleep=0.1)
+            Utils.touch_randomly(self.region['extra_all_ship_filter'], sleep=0.1)
             if self.config.retirement['commons']:
-                Utils.touch_randomly(self.region['common_ship_filter'])
-                Utils.script_sleep(self.sleep_time_short)
+                Utils.touch_randomly(self.region['common_ship_filter'], sleep=0.1)
+                #Utils.script_sleep(self.sleep_time_short)
             if self.config.retirement['rares']:
-                Utils.touch_randomly(self.region['rare_ship_filter'])
-                Utils.script_sleep(self.sleep_time_short)
+                Utils.touch_randomly(self.region['rare_ship_filter'], sleep=0.1)
+                #Utils.script_sleep(self.sleep_time_short)
             
             # This sleep must be long enough such that the game can finish responding to the actions above. 
             # This is important as we have screen capture right bellow(inside Utils.get_enabled_ship_filters). 
             Utils.script_sleep(0.5)
+
+            # These following checking seems redundant. But sorted flag is important.
+            self.sorted = True
+            """
             # check if correct options are enabled
             # get the regions of enabled options
             options = Utils.get_enabled_ship_filters(filter_categories="rarity;extra")
@@ -188,8 +189,8 @@ class RetirementModule(object):
                 if retirements == tuple(checks) and len(options) <= 3:
                     Logger.log_debug("Retirement: Sorting options confirmed")
                     self.sorted = True
-            Utils.touch_randomly(self.region['confirm_filter_button'])
-            Utils.script_sleep(self.sleep_time_long)
+            """
+            Utils.touch_randomly(self.region['confirm_filter_button'], sleep=0.5)
             
     def retire_ships(self):
 
