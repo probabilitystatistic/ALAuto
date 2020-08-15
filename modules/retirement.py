@@ -213,59 +213,54 @@ class RetirementModule(object):
 
     def select_ships(self):
         Logger.log_msg("Selecting ships for retirement.")
-        Utils.touch_randomly(self.region['button_batch_retire'])
+        Utils.touch_randomly_ensured(self.region['button_batch_retire'], "menu/dock", ["retirement/no_batch", "retirement/alert_bonus"])
         # This wait right below should be long enough for the bot to capture "no_batch" dialog if no ship satisfies the quick retire condition.
-        Utils.wait_update_screen(1)
+        #Utils.wait_update_screen(1)
         if Utils.find_with_cropped("retirement/no_batch", similarity=0.9):
             for i in range(0, 7):
                 Utils.touch_randomly(self.region['select_ship_{}'.format(i)])
         else:
-            Utils.touch_randomly(self.region['close_batch_retire']);
+            Utils.touch_randomly_ensured(self.region['close_batch_retire'], "retirement/alert_bonus", ["menu/dock"]);
 
 
 
     def handle_retirement(self):
-        Utils.touch_randomly(self.region['confirm_retire_button'])
+        Utils.touch_randomly_ensured(self.region['confirm_retire_button'], "retirement/bonus", ["retirement/alert_bonus"])
         items_found = 0
-
         start_time = datetime.now()
         Logger.log_debug('Beginning of handle_retirement. Start_time:{}'.format(start_time))
 
         while True:
-            # This sleep time must be long enough to avoid capturing old screen.
-            Utils.script_sleep(0.5)
-            Utils.update_screen()
             time = datetime.now()
-            Logger.log_debug('Beginning of while loop. Time:{}'.format(time))
 
             if timedelta(minutes=5) < time - start_time:
-                Logger.log_debug('Time limit triggered')
                 Logger.log_error('Time spent on handle_retirement exceeds 5 minutes. Assume completed retirement and force quit.')
                 self.forced_quit = True
                 return
-            if Utils.find_with_cropped("retirement/alert_bonus"):
-                Logger.log_debug('retirement/alert_bonus triggered')
-                Utils.touch_randomly(self.region['confirm_selected_ships_button'])
-                Utils.script_sleep(self.sleep_time_long)
+            if Utils.find_with_cropped("retirement/alert_bonus"): #
+                Utils.touch_randomly_ensured(self.region['confirm_selected_ships_button'], 
+                                             "retirement/alert_bonus", ["menu/item_found"], 
+                                             response_time=0.5, check_level_for_ref_before=2)
                 continue
-            if Utils.find_with_cropped("menu/item_found"):
+            if Utils.find_with_cropped("menu/item_found"): #
                 Logger.log_debug('menu/item_found triggered. item_found={}'.format(items_found))
-                Utils.touch_randomly(self.region['tap_to_continue'])
-                Utils.script_sleep(self.sleep_time_long)
+                Utils.touch_randomly_ensured(self.region['tap_to_continue'], 
+                                             "menu/item_found", ["menu/alert_info", "menu/dock"], 
+                                             response_time=0.1, check_level_for_ref_before=2)
                 items_found += 1
                 if items_found > 1:
                     Logger.log_debug('Leaving handle_retirement')
                     return
                 continue
-            if Utils.find_with_cropped("menu/alert_info"):
-                Logger.log_debug('menu/item_alert_info triggered')
-                Utils.touch_randomly(self.region['confirm_selected_equipment_button'])
-                Utils.script_sleep(self.sleep_time_long)
+            if Utils.find_with_cropped("menu/alert_info"): #
+                Utils.touch_randomly_ensured(self.region['confirm_selected_equipment_button'], 
+                                             "menu/alert_info", ["retirement/button_disassemble"], 
+                                             response_time=0.1, check_level_for_ref_before=2)
                 continue
             if Utils.find_with_cropped("retirement/button_disassemble"):
-                Logger.log_debug('retirement/button_disassemble triggered')
-                Utils.touch_randomly(self.region['disassemble_button'])
-                Utils.script_sleep(1)
+                Utils.touch_randomly_ensured(self.region['disassemble_button'], 
+                                             "retirement/button_disassemble", ["menu/item_found"], 
+                                             response_time=0.5, check_level_for_ref_before=2)
                 continue
 
 
