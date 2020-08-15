@@ -827,6 +827,9 @@ class Utils(object):
                 match for reference after touch is found or the reference before touch
                 cannot be found.
         """
+
+        Logger.log_debug("Starting ensured touch. Reference before touch: {}.".format(ref_before_touch))
+
         if need_initial_screen:
             cls.update_screen()
 
@@ -857,12 +860,14 @@ class Utils(object):
 
             for i in range(len(ref_after_touch)):
                 if cls.find_with_cropped(ref_after_touch[i], similarity = similarity_after):
-                    Logger.log_debug("Ensured touch successfull at [{},{}] for {}.".format(coords[0], coords[1], ref_after_touch[i]))
+                    Logger.log_debug("Successfull ensured touch at [{},{}]; matching {}.".format(coords[0], coords[1], ref_after_touch[i]))
                     return i+1
             if count > trial:
                 Logger.log_error("Ensured touch failure at [{}, {}] after {} trials .".format(coords[0], coords[1], trial))
+                cv2.imwrite("touch_ensured_failure.png", cls.screen) 
                 return 0
-            Logger.log_debug("Ensured touch failure at [{},{}] for the {}th time, will try again.".format(coords[0], coords[1], count))      
+            Logger.log_debug("Ensured touch failure at [{},{}] for the {}th time, will try again.".format(coords[0], coords[1], count))
+            cv2.imwrite("touch_ensured_retry.png", cls.screen)
 
     @classmethod
     def touch_UIautomator(cls, coords):
