@@ -31,6 +31,7 @@ data = {
     "menu/button_battle": [1500, 420, 1700, 600],
     "menu/button_confirm": [500, 540, 1920, 1080], # Just a rough estimation!
     "menu/button_sort": [500, 700, 800, 850], # This is perhaps the sort button when port is full before starting a combat.
+    "menu/dock": [160, 0, 350, 80],
     "menu/drop_common": [1000, 250, 1920, 880], # Just a rough estimation!
     "menu/drop_elite": [1000, 250, 1920, 880], # Just a rough estimation!
     "menu/drop_rare": [1000, 250, 1920, 880], # Just a rough estimation!
