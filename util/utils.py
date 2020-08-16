@@ -887,14 +887,11 @@ class Utils(object):
                 if value >= stable_check_similarity:
                     number_of_stable_frame += 1
                     Logger.log_debug("Screen is stable at {}th frame.".format(stable_loop_count))
-                    print("Screen is stable at {}th frame.".format(stable_loop_count))
                 else:
                     number_of_stable_frame = 0
                     Logger.log_debug("Screen is not stable at {}th frame.".format(stable_loop_count))
-                    print("Screen is not stable at {}th frame.".format(stable_loop_count))
                 if number_of_stable_frame >= stable_check_frame:
                     Logger.log_debug("Screen stablized after {} frame checks(requires {} frames) with interval {}s.".format(stable_loop_count, stable_check_frame, stable_check_interval))
-                    print("Screen stablized after {} frame checks(requires {} frames) with interval {}s.".format(stable_loop_count, stable_check_frame, stable_check_interval))
                     break                
                 if stable_loop_count > stable_loop_count_max:
                     Logger.log_error("Ensured touch failure: no stable {} frame(s) with the frame interval {}s.".format(stable_check_frame, stable_check_interval))
