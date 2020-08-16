@@ -446,7 +446,8 @@ class CombatModule(object):
                     Utils.touch_randomly_ensured(self.region["combat_end_confirm"], "combat/button_confirm", 
                                                 ["combat/button_retreat", "menu/button_confirm", 
                                                  "combat/defeat_close_button", "menu/attack"], 
-                                                response_time=3, similarity_after=0.9)
+                                                response_time=3, similarity_after=0.9,
+                                                stable_check_frame=3)
                 if (not confirmed_fight) and Utils.find_with_cropped("combat/commander"):
                     items_received = True
                     # prevents fleet with submarines from getting stuck at combat end screen
@@ -1211,7 +1212,7 @@ class CombatModule(object):
                 else:
                     self.exit = 5
                     Logger.log_warning("Fleet defeated by boss.")
-                Utils.script_sleep(3)
+                #Utils.script_sleep(3)
 
                 # A temporary solution if bot fails to capture "enable to reach..." dialog so the actual boss is not cleared.
                 Utils.update_screen()
