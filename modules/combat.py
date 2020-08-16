@@ -73,7 +73,7 @@ class CombatModule(object):
             'menu_combat_start': Region(1578, 921, 270, 70),
             'tap_to_continue': Region(661, 840, 598, 203),
             'close_info_dialog': Region(1326, 274, 35, 35),
-            'dismiss_ship_drop': Region(1228, 103, 692, 500),
+            'dismiss_ship_drop': Region(200, 200, 200, 200),#'dismiss_ship_drop': Region(1228, 103, 692, 500),
             'retreat_button': Region(1130, 985, 243, 60),
             'dismiss_commission_dialog': Region(1065, 732, 235, 68),
             'normal_mode_button': Region(88, 990, 80, 40),
