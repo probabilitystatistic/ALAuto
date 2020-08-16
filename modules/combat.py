@@ -393,7 +393,7 @@ class CombatModule(object):
 
             if in_battle and Utils.find_with_cropped("combat/combat_pause", 0.7):
                 Logger.log_debug("In battle.")
-                Utils.script_sleep(1.5)
+                Utils.script_sleep(1)
                 continue
             if not items_received:
                 if Utils.find_with_cropped("combat/menu_touch2continue"):
@@ -408,8 +408,8 @@ class CombatModule(object):
                     Utils.touch_randomly_ensured(self.region['tap_to_continue'], "menu/item_found", 
                                                 ["combat/button_confirm", "menu/drop_elite", "menu/drop_rare", 
                                                  "menu/drop_ssr", "menu/drop_common", "combat/alert_lock"],
-                                                 response_time=0.5,
-                                                similarity_after=0.9)
+                                                 response_time=0.1, similarity_after=0.9, 
+                                                 stable_check_frame=2)
                     Utils.script_sleep(0)
                     continue
                 if (not locked_ship) and Utils.find_with_cropped("combat/alert_lock", 0.9): 

@@ -24,6 +24,7 @@ data = {
     "commission/alert_completed": [1660, 400, 1760, 500],
     "commission/scroll_bar_exist": [1860, 80, 1920, 180],
     "commission/scroll_bar_reaching_end": [1860, 980, 1920, 1080],
+    "event/build_limited": [0, 150, 200, 1000], # Just a rough estimation!
     "menu/alert_info": [0, 0, 960, 540], # Just a rough estimation!
     "menu/alert_close": [960, 0, 1920, 540], # Just a rough estimation!
     "menu/attack": [140, 0, 420, 100],
