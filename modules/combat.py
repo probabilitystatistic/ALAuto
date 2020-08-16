@@ -409,7 +409,7 @@ class CombatModule(object):
                                                 ["combat/button_confirm", "menu/drop_elite", "menu/drop_rare", 
                                                  "menu/drop_ssr", "menu/drop_common", "combat/alert_lock"],
                                                  response_time=0.1, similarity_after=0.9, 
-                                                 stable_check_frame=2)
+                                                 stable_check_frame=1)
                     Utils.script_sleep(0)
                     continue
                 if (not locked_ship) and Utils.find_with_cropped("combat/alert_lock", 0.9): 
