@@ -399,7 +399,8 @@ class CombatModule(object):
                 if Utils.find_with_cropped("combat/menu_touch2continue"):
                     Logger.log_debug("Combat ended: tap to continue")
                     Utils.touch_randomly_ensured(self.region['tap_to_continue'], "combat/menu_touch2continue", 
-                                                ["menu/item_found"], 
+                                                ["menu/item_found"],
+                                                response_time=0.5, 
                                                 stable_check_frame=1)
                     in_battle = False
                     continue
