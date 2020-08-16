@@ -398,9 +398,11 @@ class CombatModule(object):
             if not items_received:
                 if Utils.find_with_cropped("combat/menu_touch2continue"):
                     Logger.log_debug("Combat ended: tap to continue")
+                    # the screen is not stable so sleep is needed
+                    Utils.script_sleep(0.5)
                     Utils.touch_randomly_ensured(self.region['tap_to_continue'], "combat/menu_touch2continue", 
                                                 ["menu/item_found"],
-                                                response_time=0.5, 
+                                                response_time=0.3, 
                                                 stable_check_frame=1)
                     in_battle = False
                     continue
