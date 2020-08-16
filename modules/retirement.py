@@ -71,8 +71,9 @@ class RetirementModule(object):
             self.retirement_done = False
             Logger.log_msg("Opening build menu to retire ships.")
 
+            Utils.update_screen()
+
             while True:
-                Utils.update_screen()
 
                 if Utils.find_with_cropped("menu/button_sort"):
                     # Tap menu retire button
@@ -82,23 +83,24 @@ class RetirementModule(object):
                 # In case function is called from menu
                 if Utils.find_with_cropped("menu/button_battle"):
                     self.called_from_menu = True
-                    Utils.touch_randomly(self.region['build_menu'])
+                    Utils.touch_randomly_ensured(self.region['build_menu'], "menu/button_battle", ["menu/build"], response_time=0.5, stable_check_frame=1)
                     # This sleep must be long enough to avoid touching the "start building" button in the build menu.
-                    Utils.script_sleep(1)
+                    #Utils.script_sleep(1)
                     continue
                 if Utils.find_with_cropped("menu/build"):
-                    if Utils.find("event/build_limited"):
-                        Utils.touch_randomly(self.region['retire_tab_2'])
+                    if Utils.find_with_cropped("event/build_limited"):
+                        Utils.touch_randomly_ensured(self.region['retire_tab_2'], "menu/build", ["menu/dock"], response_time=0.5,stable_check_frame=1)
                     else:
-                        Utils.touch_randomly(self.region['retire_tab_1'])
+                        Utils.touch_randomly_ensured(self.region['retire_tab_1'], "menu/build", ["menu/dock"], response_time=0.5,stable_check_frame=1)
                     # This sleep must be long enough to avoid touching the quick retire setting button.
-                    Utils.script_sleep(1)
+                    #Utils.script_sleep(1)
                     continue
                 # In case bot wrongly touches the setting button for quick retire due to repeating touching retire_tab_1
                 # not yet tested
                 #if Utils.find_with_cropped("retirement/setting_quick_retire"):
                 #    Utils.find_and_touch_with_cropped("menu/alert_close")
                 #    continue
+                Utils.update_screen()
                 if Utils.find_with_cropped("retirement/selected_none", similarity=0.9):
                     self.set_sort()
                     self.retire_ships()
