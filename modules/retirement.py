@@ -242,7 +242,8 @@ class RetirementModule(object):
                 # The ensurance policy is to have an exit triggered by loop count.
                 Utils.touch_randomly_ensured(self.region['confirm_selected_ships_button'], 
                                              "retirement/alert_bonus", ["menu/item_found"], 
-                                             response_time=0.5, check_level_for_ref_before=2)
+                                             response_time=0.1, check_level_for_ref_before=2,
+                                             stable_check_frame=2)
                 continue
             if Utils.find_with_cropped("menu/item_found"): #
                 Logger.log_debug('menu/item_found triggered. item_found={}'.format(items_found))
@@ -255,7 +256,8 @@ class RetirementModule(object):
                 # It is checked that the flash of dock menu only occurs when dismissing the menu/item_found.
                 Utils.touch_randomly_ensured(self.region['tap_to_continue'], 
                                              "menu/item_found", ["menu/alert_info", "menu/dock"], 
-                                             response_time=0.5, check_level_for_ref_before=2)
+                                             response_time=0.1, check_level_for_ref_before=2,
+                                             stable_check_frame=2)
                 items_found += 1
                 if items_found > 1:
                     Logger.log_debug('Leaving handle_retirement')
@@ -269,7 +271,8 @@ class RetirementModule(object):
             if Utils.find_with_cropped("retirement/button_disassemble"):
                 Utils.touch_randomly_ensured(self.region['disassemble_button'], 
                                              "retirement/button_disassemble", ["menu/item_found"], 
-                                             response_time=0.5, check_level_for_ref_before=2)
+                                             response_time=0.1, check_level_for_ref_before=2,
+                                             stable_check_frame=2)
                 continue
 
 
