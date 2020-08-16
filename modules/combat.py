@@ -398,18 +398,18 @@ class CombatModule(object):
             if not items_received:
                 if Utils.find_with_cropped("combat/menu_touch2continue"):
                     Logger.log_debug("Combat ended: tap to continue")
-                    Utils.touch_randomly_ensured(self.region['tap_to_continue'], "combat/menu_touch2continue", ["menu/item_found", "combat/button_confirm"])
+                    Utils.touch_randomly_ensured(self.region['tap_to_continue'], "combat/menu_touch2continue", 
+                                                ["menu/item_found"], 
+                                                stable_check_frame=1)
                     in_battle = False
                     continue
                 if Utils.find_with_cropped("menu/item_found"):
                     Logger.log_debug("Combat ended: items received screen")
-                    # the reference for combat/alert_lock is for possible mis-clicking here in the ship drop screen(screen change to
-                    # ship drop screen but the previous screen is captured).
                     Utils.touch_randomly_ensured(self.region['tap_to_continue'], "menu/item_found", 
                                                 ["combat/button_confirm", "menu/drop_elite", "menu/drop_rare", 
-                                                 "menu/drop_ssr", "menu/drop_common", "combat/alert_lock"],
-                                                 response_time=0.1, similarity_after=0.9, 
-                                                 stable_check_frame=1)
+                                                 "menu/drop_ssr", "menu/drop_common"],
+                                                similarity_after=0.9, 
+                                                stable_check_frame=1)
                     Utils.script_sleep(0)
                     continue
                 if (not locked_ship) and Utils.find_with_cropped("combat/alert_lock", 0.9): 
