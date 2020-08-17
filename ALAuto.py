@@ -217,7 +217,7 @@ try:
     while True:
         Utils.update_screen()
 
-
+        
         # This is a small time comparison for find and find_with_cropped
         while False:
             template_name = "menu/button_battle"
@@ -276,6 +276,7 @@ try:
             script.run_research_cycle()
         if script.should_sortie():
             script.run_sortie_cycle()
+            Utils.get_oil_and_gold()
             script.print_cycle_stats()
         else:
             Logger.log_msg("Nothing to do, will check again in a few minutes.")
