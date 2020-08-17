@@ -525,7 +525,11 @@ class Utils(object):
     def menu_navigate(cls, image="menu/button_battle"):
         cls.update_screen()
 
+        count = 0
         while not cls.find_with_cropped(image, 0.85):
+            if count > 100:
+                Logger.log_error("Too many execution in menu navigation. Quitting...")
+                exit()
             if image == "menu/button_battle":
                 if cls.find_and_touch_with_cropped("menu/alert_close", 0.9):
                     Logger.log_debug("Daily annoucement.")
@@ -533,10 +537,13 @@ class Utils(object):
                     Logger.log_debug("Daily login item received.")
                 if cls.find_and_touch_with_cropped("menu/return_to_main", 0.9):
                     Logger.log_debug("Return to main menu through the main menu button.")
+                    print("Return to main menu through the main menu button.")
                 else:
                     Logger.log_debug("Return to main menu through the last page button.")
+                    print("Return to main menu through the last page button.")
                     cls.touch_randomly(Region(54, 57, 67, 67))
-                cls.wait_update_screen(1)
+            cls.wait_update_screen(1)
+            count += 1
 
         return
 
