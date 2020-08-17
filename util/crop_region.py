@@ -30,7 +30,12 @@ data = {
     "menu/attack": [140, 0, 420, 100],
     "menu/build": [100, 0, 350, 100],
     "menu/button_battle": [1500, 420, 1700, 600],
-    "menu/button_confirm": [500, 540, 1920, 1080], # Just a rough estimation!
+    "menu/button_confirm": [500, 540, 1500, 900], # Just a rough estimation!
+    # Note that menu/button is very similar to combat/button_confirm(similarity=0.93~0.94) so 
+    # make sure their regions do not overlap to avoid false detection.
+    # This menu/confirm cannot be used to detect some menu/button_confirm in 
+    # retirement as the crop region does not contain them. However, currently menu/button_confirm
+    # is not used in retirement so it should be fine. 
     "menu/button_sort": [500, 700, 800, 850], # This is perhaps the sort button when port is full before starting a combat.
     "menu/dock": [160, 0, 350, 80],
     "menu/drop_common": [1250, 400, 1920, 800], # Just a rough estimation!

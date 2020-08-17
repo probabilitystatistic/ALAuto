@@ -449,9 +449,15 @@ class CombatModule(object):
                     confirmed_fight = True
                     Utils.touch_randomly_ensured(self.region["combat_end_confirm"], "combat/button_confirm", 
                                                 ["combat/button_retreat", "menu/button_confirm", 
-                                                 "combat/defeat_close_button", "menu/attack"], 
+                                                 "menu/attack", "combat/defeat_close_button"], 
                                                 response_time=3, similarity_after=0.9,
                                                 stable_check_frame=3)
+                    # Note that the combat/button_confirm is very similar to menu/button_confirm with similarity 0.93~0.94 and
+                    # the old crop region for menu/button_confirm contained combat/button_confirm.
+                    # As a result, if the first click in the ensured touch fail to be received by the game(possibly due to unstable screen), 
+                    # bot might consider the combat/button_confirm as menu/button_confirm and think the click was successful.
+                    # Now the crop region for menu/button_confirm is reduced such that it does not contain combat/button_confirm to
+                    # fix this bug.
                 if (not confirmed_fight) and Utils.find_with_cropped("combat/commander"):
                     items_received = True
                     # prevents fleet with submarines from getting stuck at combat end screen
@@ -639,10 +645,14 @@ class CombatModule(object):
 
         force_retreat = True if self.exit != 1 else False
         pressed_retreat_button = False
+        count = 0
 
         while True:
             Utils.update_screen()
-
+            if count > 100:
+                # ensurance policy to avoid infinite loops
+                Logger.log_error("Stuck in retreat_handler! Quitting the program...")
+                exit()
             if Utils.find("combat/menu_formation"):
                 Utils.touch_randomly(self.region["menu_nav_back"])
                 Utils.script_sleep(1)
@@ -657,8 +667,14 @@ class CombatModule(object):
                 # confirm either the retreat or an urgent commission alert
                 Utils.script_sleep(1)
                 continue
+            if Utils.find_and_touch("combat/button_confirm"):
+                # ensurance policy if the touch in the end of boss combat fails
+                Logger.log_error("The touch in the end of a boss battle fails!")
+                Utils.script_sleep(10)
+                continue
             if Utils.find("menu/attack"):
                 return
+            count += 1
 
     def clear_map(self):
         """ Clears map.
