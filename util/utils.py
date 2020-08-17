@@ -88,6 +88,8 @@ class Region(object):
 
 screen = None
 last_ocr = ''
+last_ocr_oil = ''
+last_ocr_gold = ''
 bytepointer = 0
 #u2device = u2.connect('127.0.0.1:5555') # for bluestacks
 
@@ -476,7 +478,38 @@ class Utils(object):
         return last_ocr
 
     @classmethod
-    def menu_navigate(cls, image):
+    def get_oil_and_gold(cls, print_to_screen=True):
+
+        global last_ocr_oil
+        global last_ocr_gold
+
+        oil = []
+        gold = []
+
+        while len(oil) < 5:
+            _res = int(cls.read_numbers(970, 38, 101, 36))
+            if last_ocr_oil == '' or abs(_res - last_ocr_oil) < 600:
+                oil.append(_res)
+
+        last_ocr_oil = max(set(oil), key=oil.count)
+        oil_integer = int(last_ocr_oil)
+
+        while len(gold) < 6:
+            _res = int(cls.read_numbers(1212, 38, 172, 36))
+            if last_ocr_gold == '' or abs(_res - last_ocr_gold) < 600:
+                gold.append(_res)
+
+        last_ocr_gold = max(set(gold), key=gold.count)
+        gold_integer = str(last_ocr_gold)
+
+        Logger.log_debug("Current oil = {}; gold = {}".format(oil_integer, gold_integer))
+
+        if print_to_screen:
+            Logger.log_success("Current oil = {}; gold = {}".format(oil_integer, gold_integer))
+
+        return oil_integer, gold_integer
+
+
     @classmethod
     def menu_navigate(cls, image="menu/button_battle"):
         cls.update_screen()
@@ -484,9 +517,9 @@ class Utils(object):
         while not cls.find_with_cropped(image, 0.85):
             if image == "menu/button_battle":
                 if cls.find_and_touch_with_cropped("menu/alert_close", 0.9):
-                    Logger.log_msg("Daily annoucement.")
+                    Logger.log_debug("Daily annoucement.")
                 if cls.find_and_touch_with_cropped("menu/item_found", 0.9):
-                    Logger.log_msg("Daily login item received.")
+                    Logger.log_debug("Daily login item received.")
                 if cls.find_and_touch_with_cropped("menu/return_to_main", 0.9):
                     Logger.log_debug("Return to main menu through the main menu button.")
                 else:
