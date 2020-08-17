@@ -126,7 +126,7 @@ class CombatModule(object):
 
         # get to map
         map_region = self.reach_map()
-        Utils.touch_randomly_ensured(map_region, "menu/attack", ["combat/button_go"] , need_initial_screen=True, response_time=0.5)
+        Utils.touch_randomly_ensured(map_region, "menu/attack", ["combat/button_go"] , need_initial_screen=True, stable_check_frame=1)
 
         while True:
             Utils.wait_update_screen()
@@ -141,24 +141,27 @@ class CombatModule(object):
                 else:
                     self.exit = 0
                     Logger.log_msg("Repeating map {}.".format(self.chapter_map))
+                    Utils.touch_randomly_ensured(map_region, "menu/attack", ["combat/button_go"] , stable_check_frame=1)
+                    """
                     while True:
                         Utils.touch_randomly(map_region)
                         Utils.wait_update_screen()
                         if Utils.find("combat/button_go"):
                             break
+                    """
                     continue
             if self.exit > 2:
                 self.stats.increment_combat_attempted()
                 break
-            if Utils.find("combat/button_go"):
+            if Utils.find_with_cropped("combat/button_go"):
                 Logger.log_debug("Found map summary go button.")
-                Utils.touch_randomly(self.region["map_summary_go"])
-                Utils.wait_update_screen()
+                Utils.touch_randomly_ensured(self.region["map_summary_go"], "combat/button_go", ["combat/menu_select_fleet"], stable_check_frame=1)
+                #Utils.wait_update_screen()
             if Utils.find("combat/menu_fleet") and (lambda x:x > 414 and x < 584)(Utils.find("combat/menu_fleet").y) and not self.config.combat['boss_fleet']:
                 if not self.chapter_map[0].isdigit() and string.ascii_uppercase.index(self.chapter_map[2:3]) < 1 or self.chapter_map[0].isdigit():
                     Logger.log_msg("Removing second fleet from fleet selection.")
                     Utils.touch_randomly(self.region["clear_second_fleet"])
-            if Utils.find("combat/menu_select_fleet"):
+            if Utils.find_with_cropped("combat/menu_select_fleet"):
                 Logger.log_debug("Found fleet select go button.")
                 # Rotating fleet due to low morale
                 if(self.fleet_switch_due_to_morale):
@@ -176,7 +179,7 @@ class CombatModule(object):
                     Utils.touch([first_fleet_slot_position[0], target_fleet_vertical_position])
                     Utils.script_sleep(1)
                 Utils.touch_randomly_ensured(self.region["fleet_menu_go"], "combat/menu_select_fleet", ["combat/button_retreat", "combat/alert_morale_low"], response_time=2)
-            if Utils.find("combat/button_retreat"):
+            if Utils.find_with_cropped("combat/button_retreat"):
                 Logger.log_debug("Found retreat button, starting clear function.")
                 if (self.chapter_map[0] == '7' and self.chapter_map[2] == '2' and self.config.combat['clearing_mode'] and self.config.combat['focus_on_mystery_nodes']):
                     Logger.log_debug("Started special 7-2 farming.")
@@ -189,7 +192,7 @@ class CombatModule(object):
                         self.stats.increment_combat_attempted()
                         break
                     Utils.wait_update_screen()
-            if Utils.find("menu/button_sort"):
+            if Utils.find_with_cropped("menu/button_sort"):
                 if self.config.enhancement['enabled'] and not enhancement_failed:
                     if not self.enhancement_module.enhancement_logic_wrapper(forced=True):
                         enhancement_failed = True
@@ -209,7 +212,7 @@ class CombatModule(object):
                     Utils.touch_randomly(self.region['close_info_dialog'])
                     self.exit = 4
                     break
-            if Utils.find("combat/alert_morale_low"):
+            if Utils.find_with_cropped("combat/alert_morale_low"):
                 if self.config.combat['ignore_morale']:
                     Utils.find_and_touch("menu/button_confirm")
                 #else:
@@ -229,7 +232,7 @@ class CombatModule(object):
                         self.exit = 3
                         break
 
-            if Utils.find("menu/button_confirm"):
+            if Utils.find_with_cropped("menu/button_confirm"):
                 Logger.log_msg("Found commission info message.")
                 self.stats.increment_commissions_occurance()
                 Utils.touch_randomly(self.region["combat_com_confirm"])
