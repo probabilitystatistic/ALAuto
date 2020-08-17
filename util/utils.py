@@ -537,10 +537,8 @@ class Utils(object):
                     Logger.log_debug("Daily login item received.")
                 if cls.find_and_touch_with_cropped("menu/return_to_main", 0.9):
                     Logger.log_debug("Return to main menu through the main menu button.")
-                    print("Return to main menu through the main menu button.")
                 else:
                     Logger.log_debug("Return to main menu through the last page button.")
-                    print("Return to main menu through the last page button.")
                     cls.touch_randomly(Region(54, 57, 67, 67))
             cls.wait_update_screen(1)
             count += 1
