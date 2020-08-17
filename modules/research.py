@@ -61,8 +61,9 @@ class ResearchModule(object):
                 Logger.log_msg("Going back to main menu.")       
             else:
                 Logger.log_msg("Shipyard or Fleet Tech alert detected, ignoring it.")
-            Utils.touch_randomly(self.region['main_menu_button'])
-            Utils.wait_update_screen(1)
+            Utils.menu_navigate()
+            #Utils.touch_randomly(self.region['main_menu_button'])
+            #Utils.wait_update_screen(1)
             return True
                 
     def research_cycle(self):
