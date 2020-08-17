@@ -28,7 +28,7 @@ data = {
     "menu/alert_info": [0, 0, 960, 540], # Just a rough estimation!
     "menu/alert_close": [960, 0, 1920, 540], # Just a rough estimation!
     "menu/attack": [140, 0, 420, 100],
-    "menu/back_to_main": [1760, 0, 1920, 140],
+    "menu/return_to_main": [1760, 0, 1920, 140],
     "menu/build": [100, 0, 350, 100],
     "menu/button_battle": [1500, 420, 1700, 600],
     "menu/button_confirm": [500, 540, 1500, 900], # Just a rough estimation!
