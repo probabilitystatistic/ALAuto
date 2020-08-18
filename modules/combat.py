@@ -706,7 +706,8 @@ class CombatModule(object):
             'E-D3': lambda: Utils.swipe(960, 540, 1060, 670, 300),
             # needs to be updated
 # By me:
-# adding the swipe to fit the question mark of 5-1 on screen
+# adding the swipe to fit the question mark of 5-1 on the screen; focus on enemies in the lower part of the map 4-2
+            '4-2': lambda: Utils.swipe(1000, 700, 1000, 400, 300),
             '5-1': lambda: Utils.swipe(1000, 500, 1000, 600, 300),
             '12-2': lambda: Utils.swipe(1000, 570, 1300, 540, 300),
             '12-3': lambda: Utils.swipe(1250, 530, 1300, 540, 300),
@@ -758,7 +759,7 @@ class CombatModule(object):
                 self.retreat_handler()
                 return True
 # By me:
-# Solution when boss is hidden by player's fleet. This should work for map 5-1 and 6-1.
+# Solution when boss is hidden by player's fleet. This should work for map 4-2, 5-1 and 6-1(any map with left-bottom tile of a possibly blocked boss empty).
 # It's just moving one grid left(it's two to avoid further possible block).
 # The width of one grid is roughly 180 pixels.
 # Note that this will fail if the boss is hidden by the other fleet.
