@@ -88,8 +88,6 @@ class Region(object):
 
 screen = None
 last_ocr = ''
-last_ocr_oil = ''
-last_ocr_gold = ''
 bytepointer = 0
 #u2device = u2.connect('127.0.0.1:5555') # for bluestacks
 
@@ -480,45 +478,15 @@ class Utils(object):
     @classmethod
     def get_oil_and_gold(cls, print_to_screen=True):
 
-        global last_ocr_oil
-        global last_ocr_gold
-
-        oil = []
-        gold = []
-
-        count = 0
-        while len(oil) < 5:
-            _res = int(cls.read_numbers(970, 38, 101, 36))
-            if last_ocr_oil == '' or abs(_res - last_ocr_oil) < 600:
-                oil.append(_res)
-            count += 1
-            if count > 100:
-                Logger.log_error("Too many loop in getting oil number.")
-                return 1, 1
-
-        last_ocr_oil = max(set(oil), key=oil.count)
-        oil_integer = int(last_ocr_oil)
-
-        count = 0
-        # This may only be able to read 5 digit of gold
-        while len(gold) < 5:
-            _res = int(cls.read_numbers(1279, 38, 101, 36))
-            if last_ocr_gold == '' or abs(_res - last_ocr_gold) < 600:
-                gold.append(_res)
-            count += 1
-            if count > 100:
-                Logger.log_error("Too many loop in getting gold number.")
-                return 1, 1
-
-        last_ocr_gold = max(set(gold), key=gold.count)
-        gold_integer = str(last_ocr_gold)
-
-        Logger.log_debug("Current oil = {}; gold = {}".format(oil_integer, gold_integer))
+        oil = cls.read_numbers(970, 38, 101, 36)
+        gold = cls.read_numbers(1212, 38, 172, 36, max_digits=6)
+ 
+        Logger.log_debug("Current oil = {}; gold = {}".format(oil, gold))
 
         if print_to_screen:
-            Logger.log_success("Current oil = {}; gold = {}".format(oil_integer, gold_integer))
+            Logger.log_success("Current oil = {}; gold = {}".format(oil, gold))
 
-        return oil_integer, gold_integer
+        return oil, gold
 
 
     @classmethod

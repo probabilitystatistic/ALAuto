@@ -217,7 +217,7 @@ try:
     while True:
         Utils.update_screen()
 
-        
+
         # This is a small time comparison for find and find_with_cropped
         while False:
             template_name = "menu/button_battle"
@@ -257,7 +257,8 @@ try:
             exit()
 
 
-
+        Utils.get_oil_and_gold()
+        
         if Utils.find_and_touch_with_cropped("menu/alert_close", 0.9):
             Logger.log_msg('Found annoucement.')
             continue
