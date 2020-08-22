@@ -755,7 +755,7 @@ class CombatModule(object):
         while True:
             Utils.update_screen()
 
-            if Utils.find("combat/alert_unable_battle"):
+            if Utils.find_with_cropped("combat/alert_unable_battle"):
                 Utils.touch_randomly(self.region['close_info_dialog'])
                 self.exit = 5
             #if self.config.combat['retreat_after'] != 0 and self.combats_done >= self.config.combat['retreat_after']:
@@ -943,7 +943,7 @@ class CombatModule(object):
         while True:
             Utils.update_screen()
 
-            if Utils.find("combat/alert_unable_battle"):
+            if Utils.find_with_cropped("combat/alert_unable_battle"):
                 Utils.touch_randomly(self.region['close_info_dialog'])
                 self.exit = 5
             if question_mark_all_obtained and self.config.combat['retreat_after'] == 3:
