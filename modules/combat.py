@@ -282,7 +282,7 @@ class CombatModule(object):
         # get to map selection menu
         if Utils.find_with_cropped("menu/button_battle"):
             Logger.log_debug("Found menu battle button.")
-            Utils.touch_randomly_ensured(self.region["menu_button_battle"], "", ["menu/attack"], response_time=1)
+            Utils.touch_randomly_ensured(self.region["menu_button_battle"], "", ["menu/attack"], response_time=1, stable_check_frame=1)
             #Utils.wait_update_screen(2)
 
         # correct map mode
@@ -1234,7 +1234,7 @@ class CombatModule(object):
                         self.exit = 5
                         return
                     swipes.get(s)()
-                    Utils.wait_update_screen(0.5)
+                    Utils.wait_update_screen(0.1)
                     boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
                     s += 1
                 boss_info = [boss_region.x + 50, boss_region.y + 25, "boss"]
