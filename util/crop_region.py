@@ -44,6 +44,7 @@ data = {
     "menu/drop_rare": [1250, 400, 1920, 800], # Just a rough estimation!
     "menu/drop_ssr": [1250, 400, 1920, 800], # Just a rough estimation!
     "menu/item_found": [700, 150, 1200, 400],
+    "menu/button_normal_mode": [0, 940, 250, 1080],
     "retirement/alert_bonus": [200, 900, 450, 1050],
     "retirement/bonus": [460, 960, 620, 1060],
     "retirement/button_disassemble": [1050, 800, 1380, 940], # The "confirm" when showing money earned from disassembling equipment.

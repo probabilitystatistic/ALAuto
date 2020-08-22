@@ -280,10 +280,10 @@ class CombatModule(object):
         """
         Utils.wait_update_screen()
         # get to map selection menu
-        if Utils.find("menu/button_battle"):
+        if Utils.find_with_cropped("menu/button_battle"):
             Logger.log_debug("Found menu battle button.")
-            Utils.touch_randomly(self.region["menu_button_battle"])
-            Utils.wait_update_screen(2)
+            Utils.touch_randomly_ensured(self.region["menu_button_battle"], "", ["menu/attack"], response_time=1)
+            #Utils.wait_update_screen(2)
 
         # correct map mode
         if not self.chapter_map[0].isdigit():
@@ -296,12 +296,12 @@ class CombatModule(object):
 #           By me: comment out the switching to normal mode for event map so I can farm D2 in Iris of light and dark.
 #                Utils.touch_randomly(self.region['normal_mode_button'])
 #                Utils.wait_update_screen(1)
-        else:
-            if Utils.find("menu/button_normal_mode"):
-                Logger.log_debug("Disabling hard mode.")
-                # disable the check for normal mode so as to do daily hard runs
+        # disable the check for normal mode so as to do daily hard runs
+        #else:
+            #if Utils.find_with_cropped("menu/button_normal_mode"):
+                #Logger.log_debug("Disabling hard mode.")
                 #Utils.touch_randomly(self.region['normal_mode_button'])
-                Utils.wait_update_screen(1)
+                #Utils.wait_update_screen(1)
 
         map_region = Utils.find('maps/map_{}'.format(self.chapter_map), self.map_similarity)
         if map_region != None:
@@ -311,34 +311,32 @@ class CombatModule(object):
             # navigate map selection menu
             if not self.chapter_map[0].isdigit():
                 if (self.chapter_map[2] == 'A' or self.chapter_map[2] == 'C') and \
-                    (Utils.find('maps/map_E-B1', 0.99) or Utils.find('maps/map_E-D1', 0.99)):
+                    (Utils.find('maps/map_E-B1', self.map_similarity) or Utils.find('maps/map_E-D1', self.map_similarity)):
                     Utils.touch_randomly(self.region['map_nav_left'])
                     Logger.log_debug("Swiping to the left")
                 elif (self.chapter_map[2] == 'B' or self.chapter_map[2] == 'D') and \
-                    (Utils.find('maps/map_E-A1', 0.99) or Utils.find('maps/map_E-C1', 0.99)):
+                    (Utils.find('maps/map_E-A1', self.map_similarity) or Utils.find('maps/map_E-C1', self.map_similarity)):
                     Utils.touch_randomly(self.region['map_nav_right'])
                     Logger.log_debug("Swiping to the right")
             else:
                 _map = 0
                 for x in range(1, 14):
-                    if Utils.find("maps/map_{}-1".format(x), 0.99):
+                    if Utils.find("maps/map_{}-1".format(x), self.map_similarity):
                         _map = x
                         break
                 if _map != 0:
                     taps = int(self.chapter_map.split("-")[0]) - _map
                     for x in range(0, abs(taps)):
                         if taps >= 1:
-                            Utils.touch_randomly(self.region['map_nav_right'])
+                            Utils.touch_randomly_ensured(self.region['map_nav_right'], "", [], response_time=0.1)
                             Logger.log_debug("Swiping to the right")
-                            Utils.script_sleep()
+                            #Utils.script_sleep()
                         else:
-                            Utils.touch_randomly(self.region['map_nav_left'])
+                            Utils.touch_randomly_ensured(self.region['map_nav_left'], "", [], response_time=0.1)
                             Logger.log_debug("Swiping to the left")
-                            Utils.script_sleep()
+                            #Utils.script_sleep()
 
         Utils.wait_update_screen()
-# By me: lowering the similarity for map detection
-#        map_region = Utils.find('maps/map_{}'.format(self.chapter_map), 0.99)
         map_region = Utils.find('maps/map_{}'.format(self.chapter_map), self.map_similarity)
         if map_region == None:
             Logger.log_error("Cannot find the specified map, please move to the world where it's located.")
