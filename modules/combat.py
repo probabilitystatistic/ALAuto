@@ -461,8 +461,7 @@ class CombatModule(object):
                                                 ["combat/button_retreat", "menu/button_confirm", 
                                                  "menu/attack", "combat/defeat_close_button"], 
                                                 response_time=3, similarity_after=0.9,
-                                                stable_check_frame=3)
-                    print('Debug: Exit combat-end touch_randomly_ensured.')
+                                                stable_check_frame=1)
                     # Note that the combat/button_confirm is very similar to menu/button_confirm with similarity 0.93~0.94 and
                     # the old crop region for menu/button_confirm contained combat/button_confirm.
                     # As a result, if the first click in the ensured touch fail to be received by the game(possibly due to unstable screen), 
@@ -855,7 +854,6 @@ class CombatModule(object):
                 continue
             else:
                 target_info_tmp = target_info
-                print("Debug: Entering movement_handler")
                 movement_result = self.movement_handler(target_info)
                 if movement_result == 1:
                     self.battle_handler()
