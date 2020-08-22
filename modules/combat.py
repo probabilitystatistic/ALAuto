@@ -192,6 +192,7 @@ class CombatModule(object):
                         self.stats.increment_combat_attempted()
                         break
                     Utils.wait_update_screen()
+                print("Debug: Exit clear_map.")
             if Utils.find_with_cropped("menu/button_sort"):
                 if self.config.enhancement['enabled'] and not enhancement_failed:
                     if not self.enhancement_module.enhancement_logic_wrapper(forced=True):
@@ -455,6 +456,7 @@ class CombatModule(object):
                                                  "menu/attack", "combat/defeat_close_button"], 
                                                 response_time=3, similarity_after=0.9,
                                                 stable_check_frame=3)
+                    print('Debug: Exit combat-end touch_randomly_ensured.')
                     # Note that the combat/button_confirm is very similar to menu/button_confirm with similarity 0.93~0.94 and
                     # the old crop region for menu/button_confirm contained combat/button_confirm.
                     # As a result, if the first click in the ensured touch fail to be received by the game(possibly due to unstable screen), 
@@ -821,10 +823,12 @@ class CombatModule(object):
                 self.clear_boss(boss_info)
                 continue
             if target_info == None:
+                print("Debug: searching enemies.")
                 target_info = self.get_closest_target(self.blacklist, mystery_node=(not self.config.combat["ignore_mystery_nodes"]))
                 continue
             if target_info:
                 #tap at target's coordinates
+                print("Debug: tap the target")
                 Utils.touch(target_info[0:2])
                 # This sleep must be long to avoid capturing the screen before game responds but also short enough to capture the "unable to reach..." dialog before it disappears.
                 #Utils.script_sleep(1)
@@ -845,9 +849,11 @@ class CombatModule(object):
                 continue
             else:
                 target_info_tmp = target_info
+                print("Debug: Entering movement_handler")
                 movement_result = self.movement_handler(target_info)
                 if movement_result == 1:
                     self.battle_handler()
+                    print('Debug: Exit battle_handler.')
                 # This swipe for map 2-3 makes bot more likely to target key enemies blocking the boss
                 if self.chapter_map == '2-3' and target_info_tmp[2] == 'mystery_node':
                     Logger.log_msg("Relocating screen of 2-3 after picking the mystery node.")
