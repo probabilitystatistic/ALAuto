@@ -215,14 +215,17 @@ class RetirementModule(object):
 
     def select_ships(self):
         Logger.log_msg("Selecting ships for retirement.")
-        Utils.touch_randomly_ensured(self.region['button_batch_retire'], "menu/dock", ["retirement/no_batch", "retirement/alert_bonus"])
+        # The change to the ensured touch in this part actually freezes the bot, not sure why.
+        Utils.touch_randomly(self.region['button_batch_retire'])
+        #Utils.touch_randomly_ensured(self.region['button_batch_retire'], "menu/dock", ["retirement/no_batch", "retirement/alert_bonus"])
         # This wait right below should be long enough for the bot to capture "no_batch" dialog if no ship satisfies the quick retire condition.
-        #Utils.wait_update_screen(1)
+        Utils.wait_update_screen(1)
         if Utils.find_with_cropped("retirement/no_batch", similarity=0.9):
             for i in range(0, 7):
                 Utils.touch_randomly(self.region['select_ship_{}'.format(i)])
         else:
-            Utils.touch_randomly_ensured(self.region['close_batch_retire'], "retirement/alert_bonus", ["menu/dock"]);
+            Utils.touch_randomly(self.region['close_batch_retire'])
+            #Utils.touch_randomly_ensured(self.region['close_batch_retire'], "retirement/alert_bonus", ["menu/dock"]);
 
 
 
