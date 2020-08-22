@@ -836,7 +836,7 @@ class Utils(object):
             ref_after_touch (list of string): a list of reference images 
                 appearing only after the touch to verify if the touch is successful.
                 Specify an empty list, namely [], if checking reference after the 
-                touch is not needed.
+                touch is not needed(but the screen is still updated anyway though not used).
 
             response_time (integer): time in seconds to wait between each 
                 touch trial
@@ -847,7 +847,7 @@ class Utils(object):
             check_level_for_ref_before (integer): determine how strickly to check the 
                 reference before executing touch. 1=check only once before the first touch;
                 2=check only once (after the first touch/before the second touch);
-                3=check before every touch.
+                3=check before every touch; 4=check before every touch except the first one.
 
             trial (integer) : the maximum number of times to perform the touch
 
@@ -904,6 +904,11 @@ class Utils(object):
                     if not cls.find_with_cropped(ref_before_touch, similarity=similarity_before):
                         Logger.log_error("Ensured touch failure: reference {} before {}th touch not found.".format(ref_before_touch, touch_count))
                         return 0
+                elif check_level_for_ref_before == 4:
+                    if touch_count != 0:
+                        if not cls.find_with_cropped(ref_before_touch, similarity=similarity_before):
+                            Logger.log_error("Ensured touch failure: reference {} before {}th touch not found(not check before first touch).".format(ref_before_touch, touch_count))
+                            return 0
             else:
                 Logger.log_debug("Reference check before touch is not requested.")
 
