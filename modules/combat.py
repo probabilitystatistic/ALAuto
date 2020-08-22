@@ -120,7 +120,10 @@ class CombatModule(object):
         enhancement_failed = False
         retirement_failed = False
         fleet_switch_candidate_for_morale= self.config.combat['low_mood_rotation_fleet']
+        slot_to_switch_fleet = 0 # 0 = first slot; 1 = second slot
+        fleet_slot_position = [[1650, 393], [1650, 593]]
         first_fleet_slot_position = [1650, 393]
+        second_fleet_slot_position = [1650, 593]
         fleet_slot_separation = 64
 
 
@@ -173,11 +176,14 @@ class CombatModule(object):
                     #else:
                     #    if not self.select_fleet(first_slot_fleet = fleet_switch_candidate_for_morale[self.fleet_switch_index % len(fleet_switch_candidate_for_morale)], second_slot_fleet=??):
                     #       Logger.log_warning("Abnormal fleet order.")
-                    Utils.touch_randomly(self.region["first_slot_choose"])
-                    Utils.script_sleep(1)
-                    target_fleet_vertical_position = first_fleet_slot_position[1] + fleet_slot_separation*(fleet_switch_candidate_for_morale[self.fleet_switch_index % len(fleet_switch_candidate_for_morale)] - 1)
-                    Utils.touch([first_fleet_slot_position[0], target_fleet_vertical_position])
-                    Utils.script_sleep(1)
+                    if slot_to_switch_fleet == 0:
+                        Utils.touch_randomly(self.region["first_slot_choose"])
+                    if slot_to_switch_fleet == 1:
+                        Utils.touch_randomly(self.region["second_slot_choose"])
+                    Utils.script_sleep(0.1)
+                    target_fleet_vertical_position = fleet_slot_position[slot_to_switch_fleet][1] + fleet_slot_separation*(fleet_switch_candidate_for_morale[self.fleet_switch_index % len(fleet_switch_candidate_for_morale)] - 1)
+                    Utils.touch([fleet_slot_position[slot_to_switch_fleet][0], target_fleet_vertical_position])
+                    Utils.script_sleep(0.1)
                 Utils.touch_randomly_ensured(self.region["fleet_menu_go"], "combat/menu_select_fleet", ["combat/button_retreat", "combat/alert_morale_low"], response_time=2)
             if Utils.find_with_cropped("combat/button_retreat"):
                 Logger.log_debug("Found retreat button, starting clear function.")
