@@ -434,22 +434,22 @@ class CombatModule(object):
                 if Utils.find_with_cropped("menu/drop_elite"):
                     Logger.log_msg("Received ELITE ship as drop.")
                     # sometimes this ensured touch fails after 10 clicks(but still keep going to continue). It successes the next time after the continue.
-                    Utils.touch_randomly_ensured(self.region['dismiss_ship_drop'], "menu/drop_elite", ["combat/button_confirm", "combat/alert_lock"])
+                    Utils.touch_randomly_ensured(self.region['dismiss_ship_drop'], "menu/drop_elite", ["combat/button_confirm", "combat/alert_lock"], similarity_after=0.9)
                     Utils.script_sleep(self.sleep_short)
                     continue
                 elif Utils.find_with_cropped("menu/drop_rare"):
                     Logger.log_msg("Received new RARE ship as drop.")
-                    Utils.touch_randomly_ensured(self.region['dismiss_ship_drop'], "menu/drop_rare", ["combat/button_confirm", "combat/alert_lock"])
+                    Utils.touch_randomly_ensured(self.region['dismiss_ship_drop'], "menu/drop_rare", ["combat/button_confirm", "combat/alert_lock"], similarity_after=0.9)
                     Utils.script_sleep(self.sleep_short)
                     continue
                 elif Utils.find_with_cropped("menu/drop_ssr"):
                     Logger.log_msg("Received SSR ship as drop.")
-                    Utils.touch_randomly_ensured(self.region['dismiss_ship_drop'], "menu/drop_ssr", ["combat/button_confirm", "combat/alert_lock"])
+                    Utils.touch_randomly_ensured(self.region['dismiss_ship_drop'], "menu/drop_ssr", ["combat/button_confirm", "combat/alert_lock"], similarity_after=0.9)
                     Utils.script_sleep(self.sleep_short)
                     continue
                 elif Utils.find_with_cropped("menu/drop_common"):
                     Logger.log_msg("Received new COMMON ship as drop.")
-                    Utils.touch_randomly_ensured(self.region['dismiss_ship_drop'], "menu/drop_common", ["combat/button_confirm", "combat/alert_lock"])
+                    Utils.touch_randomly_ensured(self.region['dismiss_ship_drop'], "menu/drop_common", ["combat/button_confirm", "combat/alert_lock"], similarity_after=0.9)
                     Utils.script_sleep(self.sleep_short)
                     continue
             if not in_battle:
