@@ -714,7 +714,7 @@ class CombatModule(object):
             # needs to be updated
             '4-2': lambda: Utils.swipe(1000, 700, 1000, 400, 300), #to focus on enemies in the lower part of the map
             '5-1': lambda: Utils.swipe(1000, 500, 1000, 600, 300), #to fit the question mark of 5-1 on the screen
-            '6-1': lambda: Utils.swipe(1100, 500, 900, 500, 300), #to focus on enemies in the left part of the map
+            '6-1': lambda: Utils.swipe(1200, 550, 800, 450, 300), #to focus on enemies in the left part of the map(C5 mystery mark seems to be undetectable by bot)
             '12-2': lambda: Utils.swipe(1000, 570, 1300, 540, 300),
             '12-3': lambda: Utils.swipe(1250, 530, 1300, 540, 300),
             '12-4': lambda: Utils.swipe(960, 300, 960, 540, 300),
