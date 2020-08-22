@@ -412,7 +412,7 @@ class CombatModule(object):
                     # the screen is not stable so sleep is needed
                     Utils.script_sleep(0.5)
                     Utils.touch_randomly_ensured(self.region['tap_to_continue'], "combat/menu_touch2continue", 
-                                                ["menu/item_found"],
+                                                ["menu/item_found", "combat/button_confirm"], # detect combat/button_confirm when defeated
                                                 response_time=0.1, 
                                                 stable_check_frame=1)
                     in_battle = False
