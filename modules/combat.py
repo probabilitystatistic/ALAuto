@@ -760,22 +760,6 @@ class CombatModule(object):
             if self.exit != 0:
                 self.retreat_handler()
                 return True
-# By me:
-# Solution when boss is hidden by player's fleet. This should work for map 4-2, 5-1 and 6-1(any map with left-bottom tile of a possibly blocked boss empty).
-# It's just moving one grid left(it's two to avoid further possible block).
-# The width of one grid is roughly 180 pixels.
-# Note that this will fail if the boss is hidden by the other fleet.
-            if self.kills_count >= self.kills_before_boss[self.chapter_map] and not Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9):
-                Logger.log_msg("Boss fleet is not found. Trying to uncover the boss.")
-                self.fleet_location = None
-                single_fleet_location = self.get_fleet_location()
-                location_left_of_fleet = [0, 0]
-                location_left_of_fleet[0] = single_fleet_location[0] - 180
-                location_left_of_fleet[1] = single_fleet_location[1]
-                Utils.touch(location_left_of_fleet)
-                # We must give some time for the fleet to move, otherwise the screen update right after continue will still fail to see boss.
-                Utils.script_sleep(1.5)
-                continue
             if self.kills_count >= self.kills_before_boss[self.chapter_map] and Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9):
                 Logger.log_msg("Boss fleet was found.")
 
@@ -821,6 +805,22 @@ class CombatModule(object):
                 #extrapolates boss_info(x,y,enemy_type) from the boss_region found
                 boss_info = [boss_region.x + 50, boss_region.y + 25, "boss"]
                 self.clear_boss(boss_info)
+                continue
+# By me:
+# Solution when boss is hidden by player's fleet. This should work for map 4-2, 5-1 and 6-1(any map with left-bottom tile of a possibly blocked boss empty).
+# It's just moving one grid left(it's two to avoid further possible block).
+# The width of one grid is roughly 180 pixels.
+# Note that this will fail if the boss is hidden by the other fleet.
+            elif self.kills_count >= self.kills_before_boss[self.chapter_map]:
+                Logger.log_msg("Boss fleet is not found. Trying to uncover the boss.")
+                self.fleet_location = None
+                single_fleet_location = self.get_fleet_location()
+                location_left_of_fleet = [0, 0]
+                location_left_of_fleet[0] = single_fleet_location[0] - 180
+                location_left_of_fleet[1] = single_fleet_location[1]
+                Utils.touch(location_left_of_fleet)
+                # We must give some time for the fleet to move, otherwise the screen update right after continue will still fail to see boss.
+                Utils.script_sleep(1.5)
                 continue
             if target_info == None:
                 print("Debug: searching enemies.")
