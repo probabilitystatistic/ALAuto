@@ -237,6 +237,8 @@ class RetirementModule(object):
         while True:
             count += 1
 
+            # known bug: sometimes bot mis-click the cancel button and moves to the build menu. Currently handled by too-many-click.
+
             if count > 40:
                 Logger.log_error('Too many loop in handle_retirement(normally only 5 loop per retire cycle). Force quit.')
                 self.forced_quit = True
