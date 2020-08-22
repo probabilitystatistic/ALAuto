@@ -102,3 +102,13 @@ class Logger(object):
         if not cls.debug: return
         print("{}".format(
         cls.log_format(msg)))
+
+    @classmethod
+    def log_exit(cls, msg):
+        """Method to print an error message and terminate the program.
+
+        Args:
+            msg (string): log msg
+        """
+        cls.log_error(msg)
+        exit()
