@@ -705,10 +705,9 @@ class CombatModule(object):
             'E-B3': lambda: Utils.swipe(960, 540, 1060, 670, 300),
             'E-D3': lambda: Utils.swipe(960, 540, 1060, 670, 300),
             # needs to be updated
-# By me:
-# adding the swipe to fit the question mark of 5-1 on the screen; focus on enemies in the lower part of the map 4-2
-            '4-2': lambda: Utils.swipe(1000, 700, 1000, 400, 300),
-            '5-1': lambda: Utils.swipe(1000, 500, 1000, 600, 300),
+            '4-2': lambda: Utils.swipe(1000, 700, 1000, 400, 300), #to focus on enemies in the lower part of the map
+            '5-1': lambda: Utils.swipe(1000, 500, 1000, 600, 300), #to fit the question mark of 5-1 on the screen
+            '6-1': lambda: Utils.swipe(1100, 500, 900, 500, 300), #to focus on enemies in the left part of the map
             '12-2': lambda: Utils.swipe(1000, 570, 1300, 540, 300),
             '12-3': lambda: Utils.swipe(1250, 530, 1300, 540, 300),
             '12-4': lambda: Utils.swipe(960, 300, 960, 540, 300),
@@ -728,18 +727,19 @@ class CombatModule(object):
             Utils.script_sleep()
             Utils.touch_randomly(self.region["close_strategy_menu"])
 
-        # special switch for special farming
+        # special initial move/switch for easier farming in some specific maps
         if self.chapter_map=="5-1":
             # Special farming for 5-1:
             # Setup: fleet 1 = boss fleet; another fleet = mob fleet; enable boss fleet = True; prioritize mystery node = True
-            # 1. boss fleet move to obtain the mystery node at the beginning(this also ensure no boss blocking by boss fleet)
-            # 2. switch to mob fleet, and let it clear 4 enemies(boss block by mob fleet can be handled by the default left/right disclosing)
+            # 1. boss fleet move to obtain the mystery node at the beginning(this also ensures no boss blocking by boss fleet)
+            # 2. switch to mob fleet, and let it clear 4 enemies(boss block by mob fleet can be handled by the default left disclosing)
             # 3. switch back to boss fleet, and clear the boss
             target_info = self.get_closest_target(self.blacklist, mystery_node=True)
             Utils.touch(target_info[0:2])
             self.movement_handler(target_info)
             Utils.touch_randomly(self.region['button_switch_fleet'])
             Utils.update_screen()
+
 #By me:
 # allow the bot to collect question node at the first turn
         #target_info = self.get_closest_target(self.blacklist)
@@ -1083,6 +1083,9 @@ class CombatModule(object):
                 }
         if self.chapter_map == "7-2":
             anchor_position = [1564, 677]
+            anchor_tolerance = [10, 10]
+        elif self.chapter_map == "6-1":
+            anchor_position = [423, 688]
             anchor_tolerance = [10, 10]
         else:
             Logger.log_error('No anchor point is set for map {}.'.format(self.chapter_map))
