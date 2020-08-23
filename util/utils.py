@@ -955,7 +955,7 @@ class Utils(object):
                     cv2.imwrite("touch_ensured_failure.png", cls.screen) 
                     return 0
                 Logger.log_debug("Ensured touch failure at [{},{}] for the {}th time, will try again.".format(coords[0], coords[1], touch_count))
-                if touch_count == 1: 
+                if touch_count == 1 and Logger.debug: 
                     cv2.imwrite("touch_ensured_after_first_click.png", cls.screen)
             else:
                 Logger.log_debug("Reference check after touch is not requested.")
