@@ -9,7 +9,7 @@ from modules.combat import CombatModule
 from modules.commission import CommissionModule
 from modules.enhancement import EnhancementModule
 from modules.mission import MissionModule
-from modules.retirement import RetirementModule
+from modules.retirement_optimized import RetirementModule
 from modules.headquarters import HeadquartersModule
 from modules.research import ResearchModule
 from modules.event import EventModule
