@@ -446,8 +446,8 @@ class CombatModule(object):
         response = Utils.touch_randomly_ensured(self.region["combat_end_confirm"], "", 
                                                 ["combat/button_retreat", "menu/button_confirm", 
                                                  "menu/attack", "combat/defeat_close_button"], 
-                                                response_time=2, similarity_after=0.9,
-                                                stable_check_frame=1)
+                                                response_time=3, similarity_after=0.9,
+                                                stable_check_frame=2)
         if response == 4:
             defeat = True
             Logger.log_warning("Fleet was defeated.")
