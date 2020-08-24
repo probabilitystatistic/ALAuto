@@ -5,7 +5,7 @@ import argparse
 import os.path
 import time
 #import uiautomator2 as u2
-from modules.combat import CombatModule
+from modules.combat_optimized import CombatModule
 from modules.commission import CommissionModule
 from modules.enhancement import EnhancementModule
 from modules.mission import MissionModule

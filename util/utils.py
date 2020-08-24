@@ -820,7 +820,8 @@ class Utils(object):
                       need_initial_screen=False, check_level_for_ref_before=1, trial=10, 
                       similarity_before=DEFAULT_SIMILARITY, similarity_after=DEFAULT_SIMILARITY,
                       stable_check_frame=0, stable_check_interval=0.2, 
-                      stable_check_similarity=DEFAULT_STABLE_SIMILARITY, stable_check_region=[0, 0, 1920, 1080]):
+                      stable_check_similarity=DEFAULT_STABLE_SIMILARITY, stable_check_region=[0, 0, 1920, 1080],
+                      empty_touch=0):
         """Touch with ensurance check and return True if touch is successful
 
         Args:
@@ -870,6 +871,10 @@ class Utils(object):
                 to full screen). The region is a rectangle specified by [x1, y1, x2, y2]. Namely 
                 top-left and bottum-right ponts.
 
+            empty_touch(integer): the number of extra touch before taking a screen to verify results.
+                These empty touch is not counted in trial. Their interval is controlled by response 
+                time.
+
         Return:
             Integer: an integer STARTING FROM 1 to len(ref_after_touch) indicating which
                 reference after touch is found(namely successful touch); return 0 if no 
@@ -915,8 +920,11 @@ class Utils(object):
             # execute the touch, waiting for some time, and update the screen
             #Adb.shell("input tap {} {}".format(coords[0], coords[1]))
             Adb.shell("input swipe {} {} {} {} {}".format(coords[0], coords[1], coords[0], coords[1], 0))
-            touch_count += 1
             cls.script_sleep(response_time)
+            touch_count += 1
+            for i in range(empty_touch):
+                Adb.shell("input swipe {} {} {} {} {}".format(coords[0], coords[1], coords[0], coords[1], 0))
+                cls.script_sleep(response_time)
             cls.update_screen()
 
             # check if the screen is stable
@@ -991,14 +999,15 @@ class Utils(object):
                       need_initial_screen=False, check_level_for_ref_before=1, trial=10, 
                       similarity_before=DEFAULT_SIMILARITY, similarity_after=DEFAULT_SIMILARITY,
                       stable_check_frame=0, stable_check_interval=0.2, 
-                      stable_check_similarity=DEFAULT_SIMILARITY, stable_check_region=[0, 0, 1920, 1080]):
+                      stable_check_similarity=DEFAULT_SIMILARITY, stable_check_region=[0, 0, 1920, 1080],
+                      empty_touch=0):
         x = cls.random_coord(region.x, region.x + region.w)
         y = cls.random_coord(region.y, region.y + region.h)
         return cls.touch_ensured([x, y], ref_before_touch, ref_after_touch, response_time, 
                                  need_initial_screen, check_level_for_ref_before, trial, 
                                  similarity_before, similarity_after, 
                                  stable_check_frame, stable_check_interval, 
-                                 stable_check_similarity, stable_check_region)
+                                 stable_check_similarity, stable_check_region, empty_touch)
          
 
     @classmethod
