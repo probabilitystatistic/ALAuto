@@ -95,7 +95,7 @@ class Stats(object):
             Logger.log_success("Commissions occurance: {}".format(
                 self._pretty_perhour(self.commissions_occurance, hours)))
             if self.combat_done >= 1:
-                Logger.log_success("Oil and gold from battles: {}; {}".format(
+                Logger.log_success("Oil and gold from battles:    {}; {}".format(
                     self._pretty_perhour(self.oil_battle_accumulated, hours),
                     self._pretty_perhour(self.gold_battle_accumulated, hours)))
                 Logger.log_success("Oil and gold from retirement: {}; {}".format(
@@ -103,12 +103,12 @@ class Stats(object):
                     self._pretty_perhour(self.gold_retire_accumulated, hours)))
                 # g/o from battle
                 if self.oil_battle_accumulated != 0:
-                    Logger.log_success("Average gold/oil from battle: {number1:.{digit1}f}/{number2:.{digit2}f} = {number3:.{digit3}f}".format(
+                    Logger.log_success("Average gold/oil from battle:     {number1:.{digit1}f}/{number2:.{digit2}f} = {number3:.{digit3}f}".format(
                         number1=self.gold_battle_accumulated/self.combat_done, digit1=2, 
                         number2=self.oil_battle_accumulated/self.combat_done, digit2=2, 
                         number3=abs(self.gold_battle_accumulated/self.oil_battle_accumulated), digit3=2))
                 else:
-                    Logger.log_success("Average gold/oil from battle: {number1:.{digit1}f}/{number2:.{digit2}f}".format(
+                    Logger.log_success("Average gold/oil from battle:     {number1:.{digit1}f}/{number2:.{digit2}f}".format(
                         number1=self.gold_battle_accumulated/self.combat_done, digit1=2, 
                         number2=self.oil_battle_accumulated/self.combat_done, digit2=2))
                 # g/o from retirement
@@ -117,12 +117,12 @@ class Stats(object):
                     number2=self.oil_retire_accumulated/self.combat_done, digit2=2))
                 # g/o total
                 if self.oil_battle_accumulated + self.oil_retire_accumulated != 0:
-                    Logger.log_success("Average gold/oil: {number1:.{digit1}f}/{number2:.{digit2}f} = {number3:.{digit3}f}".format(
+                    Logger.log_success("Average gold/oil:                 {number1:.{digit1}f}/{number2:.{digit2}f} = {number3:.{digit3}f}".format(
                         number1=(self.gold_battle_accumulated + self.gold_retire_accumulated)/self.combat_done, digit1=2,
                         number2=(self.oil_battle_accumulated + self.oil_retire_accumulated)/self.combat_done, digit2=2,
                         number3=(self.gold_battle_accumulated + self.gold_retire_accumulated)/abs(self.oil_battle_accumulated + self.oil_retire_accumulated),digit3=2))
                 else:
-                    Logger.log_success("Average gold/oil: {number1:.{digit1}f}/{number2:.{digit2}f}".format(
+                    Logger.log_success("Average gold/oil:                 {number1:.{digit1}f}/{number2:.{digit2}f}".format(
                         number1=(self.gold_battle_accumulated + self.gold_retire_accumulated)/self.combat_done, digit1=2,
                         number2=(self.oil_battle_accumulated + self.oil_retire_accumulated)/self.combat_done, digit2=2))
 
