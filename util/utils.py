@@ -481,7 +481,7 @@ class Utils(object):
         return last_ocr
 
     @classmethod
-    def get_oil_and_gold(cls, print_to_screen=True):
+    def get_oil_and_gold(cls, print_to_screen=False):
 
         oil = cls.read_numbers(970, 38, 101, 36)
         gold = cls.read_numbers(1212, 38, 172, 36, max_digits=6)
