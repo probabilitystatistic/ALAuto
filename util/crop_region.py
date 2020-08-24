@@ -9,8 +9,8 @@
 # form: x1, y1, x2, y2
 data = {
     "combat/alert_fleet_cannot_be_formed": [500, 400, 1400, 800],
-    "combat/alert_lock": [500, 200, 1500, 900], # Just a rough estimation!
-    "combat/alert_morale_low": [500, 200, 1500, 900], # Just a rough estimation!
+    "combat/alert_lock": [520, 340, 1396, 696], # stardard info box size
+    "combat/alert_morale_low": [520, 340, 1396, 696], # stardard info box size
     "combat/alert_unable_battle": [700, 450, 1250, 650], 
     "combat/button_confirm": [1480, 920, 1800, 1080],
     "combat/button_go": [1200, 700, 1800, 980],
@@ -42,7 +42,7 @@ data = {
     "menu/drop_common": [1250, 400, 1920, 800], # Just a rough estimation!
     "menu/drop_elite": [1300, 550, 1920, 690], 
     "menu/drop_rare": [1250, 400, 1920, 800], # Just a rough estimation!
-    "menu/drop_ssr": [1250, 400, 1920, 800], # Just a rough estimation!
+    "menu/drop_ssr": [1300, 550, 1920, 690],
     "menu/item_found": [700, 150, 1200, 400],
     "menu/button_normal_mode": [0, 940, 250, 1080],
     "retirement/alert_bonus": [200, 900, 450, 1050],
