@@ -443,6 +443,7 @@ class CombatModule(object):
             It is assumed no commission will appear if defeated.
 
         """
+        # if response_time=2,stable_check_frame=1, this touch sometimes fail
         response = Utils.touch_randomly_ensured(self.region["combat_end_confirm"], "", 
                                                 ["combat/button_retreat", "menu/button_confirm", 
                                                  "menu/attack", "combat/defeat_close_button"], 
