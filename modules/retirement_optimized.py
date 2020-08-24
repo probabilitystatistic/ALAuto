@@ -81,6 +81,8 @@ class RetirementModule(object):
                 if Utils.find_with_cropped("menu/button_battle"):
                     Logger.log_debug("Retirement called from main menu.")
                     self.called_from_menu = True
+                    oil, gold = Utils.get_oil_and_gold()
+                    Utils.touch_randomly_ensured(self.region['build_menu'], "menu/button_battle", ["menu/build"], response_time=0.5, stable_check_frame=1)
                     # to build menu
                     response = Utils.touch_randomly_ensured(self.region['build_menu'], "", ["menu/build"])
                     # to dock menu
@@ -135,6 +137,8 @@ class RetirementModule(object):
                 self.previous_call_place = "menu"
                 Logger.log_msg("Go back to main menu.")
                 Utils.menu_navigate("menu/button_battle")
+                oil_delta, gold_delta = Utils.get_oil_and_gold()
+                self.stats.read_oil_and_gold_change_from_retirement(oil_delta - oil, gold_delta - gold)
             else:
                 self.previous_call_place = "combat"
                 Logger.log_msg("Go back to combat.")

@@ -127,10 +127,13 @@ class CombatModule(object):
         first_fleet_slot_position = [1650, 393]
         second_fleet_slot_position = [1650, 593]
         fleet_slot_separation = 64
+        oil_delta = 0
+        gold_delta = 0
 
 
         # get to map
         map_region = self.reach_map()
+        oil, gold = Utils.get_oil_and_gold(print_to_screen=False)
         Utils.touch_randomly_ensured(map_region, "menu/attack", ["combat/button_go"] , need_initial_screen=True, stable_check_frame=1)
 
         while True:
@@ -246,8 +249,11 @@ class CombatModule(object):
                 self.stats.increment_commissions_occurance()
                 Utils.touch_randomly(self.region["combat_com_confirm"])
 
-        Utils.script_sleep(1)
+        #Utils.script_sleep(1)
         Utils.menu_navigate("menu/button_battle")
+
+        oil_delta, gold_delta = Utils.get_oil_and_gold()
+        self.stats.read_oil_and_gold_change_from_battle(oil_delta - oil, gold_delta - gold)
 
         return self.exit
 

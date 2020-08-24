@@ -26,6 +26,10 @@ class Stats(object):
         self.offensive_skillbook = 0
         self.defensive_skillbook = 0
         self.support_skillbook = 0
+        self.oil_battle_accumulated = 0
+        self.oil_retire_accumulated = 0 
+        self.gold_battle_accumulated = 0
+        self.gold_retire_accumulated = 0
 
     def _pretty_timedelta(self, delta):
         """Generate a human-readable time delta representation of how long the
@@ -72,10 +76,6 @@ class Stats(object):
         if oil != 0:
             Logger.log_success("Current oil: " + str(oil))
 
-        Logger.log_success(
-            "Commissions occurance: {}".format(
-                self._pretty_perhour(self.commissions_occurance, hours)))
-
         if self.config.commissions['enabled']:
             Logger.log_success(
                 "Commissions sent: {} / received: {}".format(
@@ -92,6 +92,21 @@ class Stats(object):
             Logger.log_success("Combat done: {} / attempted: {}".format(
                 self._pretty_perhour(self.combat_done, hours),
                 self._pretty_perhour(self.combat_attempted, hours)))
+            Logger.log_success("Commissions occurance: {}".format(
+                self._pretty_perhour(self.commissions_occurance, hours)))
+            if self.combat_done >= 1:
+                Logger.log_success("Oil and gold from battles: {}; {}".format(
+                    self._pretty_perhour(self.oil_battle_accumulated, hours),
+                    self._pretty_perhour(self.gold_battle_accumulated, hours)))
+                Logger.log_success("Oil and gold from retirement: {}; {}".format(
+                    self._pretty_perhour(self.oil_retire_accumulated, hours),
+                    self._pretty_perhour(self.gold_retire_accumulated, hours)))
+                Logger.log_success("Average gold/oil from battle, retirement, and total:")
+                Logger.log_success("  {}/{} = {}; {}/{}; {}/{} = {}".format(
+                    self.gold_battle_accumulated/self.combat_done, self.oil_battle_accumulated/self.combat_done, self.gold_battle_accumulated/self.oil_battle_accumulated,
+                    self.gold_retire_accumulated/self.combat_done, self.oil_retire_accumulated/self.combat_done,
+                    (self.gold_battle_accumulated + self.gold_retire_accumulated)/self.combat_done, (self.oil_battle_accumulated + self.oil_retire_accumulated)/self.combat_done, (self.gold_battle_accumulated + self.gold_retire_accumulated)/(self.oil_battle_accumulated + self.oil_retire_accumulated)
+                    ))
 
         Logger.log_success(
             "ALAuto has been running for {} (started on {})".format(
@@ -137,3 +152,11 @@ class Stats(object):
         """Increments the number of support skill book used
         """
         self.support_skillbook += 1
+
+    def read_oil_and_gold_change_from_battle(self, oil, gold):
+        self.oil_battle_accumulated += oil
+        self.gold_battle_accumulated += gold
+
+    def read_oil_and_gold_change_from_retirement(self, oil, gold):
+        self.oil_retire_accumulated += oil
+        self.gold_retire_accumulated += gold
