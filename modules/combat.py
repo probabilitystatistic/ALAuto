@@ -1194,6 +1194,13 @@ class CombatModule(object):
         self.blacklist.clear()
         self.fleet_location = None
 
+        swipes = {
+            0: lambda: Utils.swipe(960, 240, 960, 940, 300),
+            1: lambda: Utils.swipe(1560, 540, 260, 540, 300),
+            2: lambda: Utils.swipe(960, 940, 960, 240, 300),
+            3: lambda: Utils.swipe(260, 540, 1560, 540, 300)
+        }
+
         while True:
             #tap at boss' coordinates
             Utils.touch(boss_info[0:2])
@@ -1216,12 +1223,12 @@ class CombatModule(object):
                 #handle boss' coordinates
                 if not self.unable_handler(boss_info[0:2], boss=True):
                     return
-                swipes = {
-                    0: lambda: Utils.swipe(960, 240, 960, 940, 300),
-                    1: lambda: Utils.swipe(1560, 540, 260, 540, 300),
-                    2: lambda: Utils.swipe(960, 940, 960, 240, 300),
-                    3: lambda: Utils.swipe(260, 540, 1560, 540, 300)
-                }
+                #swipes = {
+                #    0: lambda: Utils.swipe(960, 240, 960, 940, 300),
+                #    1: lambda: Utils.swipe(1560, 540, 260, 540, 300),
+                #    2: lambda: Utils.swipe(960, 940, 960, 240, 300),
+                #    3: lambda: Utils.swipe(260, 540, 1560, 540, 300)
+                #}
 
 # By me: This should be a bug. It switch fleet no matter what.
 #                Utils.touch_randomly(self.region['button_switch_fleet'])
