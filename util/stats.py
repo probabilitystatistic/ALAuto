@@ -101,12 +101,31 @@ class Stats(object):
                 Logger.log_success("Oil and gold from retirement: {}; {}".format(
                     self._pretty_perhour(self.oil_retire_accumulated, hours),
                     self._pretty_perhour(self.gold_retire_accumulated, hours)))
-                Logger.log_success("Average gold/oil from battle, retirement, and total:")
-                Logger.log_success("  {}/{} = {}; {}/{}; {}/{} = {}".format(
-                    self.gold_battle_accumulated/self.combat_done, self.oil_battle_accumulated/self.combat_done, self.gold_battle_accumulated/self.oil_battle_accumulated,
-                    self.gold_retire_accumulated/self.combat_done, self.oil_retire_accumulated/self.combat_done,
-                    (self.gold_battle_accumulated + self.gold_retire_accumulated)/self.combat_done, (self.oil_battle_accumulated + self.oil_retire_accumulated)/self.combat_done, (self.gold_battle_accumulated + self.gold_retire_accumulated)/(self.oil_battle_accumulated + self.oil_retire_accumulated)
-                    ))
+                # g/o from battle
+                if self.oil_battle_accumulated != 0:
+                    Logger.log_success("Average gold/oil from battle: {number1:.{digit1}f}/{number2:.{digit2}f} = {number3:.{digit3}f}".format(
+                        number1=self.gold_battle_accumulated/self.combat_done, digit1=2, 
+                        number2=self.oil_battle_accumulated/self.combat_done, digit2=2, 
+                        number3=abs(self.gold_battle_accumulated/self.oil_battle_accumulated), digit3=2))
+                else:
+                    Logger.log_success("Average gold/oil from battle: {number1:.{digit1}f}/{number2:.{digit2}f}".format(
+                        number1=self.gold_battle_accumulated/self.combat_done, digit1=2, 
+                        number2=self.oil_battle_accumulated/self.combat_done, digit2=2))
+                # g/o from retirement
+                Logger.log_success("Average gold/oil from retirement: {number1:.{digit1}f}/{number2:.{digit2}f}".format(
+                    number1=self.gold_retire_accumulated/self.combat_done, digit1=2,
+                    number2=self.oil_retire_accumulated/self.combat_done, digit2=2))
+                # g/o total
+                if self.oil_battle_accumulated + self.oil_retire_accumulated != 0:
+                    Logger.log_success("Average gold/oil: {number1:.{digit1}f}/{number2:.{digit2}f} = {number3:.{digit3}f}".format(
+                        number1=(self.gold_battle_accumulated + self.gold_retire_accumulated)/self.combat_done, digit1=2,
+                        number2=(self.oil_battle_accumulated + self.oil_retire_accumulated)/self.combat_done, digit2=2,
+                        number3=(self.gold_battle_accumulated + self.gold_retire_accumulated)/abs(self.oil_battle_accumulated + self.oil_retire_accumulated),digit3=2))
+                else:
+                    Logger.log_success("Average gold/oil: {number1:.{digit1}f}/{number2:.{digit2}f}".format(
+                        number1=(self.gold_battle_accumulated + self.gold_retire_accumulated)/self.combat_done, digit1=2,
+                        number2=(self.oil_battle_accumulated + self.oil_retire_accumulated)/self.combat_done, digit2=2))
+
 
         Logger.log_success(
             "ALAuto has been running for {} (started on {})".format(
