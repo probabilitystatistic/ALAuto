@@ -257,7 +257,6 @@ try:
             exit()
 
 
-        Utils.get_oil_and_gold()
         
         if Utils.find_and_touch_with_cropped("menu/alert_close", 0.9):
             Logger.log_msg('Found annoucement.')
@@ -277,7 +276,6 @@ try:
             script.run_research_cycle()
         if script.should_sortie():
             script.run_sortie_cycle()
-            Utils.get_oil_and_gold()
             script.print_cycle_stats()
         else:
             Logger.log_msg("Nothing to do, will check again in a few minutes.")
