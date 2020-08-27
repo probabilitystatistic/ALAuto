@@ -98,6 +98,29 @@ class Adb(object):
         subprocess.call(cmd)
 
     @staticmethod
+    def shell_try(args):
+        """Executes the command via adb shell
+
+        Args:
+            args (string): Command to execute.
+        """
+        cmd = ['adb', '-t', Adb.transID ,'shell'] + args.split(' ')
+        Logger.log_debug(str(cmd))
+        try:
+            subprocess.call(cmd, timeout=10)
+        except subprocess.TimeoutExpired:
+            Logger.log_error("Adb shell timeout! for the following command:")
+            Logger.log_error(str(cmd))
+            Logger.log_error("Retrying...")
+            try:
+                subprocess.call(cmd, timeout=10)
+            except subprocess.TimeoutExpired:
+                Logger.log_error("Retry failed. Terminating...")
+                exit()
+            else:
+                Logger.log_success("Retry succeed!")
+
+    @staticmethod
     def cmd(args):
         """Executes a general command of ADB
 

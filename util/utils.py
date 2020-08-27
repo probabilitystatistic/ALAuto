@@ -813,7 +813,7 @@ class Utils(object):
         """
         #Adb.shell("input swipe {} {} {} {} {}".format(coords[0], coords[1], coords[0], coords[1], randint(50, 120)))
         #Adb.shell("input tap {} {}".format(coords[0], coords[1]))
-        Adb.shell("input swipe {} {} {} {} {}".format(coords[0], coords[1], coords[0], coords[1], 0))
+        Adb.shell_try("input swipe {} {} {} {} {}".format(coords[0], coords[1], coords[0], coords[1], 0))
         #u2device.click(coords[0], coords[1]) # somehow not working after entering  a map.
 
         #cls.script_sleep()
@@ -932,7 +932,7 @@ class Utils(object):
 
             # execute the touch, waiting for a period of response_time
             #Adb.shell("input tap {} {}".format(coords[0], coords[1]))
-            Adb.shell("input swipe {} {} {} {} {}".format(coords[0], coords[1], coords[0], coords[1], 0))
+            Adb.shell_try("input swipe {} {} {} {} {}".format(coords[0], coords[1], coords[0], coords[1], 0))
             cls.script_sleep(response_time)
             touch_count += 1
 
