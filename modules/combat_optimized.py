@@ -434,7 +434,7 @@ class CombatModule(object):
                 "switch over" button(for switching fleet) in the stage screen or the "commission" button(for entering 
                 commission menu) in the "menu/attack" screen.
 
-            However it could mis-dismiss the info screen noting a new ergent commission. Currently this isavoided by
+            However it could mis-dismiss the info screen noting a new ergent commission. Currently this is avoided by
                 checking if the screen is stable.
 
             Currently info screens noting forced fleet switch or unable-to-battle due to defeat are assumed to be safe
@@ -442,13 +442,24 @@ class CombatModule(object):
 
             It is assumed no commission will appear if defeated.
 
+            Note that when a commision popups after killing a mob fleet, "menu/button_confirm" and "menu/button_retreat" 
+                both appears in the screen. As bot needs to click the confirm button of the commission, the detection of
+                "menu/button_confirm" must be placed before "menu/button_retreat" in the ref_after_touch list. Otherwise
+                bot will detect "menu/button_retreat" and thinks there is no commission(and stuck). Similarly in case of
+                killing the boss, "menu/button_confirm" and "menu/attack" both appear.
+
         """
-        # if response_time=2,stable_check_frame=1, this touch sometimes fail
+        # if response_time=2,stable_check_frame=1, this touch sometimes fails
+        # if response_time=3, stable_check_frame=2, this touch sometimes fails to see commission popup
+        # if response_time=5, stable_check_frame=3, this touch sometimes fails to see commission popup at the round boss appears
+        Logger.enable_debugging(Logger)
         response = Utils.touch_randomly_ensured(self.region["combat_end_confirm"], "", 
-                                                ["combat/button_retreat", "menu/button_confirm", 
+                                                ["menu/button_confirm", "combat/button_retreat", 
                                                  "menu/attack", "combat/defeat_close_button"], 
                                                 response_time=3, similarity_after=0.9,
                                                 stable_check_frame=2)
+        Logger.disable_debugging(Logger)
+
         if response == 4:
             defeat = True
             Logger.log_warning("Fleet was defeated.")
@@ -462,7 +473,6 @@ class CombatModule(object):
 
         # post-summary
         if defeat:
-            Logger.log_warning("Fleet was defeated.")
             """ retreat or not(controlled by self.exit) in various cases(according to original battle_handler):
             unable to battle(no remaining fleet) = y
             fleet cannot be formed, boss fight = y
@@ -490,8 +500,6 @@ class CombatModule(object):
             return False
         else:
             if response == 1:
-                Logger.log_debug("No commission. Stage not cleared yet.")
-            elif response == 2:
                 Logger.log_msg("Found commission info message.")
                 self.stats.increment_commissions_occurance()
                 if boss:
@@ -840,7 +848,6 @@ class CombatModule(object):
                 movement_result = self.movement_handler(target_info)
                 if movement_result == 1:
                     self.battle_handler()
-                    print('Debug: Exit battle_handler.')
                 # This swipe for map 2-3 makes bot more likely to target key enemies blocking the boss
                 if self.chapter_map == '2-3' and target_info_tmp[2] == 'mystery_node':
                     Logger.log_msg("Relocating screen of 2-3 after picking the mystery node.")
