@@ -98,7 +98,7 @@ class Utils(object):
     screencap_mode = None
 
     DEFAULT_SIMILARITY = 0.95
-    DEFAULT_STABLE_SIMILARITY = 0.90
+    DEFAULT_STABLE_SIMILARITY = 0.90 # for full screen check 0.9 is great overall and 0.95 is too much(floating fleets will lead to unstable screen especially in 7-2 with many mystery on screen)
     DEFAULT_SLEEP_TIME = 0.9 # for touch and touch_randomly
     DEFAULT_RESPONSE_TIME = 0.1 # for touch_ensured and touch_randomly_ensured
     assets = ''
@@ -835,9 +835,13 @@ class Utils(object):
                 reference before touch is not needed.
         
             ref_after_touch (list of string): a list of reference images 
-                appearing only after the touch to verify if the touch is successful.
+                appearing after the touch to verify if the touch is successful.
                 Specify an empty list, namely [], if checking reference after the 
                 touch is not needed(but the screen is still updated anyway though not used).
+                If ref_after_touch also appears before touch, false detection would occur.
+                If ref_after_touch has more than one image to match and there are two of 
+                them appear in the same screen, only the first matched one will be returned.
+                So special care should be taken by user in this case. 
 
             response_time (integer): time in seconds to wait between each 
                 touch trial
