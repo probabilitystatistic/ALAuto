@@ -1003,7 +1003,7 @@ class Utils(object):
                       need_initial_screen=False, check_level_for_ref_before=1, trial=10, 
                       similarity_before=DEFAULT_SIMILARITY, similarity_after=DEFAULT_SIMILARITY,
                       stable_check_frame=0, stable_check_interval=0.2, 
-                      stable_check_similarity=DEFAULT_SIMILARITY, stable_check_region=[0, 0, 1920, 1080],
+                      stable_check_similarity=DEFAULT_STABLE_SIMILARITY, stable_check_region=[0, 0, 1920, 1080],
                       empty_touch=0):
         x = cls.random_coord(region.x, region.x + region.w)
         y = cls.random_coord(region.y, region.y + region.h)
