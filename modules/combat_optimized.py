@@ -687,6 +687,7 @@ class CombatModule(object):
         self.mystery_nodes_list.clear()
         self.blacklist.clear()
         self.swipe_counter = 0
+        boss_swipe = 0
         Logger.log_msg("Started map clear.")
         Utils.script_sleep(2.5)
 
@@ -705,7 +706,8 @@ class CombatModule(object):
             # needs to be updated
             '4-2': lambda: Utils.swipe(1000, 700, 1000, 400, 300), #to focus on enemies in the lower part of the map
             '5-1': lambda: Utils.swipe(1000, 500, 1000, 600, 300), #to fit the question mark of 5-1 on the screen
-            '6-1': lambda: Utils.swipe(1200, 550, 800, 450, 300), #to focus on enemies in the left part of the map(C5 mystery mark seems to be undetectable by bot)
+            #'6-1': lambda: Utils.swipe(1200, 550, 800, 450, 300), #to focus on enemies in the left part of the map(C5 mystery mark seems to be undetectable by bot)
+            '6-1': lambda: Utils.swipe(700, 500, 1300, 500, 300), #temporary solution to avoid bug related to blocking boss 
             '12-2': lambda: Utils.swipe(1000, 570, 1300, 540, 300),
             '12-3': lambda: Utils.swipe(1250, 530, 1300, 540, 300),
             '12-4': lambda: Utils.swipe(960, 300, 960, 540, 300),
@@ -808,7 +810,7 @@ class CombatModule(object):
 # The width of one grid is roughly 180 pixels.
 # Note that this will fail if the boss is hidden by the other fleet.
             elif self.kills_count >= self.kills_before_boss[self.chapter_map]:
-                Logger.log_msg("Boss fleet is not found. Trying to uncover the boss.")
+                Logger.log_warning("Boss fleet is not found. Trying to uncover the boss.")
                 self.fleet_location = None
                 single_fleet_location = self.get_fleet_location()
                 location_left_of_fleet = [0, 0]
@@ -817,6 +819,10 @@ class CombatModule(object):
                 Utils.touch(location_left_of_fleet)
                 # We must give some time for the fleet to move, otherwise the screen update right after continue will still fail to see boss.
                 Utils.script_sleep(1.5)
+                boss_swipe += 1
+                if boss_swipe >= 3:
+                    Logger.log_error("Boss cannot be uncovered. Terminating...")
+                    exit()
                 continue
             if target_info == None:
                 print("Debug: searching enemies.")
