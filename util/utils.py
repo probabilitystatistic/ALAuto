@@ -257,8 +257,12 @@ class Utils(object):
                                 'aScreenCap header verification failure, corrupted image received. HEADER IN HEX = {}'.format(
                                     compressed_data_header.tobytes().hex()))
                     uncompressed_data_size = compressed_data_header[1].item()
+                    # This decompression may be faulty due to a bug in go, which binds with lz4 library, see: https://github.com/python-lz4/python-lz4/issues/183
+                    #color_screen = cv2.imdecode(numpy.frombuffer(
+                    #    lz4.block.decompress(raw_compressed_data[20:], uncompressed_size=uncompressed_data_size),
+                    #    dtype=numpy.uint8), cv2.IMREAD_COLOR)
                     color_screen = cv2.imdecode(numpy.frombuffer(
-                        lz4.block.decompress(raw_compressed_data[20:], uncompressed_size=uncompressed_data_size),
+                        lz4.block.decompress(raw_compressed_data[20:], uncompressed_size=uncompressed_data_size+1),
                         dtype=numpy.uint8), cv2.IMREAD_COLOR)
                     elapsed_time = time.perf_counter() - start_time
                     Logger.log_debug("aScreenCap took {} ms to complete.".format('%.2f' % (elapsed_time * 1000)))
