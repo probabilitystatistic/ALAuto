@@ -891,45 +891,52 @@ class Utils(object):
                 after touch is required.
         """
 
-        Logger.log_debug("Starting ensured touch. Reference before touch: {}.".format(ref_before_touch))
+        write_stable_check_frame_to_file_in_debug_mode = False
+        stable_loop_count_max = 100
+
+        Logger.log_debug("Ensured touch:")
+
+        # print the reference before touch
+        if ref_before_touch:
+            Logger.log_debug("  Reference before touch: {}".format(ref_before_touch))
+        else:
+            Logger.log_debug("  Reference before touch: None")
 
         if need_initial_screen:
             cls.update_screen()
 
-        stable_loop_count_max = 100
+        # the loop: check ref_before -> touch -> check stable screen -> check ref_after -> repeat
         touch_count = 0
-        screen_tmp = []
-
         while True:
             # check the reference before touch
             if ref_before_touch:
                 if check_level_for_ref_before == 1:
                     if touch_count == 0:
                         if not cls.find_with_cropped(ref_before_touch, similarity=similarity_before):
-                            Logger.log_error("Ensured touch failure: reference {} before touch not found(before first touch).".format(ref_before_touch))
+                            Logger.log_error("Reference before 1st touch not found; reference: {}".format(ref_before_touch))
                             return 0
                 elif check_level_for_ref_before == 2:
                     if touch_count == 1:
                         if not cls.find_with_cropped(ref_before_touch, similarity=similarity_before):
-                            Logger.log_error("Ensured touch failure: reference {} before touch not found(before second touch).".format(ref_before_touch))
+                            Logger.log_error("Reference before 2nd touch not found; reference: {}".format(ref_before_touch))
                             return 0
                 elif check_level_for_ref_before == 3:
                     if not cls.find_with_cropped(ref_before_touch, similarity=similarity_before):
-                        Logger.log_error("Ensured touch failure: reference {} before {}th touch not found.".format(ref_before_touch, touch_count))
+                        Logger.log_error("Reference before {}th touch not found; reference: {}.".format(touch_count, ref_before_touch))
                         return 0
                 elif check_level_for_ref_before == 4:
                     if touch_count != 0:
                         if not cls.find_with_cropped(ref_before_touch, similarity=similarity_before):
-                            Logger.log_error("Ensured touch failure: reference {} before {}th touch not found(not check before first touch).".format(ref_before_touch, touch_count))
+                            Logger.log_error("Reference before {}th touch not found(no pre-1st touch check); refernce: {}".format(touch_count, ref_before_touch))
                             return 0
-            else:
-                Logger.log_debug("Reference check before touch is not requested.")
 
-            # execute the touch, waiting for some time, and update the screen
+            # execute the touch, waiting for a period of response_time
             #Adb.shell("input tap {} {}".format(coords[0], coords[1]))
             Adb.shell("input swipe {} {} {} {} {}".format(coords[0], coords[1], coords[0], coords[1], 0))
             cls.script_sleep(response_time)
             touch_count += 1
+
+            # execute some possible empty touch
             for i in range(empty_touch):
                 Adb.shell("input swipe {} {} {} {} {}".format(coords[0], coords[1], coords[0], coords[1], 0))
                 cls.script_sleep(response_time)
@@ -938,6 +945,7 @@ class Utils(object):
             # check if the screen is stable
             stable_loop_count = 0
             number_of_stable_frame = 0
+            screen_tmp = []
             while stable_check_frame > 0:
                 if stable_loop_count == 0:
                     screen_tmp.append(cls.screen[stable_check_region[1]:stable_check_region[3], stable_check_region[0]:stable_check_region[2]])
@@ -949,28 +957,34 @@ class Utils(object):
                 value = cv2.minMaxLoc(match)[1]
                 if value >= stable_check_similarity:
                     number_of_stable_frame += 1
-                    Logger.log_debug("Screen is stable at {}th frame.".format(stable_loop_count))
+                    Logger.log_debug("  Stable {}th frame: Yes".format(stable_loop_count))
+                    if Logger.debug and write_stable_check_frame_to_file_in_debug_mode:
+                        cv2.imwrite("stable_check_{}.png".format(stable_loop_count), cls.screen)
                 else:
                     number_of_stable_frame = 0
-                    Logger.log_debug("Screen is not stable at {}th frame.".format(stable_loop_count))
+                    Logger.log_debug("  Stable {}th frame: No".format(stable_loop_count))
+                    if Logger.debug and write_stable_check_frame_to_file_in_debug_mode:
+                        cv2.imwrite("stable_check_{}.png".format(stable_loop_count), cls.screen)
                 if number_of_stable_frame >= stable_check_frame:
-                    Logger.log_debug("Screen stablized after {} frame checks(requires {} frames) with interval {}s.".format(stable_loop_count, stable_check_frame, stable_check_interval))
-                    break                
+                    Logger.log_debug("  Stablized after {} frame(s); {} requested; interval {}s".format(stable_loop_count, stable_check_frame, stable_check_interval))
+                    break 
+                if stable_loop_count > 10:
+                    Logger.log_warning("Loop for screen stable check > 10.")
                 if stable_loop_count > stable_loop_count_max:
-                    Logger.log_error("Ensured touch failure: no stable {} frame(s) with the frame interval {}s.".format(stable_check_frame, stable_check_interval))
+                    Logger.log_error("No stable {} frame(s)".format(stable_check_frame))
                     return 0
             
             # determine which kind of result is obtained
             if ref_after_touch:
                 for i in range(len(ref_after_touch)):
                     if cls.find_with_cropped(ref_after_touch[i], similarity = similarity_after):
-                        Logger.log_debug("Successful ensured touch at [{},{}]; matching {}.".format(coords[0], coords[1], ref_after_touch[i]))
+                        Logger.log_debug("Ensured touch succeeded at [{},{}]; matching {}".format(coords[0], coords[1], ref_after_touch[i]))
                         return i+1
                 if touch_count > trial:
-                    Logger.log_error("Ensured touch failure at [{}, {}] after {} trials .".format(coords[0], coords[1], trial))
+                    Logger.log_error("Ensured touch failed at [{}, {}] after {} trials".format(coords[0], coords[1], trial))
                     cv2.imwrite("touch_ensured_failure.png", cls.screen) 
                     return 0
-                Logger.log_debug("Ensured touch failure at [{},{}] for the {}th time, will try again.".format(coords[0], coords[1], touch_count))
+                Logger.log_debug("  Ensured touch failed at [{},{}] for the {}th time, will try again.".format(coords[0], coords[1], touch_count))
                 if touch_count == 1 and Logger.debug: 
                     cv2.imwrite("touch_ensured_after_first_click.png", cls.screen)
             else:
