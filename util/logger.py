@@ -25,6 +25,10 @@ class Logger(object):
         self.debug = True
         return
 
+    def disable_debugging(self):
+        self.debug = False
+        return
+
     @staticmethod
     def log_format(msg):
         """Method to add a timestamp to a log message
