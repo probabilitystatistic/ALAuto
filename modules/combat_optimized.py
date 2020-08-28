@@ -414,6 +414,7 @@ class CombatModule(object):
         # this will keep clicking the screen until the end of battle summary(where the orange "confirm" button resides) or lock screen for new ships.
         # 1 empty touch for going from "touch2continue" to item obtained screen
         # no detection for items or ship drop(except new ship inquiring if locking)
+        Logger.log_msg("Battle summary")
         response = Utils.touch_randomly_ensured(self.region['battle_handler_safe_touch'], "", 
                                                 ["combat/button_confirm", "combat/alert_lock"], 
                                                 similarity_after=0.9, response_time=0.1, empty_touch=2)
@@ -449,16 +450,13 @@ class CombatModule(object):
                 killing the boss, "menu/button_confirm" and "menu/attack" both appear.
 
         """
-        # if response_time=2,stable_check_frame=1, this touch sometimes fails
-        # if response_time=3, stable_check_frame=2, this touch sometimes fails to see commission popup
-        # if response_time=5, stable_check_frame=3, this touch sometimes fails to see commission popup at the round boss appears
-        Logger.enable_debugging(Logger)
+        #Logger.enable_debugging(Logger)
         response = Utils.touch_randomly_ensured(self.region["combat_end_confirm"], "", 
                                                 ["menu/button_confirm", "combat/button_retreat", 
                                                  "menu/attack", "combat/defeat_close_button"], 
                                                 response_time=3, similarity_after=0.9,
                                                 stable_check_frame=2)
-        Logger.disable_debugging(Logger)
+        #Logger.disable_debugging(Logger)
 
         if response == 4:
             defeat = True
@@ -825,12 +823,10 @@ class CombatModule(object):
                     exit()
                 continue
             if target_info == None:
-                print("Debug: searching enemies.")
                 target_info = self.get_closest_target(self.blacklist, mystery_node=(not self.config.combat["ignore_mystery_nodes"]))
                 continue
             if target_info:
                 #tap at target's coordinates
-                print("Debug: tap the target")
                 Utils.touch(target_info[0:2])
                 # This sleep must be long to avoid capturing the screen before game responds but also short enough to capture the "unable to reach..." dialog before it disappears.
                 #Utils.script_sleep(1)
