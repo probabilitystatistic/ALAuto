@@ -31,6 +31,7 @@ class Config(object):
         self.dorm = {'enabled': False}
         self.academy = {'enabled': False}
         self.research = {'enabled': False}
+        self.exercise = {'enabled': False}
         self.events = {'enabled': False}
         self.network = {}
         self.assets = {}
@@ -103,6 +104,9 @@ class Config(object):
 
         if config.getboolean('Research', 'Enabled'):
             self._read_research(config)
+
+        if config.getboolean('Exercise', 'Enabled'):
+            self._read_exercise(config)
 
         if config.getboolean('Events', 'Enabled'):
             self._read_event(config)
@@ -216,6 +220,10 @@ class Config(object):
         self.research['6Hours'] = config.getboolean('Research', '6Hours')
         self.research['8Hours'] = config.getboolean('Research', '8Hours')
         self.research['12Hours'] = config.getboolean('Research', '12Hours')
+
+    def _read_exercise(self, config):
+        self.exercise['enabled'] = True
+        self.exercise['acceptable_fleet_power'] = self.try_cast_to_int(config.get('Exercise', 'AcceptableFleetPower'))
 
     def _read_event(self, config):
         """Method to parse the Event settings of the passed in config.

@@ -18,6 +18,7 @@ data = {
     "combat/combat_pause": [1600, 0, 1920, 150],
     "combat/commander": [100, 250, 1000, 400],
     "combat/defeat_close_button": [750, 850, 1150, 1000],
+    "combat/menu_formation": [100, 0, 350, 100],
     "combat/menu_loading": [1560, 960, 1920, 1080],
     "combat/menu_select_fleet": [160, 80, 600, 200],
     "combat/menu_touch2continue": [100, 900, 900, 1000],
@@ -25,6 +26,8 @@ data = {
     "commission/scroll_bar_exist": [1860, 80, 1920, 180],
     "commission/scroll_bar_reaching_end": [1860, 980, 1920, 1080],
     "event/build_limited": [0, 150, 200, 1000], # Just a rough estimation!
+    "exercise/start_exercise": [800, 800, 1140, 940], 
+    "exercise/zero_turn_left": [1720, 202, 1820, 256],
     "menu/alert_info": [0, 0, 960, 540], # Just a rough estimation!
     "menu/alert_close": [960, 0, 1920, 540], # Just a rough estimation!
     "menu/attack": [140, 0, 420, 100],
@@ -43,6 +46,7 @@ data = {
     "menu/drop_elite": [1300, 550, 1920, 690], 
     "menu/drop_rare": [1250, 400, 1920, 800], # Just a rough estimation!
     "menu/drop_ssr": [1300, 550, 1920, 690],
+    "menu/exercise": [100, 0, 350, 100],
     "menu/item_found": [700, 150, 1200, 400],
     "menu/button_normal_mode": [0, 940, 250, 1080],
     "retirement/alert_bonus": [200, 900, 450, 1050],

@@ -12,6 +12,7 @@ from modules.mission import MissionModule
 from modules.retirement_optimized import RetirementModule
 from modules.headquarters import HeadquartersModule
 from modules.research import ResearchModule
+from modules.exercise import ExerciseModule
 from modules.event import EventModule
 from datetime import datetime, timedelta
 from util.adb import Adb
@@ -31,6 +32,7 @@ class ALAuto(object):
         'retirement': None,
         'headquarters': None,
         'research': None,
+        'exercise': None,
         'event': None
     }
 
@@ -62,6 +64,8 @@ class ALAuto(object):
             self.oil_limit = self.config.combat['oil_limit']
         if self.config.research['enabled']:
             self.modules['research'] = ResearchModule(self.config, self.stats)
+        if self.config.exercise['enabled']:
+            self.modules['exercise'] = ExerciseModule(self.config, self.stats)      
         if self.config.events['enabled']:
             self.modules['event'] = EventModule(self.config, self.stats)
         self.print_stats_check = True
@@ -79,6 +83,9 @@ class ALAuto(object):
             and script.next_combat != 0 \
             and script.next_combat < datetime.now() \
             and Utils.check_oil(self.oil_limit)
+
+    def should_exercise(self):
+        return self.modules['exercise']
 
     def run_sortie_cycle(self):
         """Method to run all cycles related to combat.
@@ -149,6 +156,10 @@ class ALAuto(object):
         """
         if self.modules['research']:
             self.modules['research'].research_logic_wrapper()
+
+    def run_exercise_cycle(self):
+        if self.modules['exercise']:
+            self.modules['exercise'].exercise_logic_wrapper()
 
     def run_event_cycle(self):
         """Method to run the event cycle
@@ -274,6 +285,8 @@ try:
             script.run_hq_cycle()
         if Utils.find("research/lab_alert"):
             script.run_research_cycle()
+        if script.should_exercise():
+            script.run_exercise_cycle()
         if script.should_sortie():
             script.run_sortie_cycle()
             script.print_cycle_stats()
