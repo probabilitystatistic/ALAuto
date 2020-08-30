@@ -57,7 +57,7 @@ class CommissionModule(object):
             Utils.update_screen()
             loop += 1
             if loop > 100:
-                Logger.log_warning("Too many loops in commission. Resume to other tasks.")
+                Logger.log_error("Too many loops in commission. Resume to other tasks.")
                 Utils.menu_navigate("menu/button_battle")
                 return True
             if Utils.find("commission/button_completed") and (lambda x:x > 332 and x < 511)(Utils.find("commission/button_completed").y):
@@ -82,8 +82,7 @@ class CommissionModule(object):
                         Utils.script_sleep(1)
                 if self.urgent_handler_selective():
                     self.daily_handler()
-                #Utils.touch_randomly(self.region["button_back"])
-                Utils.menu_navigate("menu/button_battle")
+                Utils.touch_randomly(self.region["button_back"])
                 continue
             if Utils.find("commission/button_go") and (lambda x:x > 332 and x < 511)(Utils.find("commission/button_go").y):
                 Logger.log_msg("All commissions are running.")
