@@ -1,7 +1,9 @@
 import math
 import string
+#from util.ocr import OCR
 from util.logger import Logger
 from util.utils import Region, Utils
+from operator import itemgetter
 
 
 class ExerciseModule(object):
@@ -12,6 +14,7 @@ class ExerciseModule(object):
         self.config = config
         self.stats = stats
         self.combats_done = 0
+        self.opponent_threshold = self.config.exercise["acceptable_fleet_power"]
  
         self.region = {
             'battle_handler_safe_touch': Region(40, 180, 110, 110),
@@ -22,7 +25,14 @@ class ExerciseModule(object):
             'menu_combat_start': Region(1578, 921, 270, 70),
             'start_exercise': Region(860, 820, 200, 60)
         }
-
+        
+        self.fleet_power_region = [
+            [Region(334, 392, 108, 36), Region(334, 438, 108, 34)],
+            [Region(700, 392, 108, 36), Region(700, 438, 108, 34)],
+            [Region(1066, 392, 108, 36), Region(1066, 438, 108, 34)],
+            [Region(1432, 392, 108, 36), Region(1432, 438, 108, 34)]
+        ]
+        
         self.opponent = [
             [362, 181],
             [728, 181],
@@ -43,13 +53,11 @@ class ExerciseModule(object):
         Utils.touch_randomly_ensured(self.region["menu_button_battle"], "", ["menu/attack"], response_time=1, stable_check_frame=1)
         Utils.touch_randomly_ensured(self.region["go_to_exercise"], "", ["menu/exercise"], response_time=1, stable_check_frame=1)
 
-        Logger.log_msg("Threshold for fleet power: {}".format(self.config.exercise["acceptable_fleet_power"]))
+        #Logger.log_msg("Threshold for fleet power: {}".format(self.opponent_threshold))
 
         # exercise combat loop
         while True:
-            if False:
-                print("Placeholder")
-            if Utils.find_with_cropped("exercise/zero_turn_left"):
+            if Utils.find_with_cropped("exercise/zero_turn_left", similarity=0.99):
                 Logger.log_msg("No more exercise turn left")
                 break
             else:
@@ -63,7 +71,31 @@ class ExerciseModule(object):
 
     def choose_opponent(self):
         # for now just choose the first opponent
-        return 0
+        power =[]
+        for i in range(4):
+            # poor OCR accuracy
+            """
+            try:
+                main = int(OCR.screen_to_string(self.fleet_power_region[i][0], language="number"))
+            except:
+                Logger.log_warning("OCR for {}th opponent's main failed.".format(i+1))
+                main = 99999
+            try:
+                vanguard = int(OCR.screen_to_string(self.fleet_power_region[i][1], language="number"))
+            except:
+                Logger.log_warning("OCR for {}th opponent's vanguard failed.".format(i+1))
+                vanguard = 99999
+            """
+            # not working, but can still roughly give number of digits
+            main = Utils.read_numbers(self.fleet_power_region[i][0].x, self.fleet_power_region[i][0].y, self.fleet_power_region[i][0].w, self.fleet_power_region[i][0].h)
+            vanguard = Utils.read_numbers(self.fleet_power_region[i][1].x, self.fleet_power_region[i][1].y, self.fleet_power_region[i][1].w, self.fleet_power_region[i][1].h)
+            power.append([main, vanguard])
+            Logger.log_msg("Opponent {}: {}, {}".format(i + 1, power[i][0], power[i][1]))
+
+        candidate = [power[0][0], power[1][0], power[2][0], power[3][0]]
+        chosen = min(enumerate(candidate), key=itemgetter(1))[0] 
+        Logger.log_msg("Opponent chosen: {}".format(chosen+1))
+        return chosen
 
     def exercise_battle_handler(self):
         Logger.log_msg("Starting combat.")
