@@ -51,9 +51,15 @@ class CommissionModule(object):
 
         self.attempts_count = 0
 
+        loop = 0
+
         while True:
             Utils.update_screen()
-
+            loop += 1
+            if loop > 100:
+                Logger.log_warning("Too many loops in commission. Resume to other tasks.")
+                Utils.menu_navigate("menu/button_battle")
+                return True
             if Utils.find("commission/button_completed") and (lambda x:x > 332 and x < 511)(Utils.find("commission/button_completed").y):
                 Logger.log_debug("Found commission complete button.")
                 self.completed_handler()
@@ -76,7 +82,8 @@ class CommissionModule(object):
                         Utils.script_sleep(1)
                 if self.urgent_handler_selective():
                     self.daily_handler()
-                Utils.touch_randomly(self.region["button_back"])
+                #Utils.touch_randomly(self.region["button_back"])
+                Utils.menu_navigate("menu/button_battle")
                 continue
             if Utils.find("commission/button_go") and (lambda x:x > 332 and x < 511)(Utils.find("commission/button_go").y):
                 Logger.log_msg("All commissions are running.")
@@ -192,6 +199,9 @@ class CommissionModule(object):
 
     @classmethod
     def find_filtered_commission(self):
+        """
+        Return position of non-driller commissions
+        """
         same_slot_determination_separtion = 90 # separation for status_indicator and driller is around 80
         driller_list = []
         commission_list = []
