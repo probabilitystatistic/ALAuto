@@ -965,7 +965,7 @@ class CombatModule(object):
                             targeting_block_A3 = True
                             break
                     continue
-            if self.kills_count == 3 and self.config.combat['retreat_after'] == 0 and not three_fight_farming_fleet_switched:
+            if self.kills_count == 2 and self.config.combat['retreat_after'] == 3 and not three_fight_farming_fleet_switched:
                 # switch fleet after killing 2 enemies for 3-fight farming
                 # this makes farming easier by switching to a healthy fleet
                 Logger.log_msg("Fleet switching after 2 fights for easier 3-fight 7-2 farming.")
