@@ -577,7 +577,7 @@ class CombatModule(object):
             else:
                 if count != 0 and count % 3 == 0:
                     Utils.touch(location)
-                if (count > 11 and (self.chapter_map == '7-2' or self.chapter_map == '5-1') and self.config.combat['clearing_mode']):
+                if (count > 15 and (self.chapter_map == '7-2' or self.chapter_map == '5-1') and self.config.combat['clearing_mode']):
                     Logger.log_warning("Clicking on the destination for too many times. Assuming target reached.")
                     return 0
                 if count > 21:
@@ -703,7 +703,7 @@ class CombatModule(object):
             'E-D3': lambda: Utils.swipe(960, 540, 1060, 670, 300),
             # needs to be updated
             '4-2': lambda: Utils.swipe(1000, 700, 1000, 400, 300), #to focus on enemies in the lower part of the map
-            '5-1': lambda: Utils.swipe(1000, 500, 1000, 600, 300), #to fit the question mark of 5-1 on the screen
+            '5-1': lambda: Utils.swipe(1000, 400, 1000, 700, 300), #to fit the question mark of 5-1 on the screen
             #'6-1': lambda: Utils.swipe(1200, 550, 800, 450, 300), #to focus on enemies in the left part of the map(C5 mystery mark seems to be undetectable by bot)
             '6-1': lambda: Utils.swipe(700, 500, 1300, 500, 300), #temporary solution to avoid bug related to blocking boss 
             '12-2': lambda: Utils.swipe(1000, 570, 1300, 540, 300),
