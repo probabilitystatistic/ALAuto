@@ -1092,6 +1092,9 @@ class CombatModule(object):
         elif self.chapter_map == "6-1":
             anchor_position = [423, 688]
             anchor_tolerance = [10, 10]
+        elif self.chapter_map == "2-1":
+            anchor_position = [500, 557]
+            anchor_tolerance = [10, 10]
         else:
             Logger.log_error('No anchor point is set for map {}.'.format(self.chapter_map))
             return False
