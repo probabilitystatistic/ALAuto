@@ -159,6 +159,7 @@ class Config(object):
         self.combat['map'] = config.get('Combat', 'Map')
         self.combat['kills_before_boss'] = self.try_cast_to_int(config.get('Combat', 'KillsBeforeBoss'))
         self.combat['boss_fleet'] = config.getboolean('Combat', 'BossFleet')
+        self.combat['boss_fleet_number'] = self.try_cast_to_int(config.get('Combat', 'BossFleetNumber'))
         self.combat['oil_limit'] = self.try_cast_to_int(config.get('Combat', 'OilLimit'))
         self.combat['retire_cycle'] = self.try_cast_to_int(config.get('Combat', 'RetireCycle'))
         self.combat['retreat_after'] = self.try_cast_to_int(config.get('Combat', 'RetreatAfter'))
