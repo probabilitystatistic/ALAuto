@@ -176,6 +176,8 @@ class CombatModule(object):
                     Logger.log_warning("Switching fleet due to low morale.")
                     self.fleet_switch_index = self.fleet_switch_index + 1
                     self.fleet_switch_due_to_morale= False
+                    fleet_to_switch_to = fleet_switch_candidate_for_morale[self.fleet_switch_index % len(fleet_switch_candidate_for_morale)]
+                    Logger.log_msg("Switch to fleet {} for the {}th slot".format(fleet_to_switch_to, slot_to_switch_fleet))
                     #if not self.config.combat['boss_fleet']:
                     #    self.select_fleet(first_slot_fleet = fleet_switch_candidate_for_morale[self.fleet_switch_index % len(fleet_switch_candidate_for_morale)])
                     #else:
@@ -186,10 +188,10 @@ class CombatModule(object):
                     if slot_to_switch_fleet == 2:
                         Utils.touch_randomly(self.region["second_slot_choose"])
                     Utils.script_sleep(0.1)
-                    target_fleet_vertical_position = fleet_slot_position[slot_to_switch_fleet - 1][1] + fleet_slot_separation*(fleet_switch_candidate_for_morale[self.fleet_switch_index % len(fleet_switch_candidate_for_morale)] - 1)
+                    target_fleet_vertical_position = fleet_slot_position[slot_to_switch_fleet - 1][1] + fleet_slot_separation*(fleet_to_switch_to - 1)
                     Utils.touch([fleet_slot_position[slot_to_switch_fleet - 1][0], target_fleet_vertical_position])
                     Utils.script_sleep(0.1)
-                Utils.touch_randomly_ensured(self.region["fleet_menu_go"], "combat/menu_select_fleet", ["combat/button_retreat", "combat/alert_morale_low"], response_time=2)
+                Utils.touch_randomly_ensured(self.region["fleet_menu_go"], "combat/menu_select_fleet", ["combat/button_retreat", "combat/alert_morale_low", "menu/button_confirm"], response_time=2)
             if Utils.find_with_cropped("combat/button_retreat"):
                 Logger.log_debug("Found retreat button, starting clear function.")
                 if (self.chapter_map[0] == '7' and self.chapter_map[2] == '2' and self.config.combat['clearing_mode'] and self.config.combat['focus_on_mystery_nodes']):
