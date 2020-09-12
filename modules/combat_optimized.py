@@ -829,7 +829,7 @@ class CombatModule(object):
             if self.exit != 0:
                 self.retreat_handler()
                 return True
-            if self.kills_count >= self.kills_before_boss[self.chapter_map] and Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9):
+            if ((self.kills_count >= self.kills_before_boss[self.chapter_map] or (self.config.exercise['enabled'] and self.config.combat['clearing_mode'])) and Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)):
                 Logger.log_msg("Boss fleet was found.")
 
                 if self.config.combat['boss_fleet']:
@@ -880,7 +880,7 @@ class CombatModule(object):
 # It's just moving one grid left(it's two to avoid further possible block).
 # The width of one grid is roughly 180 pixels.
 # Note that this will fail if the boss is hidden by the other fleet.
-            elif self.kills_count >= self.kills_before_boss[self.chapter_map]:
+            elif self.kills_count >= self.kills_before_boss[self.chapter_map] and self.config.combat['kills_before_boss'] == 0 and self.config.combat['clearing_mode']:
                 Logger.log_warning("Boss fleet is not found. Trying to uncover the boss.")
                 self.fleet_location = None
                 single_fleet_location = self.get_fleet_location()
@@ -1569,6 +1569,8 @@ class CombatModule(object):
                     self.exit = 1
                     Logger.log_msg("Boss successfully defeated.")
                 else:
+                    pass
+                    # these 2 lines should be redundant
                     self.exit = 5
                     Logger.log_warning("Fleet defeated by boss.")
                 #Utils.script_sleep(3)
