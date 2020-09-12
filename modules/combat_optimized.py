@@ -1227,7 +1227,7 @@ class CombatModule(object):
         self.mystery_nodes_list.clear()
         self.blacklist.clear()
         self.swipe_counter = 0
-        Logger.log_msg("Started map clear.")
+        Logger.log_msg("Started special map clear for 7-2.")
         Utils.script_sleep(2.5)
 
         while Utils.find("combat/fleet_lock", 0.99):
@@ -1237,6 +1237,7 @@ class CombatModule(object):
 
         if self.config.combat['fleet_switch_at_beinning']:
             Utils.touch_randomly(self.region['button_switch_fleet'])
+            Utils.script_sleep(2)
             if not self.reset_screen_by_anchor_point():
                 Logger.log_warning("Fail to reset the screen by anchor. Force retreat and try again.")
                 self.exit = 5
@@ -1289,6 +1290,7 @@ class CombatModule(object):
                 # this makes farming easier by switching to a healthy fleet
                 Logger.log_msg("Fleet switching after 2 fights for easier 3-fight 7-2 farming.")
                 Utils.touch_randomly(self.region['button_switch_fleet'])
+                Utils.script_sleep(2)
                 if not self.reset_screen_by_anchor_point():
                     Logger.log_warning("Fail to reset the screen by anchor. Force retreat and try again.")
                     self.exit = 5
@@ -1398,10 +1400,10 @@ class CombatModule(object):
     def reset_screen_by_anchor_point(self):
         screen_is_reset = False
         swipes = {
-                    2: lambda: Utils.swipe(960, 240, 960, 940, 300),
-                    0: lambda: Utils.swipe(1560, 540, 260, 540, 300),
-                    1: lambda: Utils.swipe(960, 940, 960, 240, 300),
-                    3: lambda: Utils.swipe(260, 540, 1560, 540, 300)
+                    2: lambda: Utils.swipe(960, 240, 960, 940, 300), # swipe up
+                    0: lambda: Utils.swipe(1560, 540, 260, 540, 300), # swipe left
+                    1: lambda: Utils.swipe(960, 940, 960, 240, 300), # swipe down
+                    3: lambda: Utils.swipe(260, 540, 1560, 540, 300) # swipe right
                 }
         if self.chapter_map == "7-2":
             anchor_position = [1564, 677]
@@ -1549,7 +1551,7 @@ class CombatModule(object):
 
 # By me: This should be a bug. It switch fleet no matter what.
 #                Utils.touch_randomly(self.region['button_switch_fleet'])
-                Utils.wait_update_screen(2)
+#                Utils.wait_update_screen(2)
                 boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
                 s = 0
                 while not boss_region:
@@ -1910,5 +1912,5 @@ class CombatModule(object):
     def check_movement_threads_func(self, event):
         self.movement_event[event] = (
             True
-            if (Utils.find(event))
+            if (Utils.find_with_cropped(event))
             else False)
