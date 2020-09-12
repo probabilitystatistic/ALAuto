@@ -162,9 +162,13 @@ class CommissionModule(object):
         else:
             Logger.log_debug("No scroll bar detected.")
 
+        loop = 0
         while True:   
             Utils.script_sleep(1)
-
+            loop += 1
+            if loop >= 10:
+                Logger.log_warning("Too many loops in commission. Going back and retrying.")
+                return False
             if not self.commission_is_full:
                 Utils.update_screen() 
                 commission_list = self.find_filtered_commission()
