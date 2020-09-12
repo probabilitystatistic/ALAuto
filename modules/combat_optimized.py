@@ -437,12 +437,11 @@ class CombatModule(object):
 
         # battle summary
         # this will keep clicking the screen until the end of battle summary(where the orange "confirm" button resides) or lock screen for new ships.
-        # 1 empty touch for going from "touch2continue" to item obtained screen
         # no detection for items or ship drop(except new ship inquiring if locking)
         Logger.log_msg("Battle summary")
         response = Utils.touch_randomly_ensured(self.region['battle_handler_safe_touch'], "", 
                                                 ["combat/button_confirm", "combat/alert_lock"], 
-                                                similarity_after=0.9, response_time=0.1, empty_touch=2)
+                                                similarity_after=0.9, response_time=0.1)
 
         # lock a new received ship and cocntinue to the end of battle summary
         if response == 2:
