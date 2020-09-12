@@ -549,7 +549,7 @@ class Utils(object):
         return None
 
     @classmethod
-    def find_with_cropped(cls, image, similarity=DEFAULT_SIMILARITY, color=False):
+    def find_with_cropped(cls, image, similarity=DEFAULT_SIMILARITY, color=False, dynamical_region=None):
         """Finds the specified image on the cropped screen. This function takes exactly the same input as the function find.
         Therefore updating "find" to "find_with_cropped" is straightforward. This funtion utilizes the specified region written
         in crop_region.py to crop the captured screen. Cropping a screen before search generally make search much faster. For 
@@ -557,9 +557,14 @@ class Utils(object):
 
         Args:
             image (string): [description]
+
             similarity (float, optional): Defaults to DEFAULT_SIMILARITY.
                 Percentage in similarity that the image should at least match.
+
             color (boolean): find the image in color screen
+
+            dynamical_region: region object specifying the region to search the image. This is
+                useful when the position of the image to search is not fixed in the screen.
 
         Returns:
             Region: region object containing the location and size of the image
@@ -568,20 +573,26 @@ class Utils(object):
         start_time = time.perf_counter()
 
         crop_data_exist = True
-        try:
-            cr.data[image]
-        except:
-            Logger.log_error("Crop data for searching {} does not exist. Switch to full screen search.".format(image))
-            crop_data_exist = False
-            search_region_x1 = 0
-            search_region_y1 = 0
-            search_region_x2 = 1920
-            search_region_y2 = 1080
+        if dynamical_region:
+            search_region_x1 = dynamical_region.x
+            search_region_y1 = dynamical_region.y
+            search_region_x2 = dynamical_region.x + dynamical_region.w
+            search_region_y2 = dynamical_region.y + dynamical_region.h
         else:
-            search_region_x1 = cr.data[image][0]
-            search_region_y1 = cr.data[image][1]
-            search_region_x2 = cr.data[image][2]
-            search_region_y2 = cr.data[image][3]
+            try:
+                cr.data[image]
+            except:
+                Logger.log_error("Crop data for searching {} does not exist. Switch to full screen search.".format(image))
+                crop_data_exist = False
+                search_region_x1 = 0
+                search_region_y1 = 0
+                search_region_x2 = 1920
+                search_region_y2 = 1080
+            else:
+                search_region_x1 = cr.data[image][0]
+                search_region_y1 = cr.data[image][1]
+                search_region_x2 = cr.data[image][2]
+                search_region_y2 = cr.data[image][3]
 
         if color:
             color_screen_tmp = cls.color_screen[search_region_y1:search_region_y2, search_region_x1:search_region_x2]
@@ -693,11 +704,9 @@ class Utils(object):
         else:
             comparison_method = cv2.TM_CCOEFF_NORMED
             mask = None
-
         template = cv2.imread('assets/{}/{}.png'.format(cls.assets, image), 0)
         match = cv2.matchTemplate(screen, template, comparison_method, mask=mask)
         cls.locations = numpy.where(match >= similarity)
-
         return cls.filter_similar_coords(
             list(zip(cls.locations[1], cls.locations[0])))
 
@@ -1168,6 +1177,20 @@ class Utils(object):
             index of where it is in the list of coordinates
         """
         return spatial.cKDTree(coords).query(coord)
+
+    @classmethod
+    def get_region_for_target_arrow_search(cls, coord):
+        width = 160
+        height = 160
+        x = coord[0] - int(width/2)
+        if x < 0:
+            x = 0
+        if x + width > 1920:
+            width = 1920 - x
+        y = coord[1] - height
+        if y < 0:
+            y = 0
+        return Region(x, y, width, height)
 
     @classmethod
     def get_region_color_average(cls, region, hsv=True):

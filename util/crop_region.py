@@ -9,9 +9,11 @@
 # form: x1, y1, x2, y2
 data = {
     "combat/alert_fleet_cannot_be_formed": [500, 400, 1400, 800],
+    "combat/alert_ammo_supplies": [340, 280, 1650, 540], # Just a rough estimation!
     "combat/alert_lock": [520, 340, 1396, 696], # stardard info box size
     "combat/alert_morale_low": [520, 340, 1396, 696], # stardard info box size
     "combat/alert_unable_battle": [700, 450, 1250, 650], 
+    "combat/alert_unable_reach": [743, 260, 1143, 521],
     "combat/button_confirm": [1480, 920, 1800, 1080],
     "combat/button_go": [1200, 700, 1800, 980],
     "combat/button_retreat": [1100, 950, 1400, 1080], 

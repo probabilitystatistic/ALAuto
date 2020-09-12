@@ -35,6 +35,7 @@ class CombatModule(object):
         self.map_similarity = 0.99
 
         self.kills_count = 0
+        self.dedicated_map_strategy = False
         self.kills_before_boss = {
             '1-1': 1, '1-2': 2, '1-3': 2, '1-4': 3,
             '2-1': 2, '2-2': 3, '2-3': 3, '2-4': 3,
@@ -102,9 +103,23 @@ class CombatModule(object):
             'command_buttons': Region(965, 940, 955, 140)
         }
 
+        self.key_map_region = {
+            '2-1':{'B3': Region(668, 540, 189, 140),
+                   'C1': Region(863, 288, 183, 119),
+                   'C3': Region(861, 540, 189, 140),
+                   'D3': Region(1060, 540, 189, 140),
+                   'E1': Region(1233, 288, 167, 119),
+                   'E2': Region(1247, 408, 170, 132),
+                   'E3': Region(1263, 540, 174, 140),
+                   'F2': Region(1436, 409, 169, 131),
+                   'F3': Region(1461, 540, 171, 140)
+            }
+        }
+
         self.swipe_counter = 0
         self.fleet_switch_due_to_morale= False
         self.fleet_switch_index = -1
+        self.targeting_2_1_D3 = False
 
 
     def combat_logic_wrapper(self):
@@ -196,9 +211,17 @@ class CombatModule(object):
                 Logger.log_debug("Found retreat button, starting clear function.")
                 if (self.chapter_map[0] == '7' and self.chapter_map[2] == '2' and self.config.combat['clearing_mode'] and self.config.combat['focus_on_mystery_nodes']):
                     Logger.log_debug("Started special 7-2 farming.")
+                    self.dedicated_map_strategy = True
                     if not self.clear_map_special_7_2():
                    	    self.stats.increment_combat_attempted()
                    	    break
+                    Utils.wait_update_screen()
+                elif self.chapter_map == '2-1' and self.config.combat['clearing_mode'] and self.config.combat['focus_on_mystery_nodes']:
+                    Logger.log_debug("Started special 2-1 farming.")
+                    self.dedicated_map_strategy = True
+                    if not self.clear_map_special_2_1():
+                        self.stats.increment_combat_attempted()
+                        break
                     Utils.wait_update_screen()
                 else:
                     if not self.clear_map():
@@ -515,7 +538,7 @@ class CombatModule(object):
             Logger.log_msg("Combat ended.")
             return True
 
-    def movement_handler(self, target_info):
+    def movement_handler(self, target_info, try_touch = True):
         """
         Method that handles the fleet movement until it reach its target (mystery node or enemy node).
         If the coordinates are wrong, they will be blacklisted and another set of coordinates to work on is obtained.
@@ -530,12 +553,37 @@ class CombatModule(object):
         Logger.log_msg("Moving towards objective.")
         count = 0
         location = [target_info[0], target_info[1]]
-        Utils.script_sleep(1)
+        # set up region to search the green arrow at destination
+        # assume target_info gives the center of the target
+        # this method would still mis-judge if the target is 2 tiles above the current fleet(the arrow of current fleet could be mis-judged as target arrow)
+        if try_touch:
+            arrow_found = False
+        else:
+            arrow_found = True
+        target_arrow_search_region = Utils.get_region_for_target_arrow_search(location)
+        #Utils.script_sleep(1)
 
         while True:
             Utils.update_screen()
             event = self.check_movement_threads()
 
+            if not arrow_found and Utils.find_with_cropped("combat/fleet_arrow", dynamical_region = target_arrow_search_region):
+                Logger.log_msg('Target arrow found.')
+                arrow_found = True
+            if self.targeting_2_1_D3 and self.key_map_region['2-1']['D3'].contains(self.get_fleet_location()):
+                """
+                FL = self.get_fleet_location()
+                print('D3 region:', self.key_map_region['2-1']['D3'].x, self.key_map_region['2-1']['D3'].y, self.key_map_region['2-1']['D3'].w, self.key_map_region['2-1']['D3'].h)
+                print('Fleet location:', FL)
+                #if self.key_map_region['2-1']['D3'].contains(self.get_fleet_location()):
+                if self.key_map_region['2-1']['D3'].contains(FL):
+                    Logger.log_msg('Target empty tile arrived.')
+                    self.targeting_2_1_D3 = False
+                    return 0
+                """
+                Logger.log_msg('Target empty tile arrived.')
+                self.targeting_2_1_D3 = False
+                return 0
             if (self.chapter_map[0].isdigit() and not self.config.combat['clearing_mode']) and event["combat/button_evade"]:
                 Logger.log_msg("Ambush was found, trying to evade.")
                 Utils.touch_randomly(self.region["combat_ambush_evade"])
@@ -549,6 +597,8 @@ class CombatModule(object):
                 continue
             if self.chapter_map[0].isdigit() and event["combat/alert_ammo_supplies"]:
                 Logger.log_msg("Received ammo supplies")
+                # wait for the info box to disappear
+                Utils.script_sleep(2)
                 if target_info[2] == "mystery_node":
                     Logger.log_msg("Target reached.")
                     self.fleet_location = target_info[0:2]
@@ -577,8 +627,12 @@ class CombatModule(object):
                 self.fleet_location = target_info[0:2]
                 return 1
             else:
-                if count != 0 and count % 3 == 0:
+                if count != 0 and count % 3 == 0 and not arrow_found:
                     Utils.touch(location)
+                if count > 21 and self.chapter_map == '2-1' and self.dedicated_map_strategy:
+                    Logger.log_error("Too many loops in movement_handler in 2-1. This should not occur.")
+                    self.targeting_2_1_D3 = False
+                    return 0
                 if (count > 15 and (self.chapter_map == '7-2' or self.chapter_map == '5-1') and self.config.combat['clearing_mode']):
                     Logger.log_warning("Clicking on the destination for too many times. Assuming target reached.")
                     return 0
@@ -586,6 +640,7 @@ class CombatModule(object):
                     Logger.log_msg("Blacklisting location and searching for another enemy.")
                     self.blacklist.append(location[0:2])
                     self.fleet_location = None
+                    arrow_found = False
                     location = self.get_closest_target(self.blacklist, mystery_node=(not self.config.combat["ignore_mystery_nodes"]))
                     count = 0
                 count += 1
@@ -698,6 +753,7 @@ class CombatModule(object):
 
         if self.config.combat['fleet_switch_at_beinning']:
             Utils.touch_randomly(self.region['button_switch_fleet'])
+            Utils.script_sleep(2)
 
         #swipe map to fit everything on screen
         swipes = {
@@ -728,7 +784,7 @@ class CombatModule(object):
             Utils.touch_randomly(self.region["close_strategy_menu"])
 
         # special initial move/switch for easier farming in some specific maps
-        if self.chapter_map=="5-1":
+        if self.chapter_map == "5-1":
             # Special farming for 5-1:
             # Setup: fleet 1 = boss fleet; another fleet = mob fleet; enable boss fleet = True; prioritize mystery node = True
             # 1. boss fleet move to obtain the mystery node at the beginning(this also ensures no boss blocking by boss fleet)
@@ -738,12 +794,28 @@ class CombatModule(object):
             Utils.touch(target_info[0:2])
             self.movement_handler(target_info)
             Utils.touch_randomly(self.region['button_switch_fleet'])
+            Utils.script_sleep(2)
             Utils.update_screen()
+        
+        if self.chapter_map == "2-1":
+            Utils.touch(self.key_map_region['2-1']['B3'].get_center())
+            Utils.script_sleep(2)
+            Utils.update_screen()
+        """
+            # Setup: slot 1 = boss fleet; slot 2 = mob fleet; enable boss fleet = True; prioritize mystery node = True
+            # 1. boss fleet move to/attack C3
+            # 2. switch to mob fleet, collect mystery node or kill 1~2 enemy fleet.
+            # 3. boss appears after 2 kills, switch back to boss fleet and kill boss.
+            movement_result = self.movement_handler(self.key_map_region['2-1']['C3'].get_center())
+                if movement_result == 1:
+                    self.battle_handler()
+        """
 
 #By me:
 # allow the bot to collect question node at the first turn
         #target_info = self.get_closest_target(self.blacklist)
-        target_info = self.get_closest_target(self.blacklist, mystery_node=(not self.config.combat["ignore_mystery_nodes"]))
+        if not (self.config.exercise['enabled'] and self.config.combat['clearing_mode']):
+            target_info = self.get_closest_target(self.blacklist, mystery_node=(not self.config.combat["ignore_mystery_nodes"]))
 
         while True:
             Utils.update_screen()
@@ -863,6 +935,252 @@ class CombatModule(object):
 
                 #Utils.script_sleep(3)
                 continue
+
+    def clear_map_special_2_1(self):
+        """ Clears map.
+        """
+        self.fleet_location = None
+        self.combats_done = 0
+        self.kills_count = 0
+        self.enemies_list.clear()
+        self.mystery_nodes_list.clear()
+        self.blacklist.clear()
+        self.swipe_counter = 0
+        boss_swipe = 0
+        Logger.log_msg("Started special map clear for 2-1.")
+        Utils.script_sleep(2.5)
+
+        while Utils.find("combat/fleet_lock", 0.99):
+            Utils.touch_randomly(self.region["fleet_lock"])
+            Logger.log_warning("Fleet lock is not supported, disabling it.")
+            Utils.wait_update_screen()
+
+        if self.config.combat['fleet_switch_at_beinning']:
+            Utils.touch_randomly(self.region['button_switch_fleet'])
+            Utils.script_sleep(2)
+
+        #swipe map to fit everything on screen
+        swipes = {
+            'E-B3': lambda: Utils.swipe(960, 540, 1060, 670, 300)
+        }
+        swipes.get(self.chapter_map, lambda: None)()
+
+        # disable subs' hunting range
+        if self.config.combat["hide_subs_hunting_range"]:
+            Utils.script_sleep(0.5)
+            Utils.touch_randomly(self.region["open_strategy_menu"])
+            Utils.script_sleep()
+            Utils.touch_randomly(self.region["disable_subs_hunting_radius"])
+            Utils.script_sleep()
+            Utils.touch_randomly(self.region["close_strategy_menu"])
+
+        # starting with boss fleet in control
+        # is mystery node reachable?
+        if self.is_reachable(self.key_map_region['2-1']['F2'].get_center()): # take mystery node
+            Logger.log_msg("Route B")
+            # is D3 reachable?
+            if self.is_reachable(self.key_map_region['2-1']['D3'].get_center()): # boss fleet moves to D3
+                Logger.log_msg("Route B2")
+                # switch to mob fleet
+                Utils.touch_randomly(self.region['button_switch_fleet'])
+                self.reset_screen_by_anchor_point()
+                # kill 2 mobs
+                self.kill_specific_number_of_mob(2)
+                if self.exit != 0: self.retreat_handler(); return True
+                # boss appears, switch to boss fleet(screen reset is not needed as boss fleet is at D3)
+                Utils.touch_randomly(self.region['button_switch_fleet'])
+                #self.reset_screen_by_anchor_point()
+                # kill boss
+                self.kill_boss()
+                if self.exit != 0: self.retreat_handler(); return True
+                return True            
+            else:
+                Logger.log_msg("Route B1")
+                # kill E3 enemy
+                self.kill_the_specific_enemy(self.key_map_region['2-1']['E3'].get_center()); 
+                if self.exit != 0: self.retreat_handler(); return True
+                # switch to mob fleet
+                Utils.touch_randomly(self.region['button_switch_fleet'])
+                self.reset_screen_by_anchor_point()
+                # kill C3 enemy
+                self.kill_the_specific_enemy(self.key_map_region['2-1']['C3'].get_center())
+                if self.exit != 0: self.retreat_handler(); return True
+                # boss appears, kill it with mob fleet
+                self.kill_boss()
+                if self.exit != 0: self.retreat_handler(); return True
+                return True
+        else:
+            Logger.log_msg("Route A")
+            # is D3 reachable?
+            if self.is_reachable(self.key_map_region['2-1']['D3'].get_center()): # boss fleet moves to D3
+                Logger.log_msg("Route A2")
+                # switch to mob fleet
+                Utils.touch_randomly(self.region['button_switch_fleet'])
+                self.reset_screen_by_anchor_point()
+                # kill E3 enemy
+                self.kill_the_specific_enemy(self.key_map_region['2-1']['E3'].get_center())
+                if self.exit != 0: self.retreat_handler(); return True
+                # is mystery node reachable?
+                if self.is_reachable(self.key_map_region['2-1']['F2'].get_center()): # take mystery node
+                    Logger.log_msg("Route A2b")
+                    # kill 1 mob
+                    self.kill_specific_number_of_mob(1)
+                    if self.exit != 0: self.retreat_handler(); return True
+                    # boss appears, switch to boss fleet(no need to reset screen as boss fleet is at D3)
+                    Utils.touch_randomly(self.region['button_switch_fleet'])
+                    #self.reset_screen_by_anchor_point()
+                    # kill boss
+                    self.kill_boss()
+                    if self.exit != 0: self.retreat_handler(); return True
+                    return True
+                else:
+                    Logger.log_msg("Route A2a")
+                    # kill E2 enemy
+                    self.kill_the_specific_enemy(self.key_map_region['2-1']['E2'].get_center())
+                    if self.exit != 0: self.retreat_handler(); return True
+                    # boss appears, reset screen
+                    self.reset_screen_by_anchor_point()
+                    # take mystery node
+                    self.is_reachable(self.key_map_region['2-1']['F2'].get_center())
+                    # switch to boss fleet(no need to reset screen as boss fleet is at D3)
+                    Utils.touch_randomly(self.region['button_switch_fleet'])
+                    #self.reset_screen_by_anchor_point()
+                    # kill boss
+                    self.kill_boss()
+                    if self.exit != 0: self.retreat_handler(); return True
+                    return True
+            else:
+                Logger.log_msg("Route A1")
+                # switch to mob fleet
+                Utils.touch_randomly(self.region['button_switch_fleet'])
+                self.reset_screen_by_anchor_point()
+                # kill C3 enemy
+                self.kill_the_specific_enemy(self.key_map_region['2-1']['C3'].get_center())
+                if self.exit != 0: self.retreat_handler(); return True
+                # is mystery node reachable?
+                if self.is_reachable(self.key_map_region['2-1']['F2'].get_center()): # take mystery node
+                    Logger.log_msg("Route A1b")
+                    # kill C1 enemy
+                    self.kill_the_specific_enemy(self.key_map_region['2-1']['C1'].get_center())
+                    if self.exit != 0: self.retreat_handler(); return True
+                    # boss appears, kill it with mob fleet
+                    self.kill_boss()
+                    if self.exit != 0: self.retreat_handler(); return True
+                    return True               
+                else:
+                    Logger.log_msg("Route A1a")
+                    # E3 enemy exist?
+                    if self.enemy_exist_here(self.key_map_region['2-1']['E3']):
+                        Logger.log_msg("Route A1a2")
+                        # move to D3 to avoid possible blocking of C1 enemy
+                        Utils.touch(self.key_map_region['2-1']['D3'].get_center(), sleep=1)
+                        # C1 enemy exist?
+                        if self.enemy_exist_here(self.key_map_region['2-1']['C1'], print_info=True):
+                            Logger.log_msg("Route A1a2b")
+                            # kill E3 enemy
+                            self.kill_the_specific_enemy(self.key_map_region['2-1']['E3'].get_center())
+                            if self.exit != 0: self.retreat_handler(); return True
+                            # boss appears, reset screen
+                            self.reset_screen_by_anchor_point()
+                            # kill E2 enemy
+                            self.kill_the_specific_enemy(self.key_map_region['2-1']['E2'].get_center())
+                            if self.exit != 0: self.retreat_handler(); return True
+                            # take mystery node
+                            self.is_reachable(self.key_map_region['2-1']['F2'].get_center())
+                            # kill boss
+                            self.kill_boss()
+                            if self.exit != 0: self.retreat_handler(); return True
+                            return True
+                        else:
+                            Logger.log_msg("Route A1a2a")
+                            # kill E1 enemy
+                            self.kill_the_specific_enemy(self.key_map_region['2-1']['E1'].get_center())
+                            if self.exit != 0: self.retreat_handler(); return True
+                            # boss appears, reset screen
+                            self.reset_screen_by_anchor_point()
+                            # take mystery node
+                            self.is_reachable(self.key_map_region['2-1']['F2'].get_center())
+                            # switch to boss fleet
+                            Utils.touch_randomly(self.region['button_switch_fleet'])
+                            self.reset_screen_by_anchor_point()
+                            # kill boss
+                            self.kill_boss()
+                            if self.exit != 0: self.retreat_handler(); return True
+                            return True
+                    else:
+                        Logger.log_msg("Route A1a1")
+                        # kill E2 enemy
+                        self.kill_the_specific_enemy(self.key_map_region['2-1']['E2'].get_center())
+                        if self.exit != 0: self.retreat_handler(); return True
+                        # boss appears, reset screen
+                        self.reset_screen_by_anchor_point()
+                        # take mystery node
+                        self.is_reachable(self.key_map_region['2-1']['F2'].get_center())
+                        # switch to boss fleet
+                        Utils.touch_randomly(self.region['button_switch_fleet'])
+                        self.reset_screen_by_anchor_point()
+                        # kill boss
+                        self.kill_boss()
+                        if self.exit != 0: self.retreat_handler(); return True
+                        return True
+
+    def kill_the_specific_enemy(self, coord):
+        target_info = [coord[0], coord[1], 'enemy']
+        count = 0
+        while True:
+            count += 1
+            if count >= 10:
+                Logger.log_error("Too many loops in kill_the_specific_enemy. Terminating...")
+                exit()
+            Utils.touch(target_info[0:2])
+            Utils.update_screen()
+            movement_result = self.movement_handler(target_info)
+            if movement_result == 1:
+                self.battle_handler()
+                target_info = None
+                self.blacklist.clear()
+                return
+
+    def kill_specific_number_of_mob(self, number):
+        present_kill_count = self.kills_count
+        target_info = None
+        count = 0
+        while True:
+            count += 1
+            if count >= 100:
+                Logger.log_error("Too many loops in kill_specific_number_of_mob. Terminating...")
+                exit()
+            if self.exit != 0:
+                return
+            if self.kills_count >= present_kill_count + number:
+                return
+            Utils.update_screen()
+            if target_info == None:
+                target_info = self.get_closest_target(self.blacklist, mystery_node=False)
+                continue
+            if target_info:
+                Utils.touch(target_info[0:2])
+                Utils.update_screen()
+            else:
+                continue
+            if Utils.find_with_cropped("combat/alert_unable_reach"):
+                Logger.log_warning("Unable to reach the target.")
+                self.blacklist.append(target_info[0:2])
+                target_info = None
+                continue
+            else:
+                movement_result = self.movement_handler(target_info)
+                if movement_result == 1:
+                    self.battle_handler()
+                target_info = None
+                self.blacklist.clear()
+                continue
+
+    def kill_boss(self):
+        Utils.update_screen()
+        boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
+        boss_info = [boss_region.x + 50, boss_region.y + 25, "boss"]
+        self.clear_boss(boss_info)
 
     def clear_map_special_7_2(self):
         """ Framing 7-2 for 4 question marks with 3 or at most 4 battles. Only support one fleet!
@@ -1094,7 +1412,7 @@ class CombatModule(object):
             anchor_tolerance = [10, 10]
         elif self.chapter_map == "2-1":
             anchor_position = [500, 557]
-            anchor_tolerance = [10, 10]
+            anchor_tolerance = [30, 30]
         else:
             Logger.log_error('No anchor point is set for map {}.'.format(self.chapter_map))
             return False
@@ -1428,6 +1746,8 @@ class CombatModule(object):
             array: An array containing the x and y coordinates of the fleet's
             current location.
         """
+        # this line forces to search fleet location when called
+        self.fleet_location = None
         if not self.fleet_location:
             coords = [0, 0]
             count = 0
@@ -1493,7 +1813,7 @@ class CombatModule(object):
             targets = self.get_enemies(blacklist, boss)
 
         closest = targets[Utils.find_closest(targets, location)[1]]
-
+        
         Logger.log_info('Current location is: {}'.format(fleet_location))
         Logger.log_info('Targets found at: {}'.format(targets))
         Logger.log_info('Closest target is at {}'.format(closest))
@@ -1514,6 +1834,46 @@ class CombatModule(object):
             target_type = "mystery_node"
 
         return [closest[0], closest[1], target_type]
+
+    def is_reachable(self, coord):
+        # dedicated for 2-1
+        # set up region to search the green arrow at destination
+        # assume target_info gives the center of the target
+        # this method would still mis-judge if the target is 2 tiles above the current fleet(the arrow of current fleet could be mis-judged as target arrow)
+        arrow_found = False
+        target_arrow_search_region = Utils.get_region_for_target_arrow_search(coord) 
+        if self.key_map_region['2-1']['D3'].contains(coord):
+            self.targeting_2_1_D3 = True
+        Logger.log_msg('Touch location {}.'.format(coord))
+        Utils.touch(coord, sleep=0.45)
+        # check 10 frames
+        for i in range(10):
+            Utils.update_screen()
+            if Utils.find_with_cropped('combat/alert_unable_reach'):
+                Logger.log_msg('Unable to reach the target.')
+                # wait for the 'unable to reach' dialog to disappear to avoid mis-determination for other algorithm after this call
+                Utils.script_sleep(3) 
+                self.targeting_2_1_D3 = False
+                return False
+            if not arrow_found and Utils.find_with_cropped("combat/fleet_arrow", dynamical_region = target_arrow_search_region):
+                Logger.log_msg('Target arrow found.')
+                arrow_found = True
+                break
+        self.movement_handler([coord[0], coord[1], 'mystery_node'], try_touch= not arrow_found)
+        return True
+
+    def enemy_exist_here(self, region, print_info=False):
+        # dedicated for 2-1
+        self.enemies_list.clear()
+        enemies = self.get_enemies([], False)
+        if print_info == True: 
+            Logger.log_msg('Region for detecting an enemy: {}, {}, {}, {}.'.format(region.x, region.y, region.w, region.h))
+        for index in range(0, len(enemies)):
+            if print_info == True: 
+                Logger.log_msg('Enemy {} locates at {}, {}:'.format(index, enemies[index][0], enemies[index][1]))
+            if region.contains([enemies[index][0], enemies[index][1]]):
+                return True
+        return False
 
     def check_movement_threads(self):
         thread_list = []
