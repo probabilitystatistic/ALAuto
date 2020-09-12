@@ -148,7 +148,7 @@ class CombatModule(object):
 
         # get to map
         map_region = self.reach_map()
-        oil, gold = Utils.get_oil_and_gold(print_to_screen=False)
+        oil, gold = Utils.get_oil_and_gold()
         Utils.touch_randomly_ensured(map_region, "menu/attack", ["combat/button_go"] , need_initial_screen=True, stable_check_frame=1)
 
         while True:
