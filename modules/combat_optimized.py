@@ -1424,14 +1424,14 @@ class CombatModule(object):
         while not screen_is_reset:
             s = 0
             while not anchor:
-                swipes.get(s % 3)()
+                swipes.get(s % 4)()
                 Utils.wait_update_screen(0.1)
                 anchor = Utils.find_in_scaling_range("map_anchors/map_{}".format(self.chapter_map), similarity=0.95)
                 s += 1
                 if s > 15:
                     Logger.log_error("Swipe too many times for searching anchor point.")
                     return False
-            Utils.swipe(1920/2, 1080/2, 1920/2 + anchor_position[0] - anchor.x, 1080/2 + anchor_position[1] - anchor.y, 1500)
+            Utils.swipe(1920/2, 1080/2, 1920/2 + anchor_position[0] - anchor.x, 1080/2 + anchor_position[1] - anchor.y, 300)
             swipe_reset += 1
             if swipe_reset > 15:
                 Logger.log_error("Swipe too many times for resetting screen.")
@@ -1559,7 +1559,7 @@ class CombatModule(object):
                         Logger.log_error("Searching boss for too many times. Start retreating... ")
                         self.exit = 5
                         return
-                    swipes.get(s)()
+                    swipes.get(s % 4)()
                     Utils.wait_update_screen(0.1)
                     boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
                     s += 1
@@ -1588,7 +1588,7 @@ class CombatModule(object):
                             Logger.log_error("Searching boss for too many times. Start retreating... ")
                             self.exit = 5
                             return
-                        swipes.get(s % 3)()
+                        swipes.get(s % 4)()
                         Utils.wait_update_screen(0.1)
                         boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
                         s += 1
