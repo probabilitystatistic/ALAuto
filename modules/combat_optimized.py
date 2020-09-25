@@ -152,7 +152,8 @@ class CombatModule(object):
         Utils.touch_randomly_ensured(map_region, "menu/attack", ["combat/button_go"] , need_initial_screen=True, stable_check_frame=1)
 
         while True:
-            Utils.wait_update_screen()
+            #Utils.wait_update_screen()
+            Utils.update_screen()
 
             if self.exit == 1 or self.exit == 2 or self.exit == 6:
                 self.stats.increment_combat_done()
