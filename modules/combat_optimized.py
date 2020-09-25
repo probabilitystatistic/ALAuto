@@ -591,16 +591,20 @@ class CombatModule(object):
             if (self.chapter_map[0].isdigit() and not self.config.combat['clearing_mode']) and event["combat/button_evade"]:
                 Logger.log_msg("Ambush was found, trying to evade.")
                 Utils.touch_randomly(self.region["combat_ambush_evade"])
+                arrow_found = False
                 Utils.script_sleep(0.5)
                 continue
             if (self.chapter_map[0].isdigit() and not self.config.combat['clearing_mode']) and event["combat/alert_failed_evade"]:
                 Logger.log_warning("Failed to evade ambush.")
                 self.kills_count -= 1
+                arrow_found = False
                 Utils.touch_randomly(self.region["menu_combat_start"])
                 self.battle_handler()
                 continue
             if self.chapter_map[0].isdigit() and event["combat/alert_ammo_supplies"]:
                 Logger.log_msg("Received ammo supplies")
+                if target_info[2] == 'enemy':
+                    arrow_found = False
                 # wait for the info box to disappear
                 Utils.script_sleep(2)
                 if target_info[2] == "mystery_node":
@@ -611,6 +615,8 @@ class CombatModule(object):
             if self.chapter_map[0].isdigit() and event["menu/item_found"]:
                 Logger.log_msg("Item found on node.")
                 Utils.touch_randomly(self.region['tap_to_continue'])
+                if target_info[2] == 'enemy':
+                    arrow_found = False
                 if Utils.find("combat/menu_emergency"):
                     Utils.script_sleep(1)
                     Utils.touch_randomly(self.region["close_strategy_menu"])
@@ -622,6 +628,7 @@ class CombatModule(object):
             if event["menu/alert_info"]:
                 Logger.log_debug("Found alert.")
                 Utils.find_and_touch("menu/alert_close")
+                arrow_found = False
                 continue
             if event["combat/menu_loading"]:
                 self.fleet_location = target_info[0:2]
@@ -637,7 +644,7 @@ class CombatModule(object):
                     Logger.log_error("Too many loops in movement_handler in 2-1. This should not occur.")
                     self.targeting_2_1_D3 = False
                     return 0
-                if (count > 15 and (self.chapter_map == '7-2' or self.chapter_map == '5-1') and self.config.combat['clearing_mode']):
+                if (count > 31 and (self.chapter_map == '7-2' or self.chapter_map == '5-1') and self.config.combat['clearing_mode']):
                     Logger.log_warning("Clicking on the destination for too many times. Assuming target reached.")
                     return 0
                 if count > 21:
