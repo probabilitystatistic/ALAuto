@@ -30,7 +30,7 @@ class RetirementModule(object):
             'build_menu': Region(1452, 1030, 198, 29), # y should be over 1030 to avoid mistakingly touching "start building" button
             'retire_tab_1': Region(20, 661, 115, 60), # y should be below 730 to avoid mistakingly touching batch setting button
             # retire_tab_2 is used when there is wishing well
-            'retire_tab_2': Region(30, 816, 94, 94), # should be modified to avoid touching batch setting button
+            'retire_tab_2': Region(40, 840, 80, 40), 
             'menu_nav_back': Region(54, 57, 67, 67),
             'sort_filters_button': Region(1655, 14, 130, 51),
             'rarity_all_ship_filter': Region(435, 668, 190, 45),
@@ -82,9 +82,8 @@ class RetirementModule(object):
                     Logger.log_debug("Retirement called from main menu.")
                     self.called_from_menu = True
                     oil, gold = Utils.get_oil_and_gold()
-                    Utils.touch_randomly_ensured(self.region['build_menu'], "menu/button_battle", ["menu/build"], response_time=0.5, stable_check_frame=1)
                     # to build menu
-                    response = Utils.touch_randomly_ensured(self.region['build_menu'], "", ["menu/build"])
+                    response = Utils.touch_randomly_ensured(self.region['build_menu'], "menu/button_battle", ["menu/build"], response_time=0.5, stable_check_frame=1)
                     # to dock menu
                     if response != 0:
                         if Utils.find_with_cropped("event/build_limited"):
