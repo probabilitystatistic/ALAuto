@@ -113,6 +113,10 @@ class CombatModule(object):
                    'E3': Region(1263, 540, 174, 140),
                    'F2': Region(1436, 409, 169, 131),
                    'F3': Region(1461, 540, 171, 140)
+            },
+            'E-C3':{'C1': Region(960, 273, 170, 114),
+                    'D1': Region(1142, 274, 170, 114),
+                    'F2': Region(1532, 391, 135, 125)
             }
         }
 
@@ -754,10 +758,13 @@ class CombatModule(object):
         if self.config.combat['fleet_switch_at_beinning']:
             Utils.touch_randomly(self.region['button_switch_fleet'])
             Utils.script_sleep(2)
+            if self.chapter_map == 'E-C3':
+                self.reset_screen_by_anchor_point()
 
         #swipe map to fit everything on screen
         swipes = {
             'E-B3': lambda: Utils.swipe(960, 540, 1060, 670, 300),
+            'E-C3': lambda: Utils.swipe(1200, 540, 800, 540, 300),
             'E-D3': lambda: Utils.swipe(960, 540, 1060, 670, 300),
             # needs to be updated
             '4-2': lambda: Utils.swipe(1000, 700, 1000, 400, 300), #to focus on enemies in the lower part of the map
@@ -797,19 +804,23 @@ class CombatModule(object):
             Utils.script_sleep(2)
             Utils.update_screen()
         
-        if self.chapter_map == "2-1":
-            Utils.touch(self.key_map_region['2-1']['B3'].get_center())
+        # dedicated for scherzo of iron and blood event
+        if self.chapter_map == "E-C3":
+            Utils.touch(self.key_map_region['E-C3']['C1'].get_center())
+            Utils.script_sleep(2)
+            Utils.touch(self.key_map_region['E-C3']['D1'].get_center())
+            Utils.script_sleep(1)
+            Utils.update_screen()
+            self.battle_handler()
+            Utils.touch(self.key_map_region['E-C3']['F2'].get_center())
             Utils.script_sleep(2)
             Utils.update_screen()
-        """
-            # Setup: slot 1 = boss fleet; slot 2 = mob fleet; enable boss fleet = True; prioritize mystery node = True
-            # 1. boss fleet move to/attack C3
-            # 2. switch to mob fleet, collect mystery node or kill 1~2 enemy fleet.
-            # 3. boss appears after 2 kills, switch back to boss fleet and kill boss.
-            movement_result = self.movement_handler(self.key_map_region['2-1']['C3'].get_center())
-                if movement_result == 1:
-                    self.battle_handler()
-        """
+            self.battle_handler()
+            #Utils.touch_randomly(self.region['button_switch_fleet'])
+            Utils.update_screen()
+            #fleet_switched_for_E_C3 = False
+
+
 
 #By me:
 # allow the bot to collect question node at the first turn
@@ -1414,6 +1425,9 @@ class CombatModule(object):
             anchor_tolerance = [10, 10]
         elif self.chapter_map == "2-1":
             anchor_position = [500, 557]
+            anchor_tolerance = [30, 30]
+        elif self.chapter_map == "E-C3":
+            anchor_position = [1748, 406]
             anchor_tolerance = [30, 30]
         else:
             Logger.log_error('No anchor point is set for map {}.'.format(self.chapter_map))
