@@ -53,6 +53,8 @@ data = {
     "menu/item_found": [700, 150, 1200, 400],
     "menu/button_normal_mode": [0, 940, 250, 1080],
     "menu/special_event": [100, 0, 500, 100],
+    "research/series1": [405, 140, 500, 230],
+    "research/series2": [405, 140, 500, 230],
     "retirement/alert_bonus": [200, 900, 450, 1050],
     "retirement/bonus": [460, 960, 620, 1060],
     "retirement/button_disassemble": [1050, 800, 1380, 940], # The "confirm" when showing money earned from disassembling equipment.
