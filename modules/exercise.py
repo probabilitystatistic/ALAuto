@@ -1,6 +1,6 @@
 import math
 import string
-#from util.ocr import OCR
+from util.ocr import OCR
 from util.logger import Logger
 from util.utils import Region, Utils
 from operator import itemgetter
@@ -98,7 +98,7 @@ class ExerciseModule(object):
         Utils.touch_randomly_ensured(self.region["menu_button_battle"], "", ["menu/attack"], response_time=1, stable_check_frame=1)
         Utils.touch_randomly_ensured(self.region["go_to_exercise"], "", ["menu/exercise"], response_time=1, stable_check_frame=1)
 
-        #Logger.log_msg("Threshold for fleet power: {}".format(self.opponent_threshold))
+        Logger.log_msg("Threshold for fleet power: {}".format(self.opponent_threshold))
 
         # exercise combat loop
         while True:
@@ -116,7 +116,9 @@ class ExerciseModule(object):
 
     def choose_opponent(self):
         # for now just choose the first opponent
-        power =[]
+        average_power_previous_opponent = 0
+        power = []
+        chosen = -1
         for i in range(4):
             # poor OCR accuracy
             """
@@ -131,14 +133,27 @@ class ExerciseModule(object):
                 Logger.log_warning("OCR for {}th opponent's vanguard failed.".format(i+1))
                 vanguard = 99999
             """
+            main = int(OCR.screen_to_string_by_OCRspace(self.fleet_power_region[i][0], mode="number"))
+            vanguard = int(OCR.screen_to_string_by_OCRspace(self.fleet_power_region[i][1], mode="number"))
+
             # not working, but can still roughly give number of digits
-            main = Utils.read_numbers(self.fleet_power_region[i][0].x, self.fleet_power_region[i][0].y, self.fleet_power_region[i][0].w, self.fleet_power_region[i][0].h)
-            vanguard = Utils.read_numbers(self.fleet_power_region[i][1].x, self.fleet_power_region[i][1].y, self.fleet_power_region[i][1].w, self.fleet_power_region[i][1].h)
+            #main = Utils.read_numbers(self.fleet_power_region[i][0].x, self.fleet_power_region[i][0].y, self.fleet_power_region[i][0].w, self.fleet_power_region[i][0].h)
+            #vanguard = Utils.read_numbers(self.fleet_power_region[i][1].x, self.fleet_power_region[i][1].y, self.fleet_power_region[i][1].w, self.fleet_power_region[i][1].h)
             power.append([main, vanguard])
-            Logger.log_msg("Opponent {}: {}, {}".format(i + 1, power[i][0], power[i][1]))
+            if main <= self.opponent_threshold and vanguard <= self.opponent_threshold:
+                if (main + vanguard)/2 >= average_power_previous_opponent:
+                    chosen = i
+                average_power_previous_opponent = (main + vanguard)/2
+            #Logger.log_msg("Opponent {}: {}, {}".format(i + 1, power[i][0], power[i][1]))
 
         candidate = [power[0][0], power[1][0], power[2][0], power[3][0]]
-        chosen = min(enumerate(candidate), key=itemgetter(1))[0] 
+        Logger.log_msg("Opponents' power")
+        Logger.log_msg("[{}, {}]; [{}, {}]; [{}, {}]; [{}, {}]".format(power[0][0], power[0][1], 
+                                                                       power[1][0], power[1][1],
+                                                                       power[2][0], power[2][1],
+                                                                       power[3][0], power[3][1]))
+        if chosen == -1:
+            chosen = min(enumerate(candidate), key=itemgetter(1))[0] 
         Logger.log_msg("Opponent chosen: {}".format(chosen+1))
         return chosen
 
