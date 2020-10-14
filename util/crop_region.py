@@ -28,6 +28,7 @@ data = {
     "commission/scroll_bar_exist": [1860, 80, 1920, 180],
     "commission/scroll_bar_reaching_end": [1860, 980, 1920, 1080],
     "event/build_limited": [0, 150, 200, 1000], # Just a rough estimation!
+    "event/raid_ticket": [1200, 720, 1280, 820],
     "exercise/start_exercise": [800, 800, 1140, 940], 
     "exercise/zero_turn_left": [1720, 202, 1820, 256],
     "menu/alert_info": [0, 0, 960, 540], # Just a rough estimation!
@@ -51,6 +52,7 @@ data = {
     "menu/exercise": [100, 0, 350, 100],
     "menu/item_found": [700, 150, 1200, 400],
     "menu/button_normal_mode": [0, 940, 250, 1080],
+    "menu/special_event": [100, 0, 500, 100],
     "retirement/alert_bonus": [200, 900, 450, 1050],
     "retirement/bonus": [460, 960, 620, 1060],
     "retirement/button_disassemble": [1050, 800, 1380, 940], # The "confirm" when showing money earned from disassembling equipment.

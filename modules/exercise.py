@@ -15,14 +15,27 @@ class ExerciseModule(object):
         self.stats = stats
         self.combats_done = 0
         self.opponent_threshold = self.config.exercise["acceptable_fleet_power"]
+        self.raid_without_ticket = False
+        self.use_raid_ticket = False
  
         self.region = {
             'battle_handler_safe_touch': Region(40, 180, 110, 110),
             'battle_handler_defeat_close_touch': Region(880, 900, 100, 40),
             'combat_end_confirm': Region(1504, 952, 38, 70), # safe
+            'close_info_dialog': Region(1326, 274, 35, 35),
+            'fleet_menu_go': Region(1485, 872, 270, 74),
+            'raid_essex': Region(910, 390, 70, 70),
+            'raid_essex_EX': Region(1650, 250, 50, 50),
+            'raid_essex_hard': Region(1650, 410, 50, 50),
+            'raid_essex_normal': Region(1650, 580, 50, 50),
+            'raid_essex_easy': Region(1650, 750, 50, 50),
+            'raid_repeat': Region(1300, 960, 100, 60),
+            'raid_with_ticket': Region(1150, 750, 100, 50),
+            'raid_without_ticket': Region(700, 750, 100, 50),
             'go_to_exercise': Region(1830, 980, 40, 70),
             'menu_button_battle': Region(1517, 442, 209, 206),
             'menu_combat_start': Region(1578, 921, 270, 70),
+            'menu_nav_back': Region(54, 57, 67, 67),
             'start_exercise': Region(860, 820, 200, 60)
         }
         
@@ -48,6 +61,38 @@ class ExerciseModule(object):
         Returns:
         """
 
+
+        # beginning of temporary code for essex raid
+        # switch on/off essex raid
+        if 1:
+            oil, gold = Utils.get_oil_and_gold()
+            do_easy = False
+            do_normal = True
+            do_hard = True
+            do_EX = False
+            do_essex_exercise = [do_easy, do_normal, do_hard, do_EX]
+            level_button = [self.region["raid_essex_easy"], self.region["raid_essex_normal"], self.region["raid_essex_hard"], self.region["raid_essex_EX"]]
+            # move to the raid menu
+            Utils.update_screen()
+            Utils.touch_randomly_ensured(self.region["raid_essex"], "", ["menu/special_event"], response_time=1)
+            for i in range(4):
+                if not do_essex_exercise[i]:
+                    continue
+                Utils.touch_randomly_ensured(level_button[i], "menu/special_event", ["combat/menu_select_fleet"], response_time=1, check_level_for_ref_before=3)
+                Utils.touch_randomly_ensured(self.region["fleet_menu_go"], "", ["combat/menu_formation"], response_time=1)
+                while True:
+                    if self.stats.combat_done != 0 and self.stats.combat_done % 5 == 0:
+                        Logger.log_msg("Combats done in raid: {}".format(self.stats.combat_done))
+                    if not self.daily_battle_handler(mode = 'raid'):
+                        break
+                    self.stats.increment_combat_done()
+            Utils.menu_navigate()
+            oil_delta, gold_delta = Utils.get_oil_and_gold()
+            self.stats.read_oil_and_gold_change_from_battle(oil_delta - oil, gold_delta - gold)
+            Logger.log_warning('End of Essex raid.')
+        # end of temporary code for essex raid
+
+
         # move to exercise menu
         Utils.wait_update_screen()
         Utils.touch_randomly_ensured(self.region["menu_button_battle"], "", ["menu/attack"], response_time=1, stable_check_frame=1)
@@ -64,7 +109,7 @@ class ExerciseModule(object):
                 opponent = self.choose_opponent()
                 Utils.touch_ensured(self.opponent[opponent], "", ["exercise/start_exercise"], response_time=1, stable_check_frame=1)
                 Utils.touch_randomly_ensured(self.region["start_exercise"], "", ["combat/menu_formation"], response_time=1, stable_check_frame=1)
-                self.exercise_battle_handler()
+                self.daily_battle_handler(mode = 'exercise')
 
         Utils.menu_navigate("menu/button_battle")
         return
@@ -97,7 +142,10 @@ class ExerciseModule(object):
         Logger.log_msg("Opponent chosen: {}".format(chosen+1))
         return chosen
 
-    def exercise_battle_handler(self):
+    def daily_battle_handler(self, mode = 'exercise'):
+        """
+        return True if fight is carried out, False otherwise.
+        """
         Logger.log_msg("Starting combat.")
 
         while not (Utils.find_with_cropped("combat/menu_loading", 0.8)):
@@ -106,8 +154,24 @@ class ExerciseModule(object):
                 Logger.log_warning("Loading screen was not found but combat pause is present, assuming combat is initiated normally.")
                 break
             else:
-                Utils.touch_randomly(self.region["menu_combat_start"])
-                Utils.script_sleep(1)
+                if mode == 'raid' and Utils.find_with_cropped("event/raid_ticket"):
+                    # note that at least one ticket is needed for triggering the stopping condition for a difficulty raid
+                    if self.use_raid_ticket:
+                        Utils.touch_randomly(self.region['raid_with_ticket'])
+                        Utils.script_sleep(1)
+                    elif self.raid_without_ticket:
+                        Utils.touch_randomly(self.region['raid_without_ticket'])
+                        Utils.script_sleep(1)
+                    else:
+                        Utils.touch_randomly(self.region['close_info_dialog'])
+                        Utils.touch_randomly(self.region['menu_nav_back']) #back to fleet selection
+                        Utils.touch_randomly(self.region['menu_nav_back']) # back to raid menu
+                        Logger.log_warning('No more free rounds.')
+                        Utils.update_screen()
+                        return False
+                else:
+                    Utils.touch_randomly(self.region["menu_combat_start"])
+                    Utils.script_sleep(1)
 
         Utils.script_sleep(4)
 
@@ -126,25 +190,32 @@ class ExerciseModule(object):
         # battle summary
         # this will keep clicking the screen until the end of battle summary(where the orange "confirm" button resides) or lock screen for new ships.
         # 1 empty touch for going from "touch2continue" to item obtained screen
-        # no detection for items or ship drop(except new ship inquiring if locking)
+        # no detection for items or ship drop
         Logger.log_msg("Battle summary")
         response = Utils.touch_randomly_ensured(self.region['battle_handler_safe_touch'], "", 
-                                                ["combat/button_confirm"], response_time=0.1, empty_touch=2)
+                                                ["combat/button_confirm"], response_time=0.1)
 
     
         # press the orange "confirm" button at the end of battle summary
-        response = Utils.touch_randomly_ensured(self.region["combat_end_confirm"], "", 
-                                                ["menu/exercise", "combat/defeat_close_button"], 
-                                                response_time=2, similarity_after=0.9,
-                                                stable_check_frame=1)
-
-        if response == 2:
-            defeat = True
-            Logger.log_warning("Fleet was defeated.")
-            response = Utils.touch_randomly_ensured(self.region["battle_handler_defeat_close_touch"], "", 
-                                                    ["menu/exercise"], 
-                                                    response_time=2, stable_check_frame=1)
-
+        if mode == 'exercise':
+            response = Utils.touch_randomly_ensured(self.region["combat_end_confirm"], "", 
+                                                    ["menu/exercise", "combat/defeat_close_button"], 
+                                                    response_time=2, similarity_after=0.9,
+                                                    stable_check_frame=1)
+            if response == 2:
+                defeat = True
+                Logger.log_warning("Fleet was defeated.")
+                response = Utils.touch_randomly_ensured(self.region["battle_handler_defeat_close_touch"], "", 
+                                                        ["menu/exercise"], 
+                                                        response_time=2, stable_check_frame=1)
+        
+        elif mode == 'raid':
+            # no detection of defeat
+            response = Utils.touch_randomly_ensured(self.region["raid_repeat"], "", 
+                                                    ["combat/menu_formation"], 
+                                                    response_time=2, similarity_after=0.9,
+                                                    stable_check_frame=1) 
+        
         # post-summary
         Logger.log_msg("Combat ended.")
-        return
+        return True
