@@ -1285,7 +1285,7 @@ class CombatModule(object):
             Utils.script_sleep(1)     
 
         # move to the boss position to avoid blocking A3 enemy
-        # FIXME: This might fail if the initial spawns happen to block our fleet
+        # FIXME: This might fail if the initial spawns happen to block our fleet from moving to boss position
         Utils.touch(position_boss)
         Utils.script_sleep(2.5)
 
@@ -1306,7 +1306,6 @@ class CombatModule(object):
             if self.kills_count >= 3 and target_info == None and not question_mark_all_obtained:
                 Logger.log_msg("Collecting question marks after 3 battles.")
                 target_info = self.get_closest_target(self.blacklist, [], True, False)
-                print("Debug: target info", target_info)
                 if target_info[2] == 'enemy': 
                     Logger.log_msg("No more question marks.")
                     question_mark_all_obtained = True
