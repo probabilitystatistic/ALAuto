@@ -247,7 +247,7 @@ class Utils(object):
                 elif cls.screencap_mode == consts.ASCREENCAP:
                     start_time = time.perf_counter()
                     raw_compressed_data = Utils.reposition_byte_pointer(
-                        Adb.exec_out('/data/local/tmp/ascreencap --pack 2 --stdout'))
+                        Adb.exec_out_try('/data/local/tmp/ascreencap --pack 2 --stdout'))
                     compressed_data_header = numpy.frombuffer(raw_compressed_data[0:20], dtype=numpy.uint32)
                     if compressed_data_header[0] != 828001602:
                         compressed_data_header = compressed_data_header.byteswap()

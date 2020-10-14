@@ -87,6 +87,36 @@ class Adb(object):
         return process.communicate()[0]
 
     @staticmethod
+    def exec_out_try(args):
+        """Executes the command via exec-out
+
+        Args:
+            args (string): Command to execute.
+
+        Returns:
+            tuple: A tuple containing stdoutdata and stderrdata
+        """
+        cmd = ['adb', '-t', Adb.transID , 'exec-out'] + args.split(' ')
+        process = subprocess.Popen(cmd, stderr = subprocess.PIPE, stdout = subprocess.PIPE)
+        try:
+            out, err = process.communicate(timeout = 10)
+        except subprocess.TimeoutExpired as e:
+            process.kill()
+            Logger.log_error("Adb exec-out timeout! for the following command:")
+            Logger.log_error(str(cmd))
+            Logger.log_error("Retrying...")
+            process = subprocess.Popen(cmd, stderr = subprocess.PIPE, stdout = subprocess.PIPE)
+            try:
+                out, err = process.communicate(timeout = 10)
+            except subprocess.TimeoutExpired as e:
+                process.kill()
+                Logger.log_error("Retry failed. Terminating...")
+                exit()
+            else:
+                Logger.log_success("Retry succeed!")
+        return out
+
+    @staticmethod
     def shell(args):
         """Executes the command via adb shell
 
