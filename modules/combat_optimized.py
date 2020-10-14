@@ -762,6 +762,11 @@ class CombatModule(object):
         Logger.log_msg("Started map clear.")
         Utils.script_sleep(2.5)
 
+        while Utils.find_with_cropped("menu/button_confirm"):
+            Logger.log_msg("Found commission info message.")
+            self.stats.increment_commissions_occurance()
+            Utils.touch_randomly(self.region["combat_com_confirm"])
+
         while Utils.find("combat/fleet_lock", 0.99):
             Utils.touch_randomly(self.region["fleet_lock"])
             Logger.log_warning("Fleet lock is not supported, disabling it.")
@@ -972,6 +977,11 @@ class CombatModule(object):
         boss_swipe = 0
         Logger.log_msg("Started special map clear for 2-1.")
         Utils.script_sleep(2.5)
+
+        while Utils.find_with_cropped("menu/button_confirm"):
+            Logger.log_msg("Found commission info message.")
+            self.stats.increment_commissions_occurance()
+            Utils.touch_randomly(self.region["combat_com_confirm"])
 
         while Utils.find("combat/fleet_lock", 0.99):
             Utils.touch_randomly(self.region["fleet_lock"])
@@ -1253,6 +1263,11 @@ class CombatModule(object):
         self.swipe_counter = 0
         Logger.log_msg("Started special map clear for 7-2.")
         Utils.script_sleep(2.5)
+
+        while Utils.find_with_cropped("menu/button_confirm"):
+            Logger.log_msg("Found commission info message.")
+            self.stats.increment_commissions_occurance()
+            Utils.touch_randomly(self.region["combat_com_confirm"])
 
         while Utils.find("combat/fleet_lock", 0.99):
             Utils.touch_randomly(self.region["fleet_lock"])
