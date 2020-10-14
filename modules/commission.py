@@ -203,7 +203,7 @@ class CommissionModule(object):
     @classmethod
     def find_filtered_commission(self):
         """
-        Return position of non-driller commissions
+        Return a list containing positions of non-driller commissions
         """
         same_slot_determination_separtion = 90 # separation for status_indicator and driller is around 80
         driller_list = []
