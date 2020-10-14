@@ -1512,7 +1512,15 @@ class CombatModule(object):
         enemies = self.get_enemies([], False)
         targets = enemies
 
-        if not block_right_clear:
+        if not block_A3_clear and not block_target_obtained:
+            for index_target in range(0, len(targets)):
+                if self.is_within_zone(targets[index_target], region_block_A3):
+                    index_target_chosen = index_target
+                    Logger.log_info('Found A3 enemy at: {}'.format(targets[index_target]))
+                    targeting_block_A3 = True
+                    block_target_obtained = True
+                    break
+        if not block_right_clear and not block_target_obtained:
             for index_target in range(0, len(targets)):
                 for index_block in range(0,3):
                     if self.is_within_zone(targets[index_target], region_block_right[index_block]):
@@ -1533,14 +1541,6 @@ class CombatModule(object):
                         block_target_obtained = True
                         break
                 if block_target_obtained :
-                    break
-        if not block_A3_clear and not block_target_obtained:
-            for index_target in range(0, len(targets)):
-                if self.is_within_zone(targets[index_target], region_block_A3):
-                    index_target_chosen = index_target
-                    Logger.log_info('Found A3 enemy at: {}'.format(targets[index_target]))
-                    targeting_block_A3 = True
-                    block_target_obtained = True
                     break
         if not block_target_obtained:
             Logger.log_info('Found no block enemy, attacking the first one at: {}'.format(targets[0]))
