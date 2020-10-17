@@ -1075,6 +1075,7 @@ class CombatModule(object):
                     self.kill_the_specific_enemy(self.key_map_region['2-1']['E2'].get_center())
                     if self.exit != 0: self.retreat_handler(); return True
                     # boss appears, reset screen
+                    # this may not be necessary as the mystery node is still in the screen
                     self.reset_screen_by_anchor_point()
                     # take mystery node
                     self.is_reachable(self.key_map_region['2-1']['F2'].get_center())
