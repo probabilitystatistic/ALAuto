@@ -179,8 +179,8 @@ class ExerciseModule(object):
                         Utils.script_sleep(1)
                     else:
                         Utils.touch_randomly(self.region['close_info_dialog'])
-                        Utils.touch_randomly(self.region['menu_nav_back']) #back to fleet selection
-                        Utils.touch_randomly(self.region['menu_nav_back']) # back to raid menu
+                        # note that if quit from repeating only one touch is needed for going back to raid menu, but two touches if not quit from repeating.
+                        Utils.touch_randomly_ensured(self.region['menu_nav_back'], "", ["menu/special_event"], response_time=1, stable_check_frame=1)
                         Logger.log_warning('No more free rounds.')
                         Utils.update_screen()
                         return False
