@@ -233,7 +233,6 @@ class CombatModule(object):
                         self.stats.increment_combat_attempted()
                         break
                     Utils.wait_update_screen()
-                print("Debug: Exit clear_map.")
             if Utils.find_with_cropped("menu/button_sort"):
                 if self.config.enhancement['enabled'] and not enhancement_failed:
                     if not self.enhancement_module.enhancement_logic_wrapper(forced=True):
@@ -571,7 +570,7 @@ class CombatModule(object):
             arrow_found = True
         target_arrow_search_region = Utils.get_region_for_target_arrow_search(location)
         fleet_arrival_detection_region = Utils.get_region_for_fleet_arrival_detection(location)
-        print("fleet_arrival_detection_region:", fleet_arrival_detection_region.x, fleet_arrival_detection_region.y, fleet_arrival_detection_region.w, fleet_arrival_detection_region.h)
+        #print("fleet_arrival_detection_region:", fleet_arrival_detection_region.x, fleet_arrival_detection_region.y, fleet_arrival_detection_region.w, fleet_arrival_detection_region.h)
         count_fleet_at_target_location = 0
         #Utils.script_sleep(1)
 
@@ -1843,6 +1842,8 @@ class CombatModule(object):
                     coords = [0, 0]
 
             self.fleet_location = coords
+
+            #print('fleet location: {}'.format(self.fleet_location))
 
         return self.fleet_location
 
