@@ -20,6 +20,13 @@ data = {
     "combat/combat_pause": [1600, 0, 1920, 150],
     "combat/commander": [100, 250, 1000, 400],
     "combat/defeat_close_button": [750, 850, 1150, 1000],
+    "combat/fleet1": [780, 900, 860, 1000], 
+    "combat/fleet2": [780, 900, 860, 1000], 
+    "combat/fleet3": [780, 900, 860, 1000], 
+    "combat/fleet4": [780, 900, 860, 1000], 
+    "combat/fleet5": [780, 900, 860, 1000], 
+    "combat/fleet6": [780, 900, 860, 1000], 
+    "combat/menu_emergency": [520, 340, 1396, 696], # Just a rough estimation!
     "combat/menu_formation": [100, 0, 350, 100],
     "combat/menu_loading": [1560, 960, 1920, 1080],
     "combat/menu_select_fleet": [160, 80, 600, 200],
@@ -27,6 +34,15 @@ data = {
     "commission/alert_completed": [1660, 400, 1760, 500],
     "commission/scroll_bar_exist": [1860, 80, 1920, 180],
     "commission/scroll_bar_reaching_end": [1860, 980, 1920, 1080],
+    "daily_raid/closed": [1060, 530, 1140, 620],
+    "daily_raid/gold": [600, 180, 1800, 420],
+    "daily_raid/techbox": [750, 150, 1150, 550],
+    "daily_raid/material": [750, 150, 1150, 550],
+    "daily_raid/mind_core": [750, 150, 1150, 550],
+    "daily_raid/skillbook": [750, 150, 1150, 550],
+    "daily_raid/torpedo": [750, 150, 1150, 550],
+    "daily_raid/zero_ticket": [790, 170, 850, 220],
+    "daily_raid/zero_ticket_green": [1760, 120, 1840, 180],
     "event/build_limited": [0, 150, 200, 1000], # Just a rough estimation!
     "event/raid_ticket": [1200, 720, 1280, 820],
     "exercise/start_exercise": [800, 800, 1140, 940], 
@@ -44,6 +60,7 @@ data = {
     # retirement as the crop region does not contain them. However, currently menu/button_confirm
     # is not used in retirement so it should be fine. 
     "menu/button_sort": [500, 700, 800, 850], # This is perhaps the sort button when port is full before starting a combat.
+    "menu/daily_raid": [160, 0, 400, 80],
     "menu/dock": [160, 0, 350, 80],
     "menu/drop_common": [1250, 400, 1920, 800], # Just a rough estimation!
     "menu/drop_elite": [1300, 550, 1920, 690], 
