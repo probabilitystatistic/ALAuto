@@ -555,6 +555,10 @@ class CombatModule(object):
         Returns:
             (int): 1 if a fight is needed, otherwise 0.
         """
+        """
+        Known bug: In the case when target arrow is found, if a fleet passes a mystery node yielding ammo 
+        but not detected, the fleet will just stopped. This results in blacklisting the reachable target.
+        """
         Logger.log_msg("Moving towards objective.")
         count = 0
         location = [target_info[0], target_info[1]]
@@ -566,6 +570,9 @@ class CombatModule(object):
         else:
             arrow_found = True
         target_arrow_search_region = Utils.get_region_for_target_arrow_search(location)
+        fleet_arrival_detection_region = Utils.get_region_for_fleet_arrival_detection(location)
+        print("fleet_arrival_detection_region:", fleet_arrival_detection_region.x, fleet_arrival_detection_region.y, fleet_arrival_detection_region.w, fleet_arrival_detection_region.h)
+        count_fleet_at_target_location = 0
         #Utils.script_sleep(1)
 
         while True:
@@ -630,6 +637,12 @@ class CombatModule(object):
                 Logger.log_debug("Found alert.")
                 Utils.find_and_touch("menu/alert_close")
                 arrow_found = False
+                #continue
+            if target_info[2] == 'mystery_node' and fleet_arrival_detection_region.contains(self.get_fleet_location()):
+                count_fleet_at_target_location += 1
+                if count_fleet_at_target_location >= 3:
+                    Logger.log_warning('Fleet locates at the mystery node but no item is detected.')
+                    return 0
                 continue
             if event["combat/menu_loading"]:
                 self.fleet_location = target_info[0:2]
@@ -1415,14 +1428,22 @@ class CombatModule(object):
                 movement_result = self.movement_handler(target_info)
                 if movement_result == 1:
                     self.battle_handler()
+                    if self.exit == 0:
+                        if targeting_block_right:
+                            block_right_clear = True 
+                        if targeting_block_left:
+                            block_left_clear = True 
+                        if targeting_block_A3:
+                            block_A3_clear = True  
                     Utils.script_sleep(3)
-                    
+                """    
                 if targeting_block_right:
                     block_right_clear = True 
                 if targeting_block_left:
                     block_left_clear = True 
                 if targeting_block_A3:
                     block_A3_clear = True  
+                """
 
                 self.blacklist.clear()                 
 

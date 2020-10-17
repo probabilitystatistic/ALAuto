@@ -1198,6 +1198,20 @@ class Utils(object):
         return Region(x, y, width, height)
 
     @classmethod
+    def get_region_for_fleet_arrival_detection(cls, coord):
+        width = 170
+        height = 150
+        x = coord[0] - int(width/2)
+        if x < 0:
+            x = 0
+        if x + width > 1920:
+            width = 1920 - x
+        y = coord[1] - height
+        if y < 0:
+            y = 0
+        return Region(x, y, width, height)
+
+    @classmethod
     def get_region_color_average(cls, region, hsv=True):
         """
         Get the average color in the region
