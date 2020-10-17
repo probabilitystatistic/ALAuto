@@ -81,7 +81,7 @@ class CommissionModule(object):
                     if Utils.find_and_touch("menu/alert_close"):
                         Utils.script_sleep(1)
                 if self.urgent_handler_selective():
-                    self.daily_handler()
+                    self.daily_handler_selective()
                 Utils.touch_randomly(self.region["button_back"])
                 continue
             if Utils.find("commission/button_go") and (lambda x:x > 332 and x < 511)(Utils.find("commission/button_go").y):
