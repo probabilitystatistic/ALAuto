@@ -278,6 +278,7 @@ class CombatModule(object):
                 Logger.log_msg("Found commission info message.")
                 self.stats.increment_commissions_occurance()
                 Utils.touch_randomly(self.region["combat_com_confirm"])
+                Utils.wait_update_screen()
 
         #Utils.script_sleep(1)
         Utils.menu_navigate("menu/button_battle")
@@ -766,6 +767,7 @@ class CombatModule(object):
             Logger.log_msg("Found commission info message.")
             self.stats.increment_commissions_occurance()
             Utils.touch_randomly(self.region["combat_com_confirm"])
+            Utils.wait_update_screen()
 
         while Utils.find("combat/fleet_lock", 0.99):
             Utils.touch_randomly(self.region["fleet_lock"])
@@ -982,6 +984,7 @@ class CombatModule(object):
             Logger.log_msg("Found commission info message.")
             self.stats.increment_commissions_occurance()
             Utils.touch_randomly(self.region["combat_com_confirm"])
+            Utils.wait_update_screen()
 
         while Utils.find("combat/fleet_lock", 0.99):
             Utils.touch_randomly(self.region["fleet_lock"])
@@ -1268,6 +1271,7 @@ class CombatModule(object):
             Logger.log_msg("Found commission info message.")
             self.stats.increment_commissions_occurance()
             Utils.touch_randomly(self.region["combat_com_confirm"])
+            Utils.wait_update_screen()
 
         while Utils.find("combat/fleet_lock", 0.99):
             Utils.touch_randomly(self.region["fleet_lock"])
