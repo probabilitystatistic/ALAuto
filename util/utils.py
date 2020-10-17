@@ -682,7 +682,7 @@ class Utils(object):
             return None
 
     @classmethod
-    def find_all(cls, image, similarity=DEFAULT_SIMILARITY, useMask=False):
+    def find_all(cls, image, similarity=DEFAULT_SIMILARITY, useMask=False, color=False):
         """Finds all locations of the image on the screen
 
         Args:
@@ -704,8 +704,13 @@ class Utils(object):
         else:
             comparison_method = cv2.TM_CCOEFF_NORMED
             mask = None
-        template = cv2.imread('assets/{}/{}.png'.format(cls.assets, image), 0)
-        match = cv2.matchTemplate(screen, template, comparison_method, mask=mask)
+        if color:
+            template = cv2.imread('assets/{}/{}.png'.format(cls.assets, image), 1)
+            match = cv2.matchTemplate(cls.color_screen, template, comparison_method, mask=mask)
+        else:
+            template = cv2.imread('assets/{}/{}.png'.format(cls.assets, image), 0)
+            match = cv2.matchTemplate(screen, template, comparison_method, mask=mask)
+        
         cls.locations = numpy.where(match >= similarity)
         return cls.filter_similar_coords(
             list(zip(cls.locations[1], cls.locations[0])))
