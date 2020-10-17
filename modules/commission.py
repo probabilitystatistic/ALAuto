@@ -125,6 +125,24 @@ class CommissionModule(object):
                     Logger.log_msg("No more commissions to start.")
                 return
 
+    def daily_handler_selective(self):
+        while True:
+            Utils.update_screen()
+
+            Utils.swipe(960, 680, 960, 400, 300)
+            commission_list = self.find_filtered_commission(mode="daily")
+            if not commission_list:
+                Utils.touch_randomly(self.region["last_commission"])
+            else:
+                # touch the last filtered commission
+                Utils.touch_randomly(commission_list[len(commission_list)])
+            if not self.start_commission():
+                if self.commission_start_attempts > 10:
+                    Logger.log_warning("Going back to main menu and retrying.")
+                else:
+                    Logger.log_msg("No more commissions to start.")
+                return
+
     def urgent_handler(self):
         """ Return true if there are remaining fleets for more commissions.
         """
