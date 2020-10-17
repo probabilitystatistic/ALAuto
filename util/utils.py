@@ -605,6 +605,7 @@ class Utils(object):
 
         height, width = template.shape[:2]
         value, location = cv2.minMaxLoc(match)[1], cv2.minMaxLoc(match)[3]
+        #print("find with crop value:", value, '; image:', image)
         if value >= similarity:
             elapsed_time = time.perf_counter() - start_time
             Logger.log_debug("Find_with_cropped took {} ms to search {}. Match.".format('%.2f' % (elapsed_time * 1000), image))

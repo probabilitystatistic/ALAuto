@@ -17,7 +17,6 @@ class ExerciseModule(object):
         self.opponent_threshold = self.config.exercise["acceptable_fleet_power"]
         self.raid_without_ticket = False
         self.use_raid_ticket = False
-        self.daily_raid_similarity = 0.9
  
         self.region = {
             'battle_handler_safe_touch': Region(40, 180, 110, 110),
@@ -117,7 +116,7 @@ class ExerciseModule(object):
         for i in range(5):
             Utils.update_screen()
             # find a daily raid
-            if Utils.find_with_cropped("daily_raid/closed") or Utils.find_with_cropped("daily_raid/zero_ticket") or Utils.find_with_cropped("daily_raid/torpedo"):
+            if Utils.find_with_cropped("daily_raid/closed") or Utils.find_with_cropped("daily_raid/zero_ticket", similarity=0.9) or Utils.find_with_cropped("daily_raid/torpedo"):
                 Utils.touch_randomly(self.region["daily_raid_right_arrow"])
                 Utils.script_sleep(0.5)
                 continue
@@ -137,11 +136,14 @@ class ExerciseModule(object):
             Utils.touch_randomly_ensured(self.region["choose_current_daily_raid"], "", ["daily_raid/gold"], response_time=1, stable_check_frame=1)
             # run the daily raid at most 3 times
             for j in range(3):
+                if Utils.find_with_cropped("daily_raid/zero_ticket_green"):
+                    Utils.touch_randomly('menu_nav_back')
+                    Utils.script_sleep(1)
+                    break
                 # choose the mission of the daily raid
                 Utils.touch_randomly_ensured(self.region["daily_raid_top_mission"], "daily_raid/gold", ["combat/menu_formation"], response_time=1, stable_check_frame=1)
                 self.daily_battle_handler(mode='daily_raid', use_this_fleet=fleet_chosen)
-                if Utils.find_with_cropped("daily_raid/zero_ticket_green"):
-                    break
+                
         Logger.log_success("All daily raids are completed.")
         Utils.menu_navigate("menu/button_battle")
         #
@@ -223,18 +225,25 @@ class ExerciseModule(object):
         Utils.find_and_touch("combat/auto_combat_off")
         # set fleet if necessary
         if use_this_fleet:
+            count = 0
             while not Utils.find_with_cropped("combat/fleet{}".format(use_this_fleet)):
                 for i in range(6):
                     if Utils.find_with_cropped("combat/fleet{}".format(i+1)):
                         current_fleet = i + 1
+                        Logger.log_msg('Current fleet: {}'.format(current_fleet))
                         break
                 step = use_this_fleet - current_fleet
-                for j in range(step):
+                for j in range(abs(step)):
                     if step > 0:
                         Utils.touch_randomly(self.region["formation_menu_right_arrow"])
                     else:
                         Utils.touch_randomly(self.region["formation_menu_left_arrow"])
                 Utils.wait_update_screen()
+                count += 1
+                if count >= 10:
+                    Logger.log_error("Too many loops in setting fleet in combat formulation menu. Terminating...")
+                    exit()
+            Logger.log_msg('Fleet {} set.'.format(use_this_fleet))
 
         Logger.log_msg("Starting combat.")
 
