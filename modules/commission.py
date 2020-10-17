@@ -171,7 +171,7 @@ class CommissionModule(object):
                 return False
             if not self.commission_is_full:
                 Utils.update_screen() 
-                commission_list = self.find_filtered_commission()
+                commission_list = self.find_filtered_commission(mode="urgent")
                 if not commission_list:
                     Logger.log_msg("Found no non-driller commissions on current screen.")
                 if commission_list:
@@ -201,28 +201,47 @@ class CommissionModule(object):
                 return False
 
     @classmethod
-    def find_filtered_commission(self):
+    def find_filtered_commission(self, mode=None):
         """
-        Return a list containing positions of non-driller commissions
+        Return a list containing positions of filtered commissions
         """
-        same_slot_determination_separtion = 90 # separation for status_indicator and driller is around 80
-        driller_list = []
-        commission_list = []
-        list_tmp = []
         Utils.update_screen()
-        list_tmp = Utils.find_all("commission/commission_status")
-        driller_list = Utils.find_all("commission/driller")
-        commission_list = copy.deepcopy(list_tmp)
-
-        if list_tmp:        
-            if driller_list:
-                for i in range(0, len(list_tmp)):
-                    for j in range(0, len(driller_list)):
-                        if same_slot_determination_separtion >= (list_tmp[i][1] - driller_list[j][1]) > 0:
-                            commission_list.remove(list_tmp[i])
-                            break
+        commission_list = Utils.find_all("commission/commission_status")
+        if mode == "daily":
+            commission_list = self.filter_out_specific_item(commission_list, neglected_item = 'driller')
+            commission_list = self.filter_out_specific_item(commission_list, neglected_item = 'majorEXP18k')
+        if mode == "urgent":
+            commission_list = self.filter_out_specific_item(commission_list, neglected_item = 'driller')
+            commission_list = self.filter_out_specific_item(commission_list, neglected_item = 'skillbook_t1')
+            commission_list = self.filter_out_specific_item(commission_list, neglected_item = 'skillbook_t2')
+            commission_list = self.filter_out_specific_item(commission_list, neglected_item = 'material_t1')
+            commission_list = self.filter_out_specific_item(commission_list, neglected_item = 'material_t2')
+            #commission_list = self.filter_out_specific_item(commission_list, neglected_item = 'ship_rare')
+            commission_list = self.filter_out_specific_item(commission_list, neglected_item = 'ship_elite')
+            commission_list = self.filter_out_specific_item(commission_list, neglected_item = 'ship_ssr')
         return commission_list
 
+    @classmethod
+    def filter_out_specific_item(self, commission_list, neglected_item="driller"):
+        # image separation smaller than this is considered in the same slot
+        # separation for status_indicator and driller is around 80
+        same_slot_determination_separtion = 90 
+        commission_tmp = copy.deepcopy(commission_list)
+        commission_list_filtered = copy.deepcopy(commission_tmp)
+
+        if neglected_item == "skillbook_t1" or "skillbook_t2" or \
+                             "material_t1" or "material_t2":
+            neglection = Utils.find_all("commission/{}".format(neglected_item), color=True)
+        else:
+            neglection = Utils.find_all("commission/{}".format(neglected_item))
+
+        if commission_tmp:
+            if neglection:
+                for i in range(len(commission_tmp)):
+                    for j in range(len(neglection)):
+                        if same_slot_determination_separtion >= (commission_tmp[i][1] - neglection[j][1]) > 0:
+                            commission_list_filtered.remove(commission_tmp[i])
+        return commission_list_filtered
 
     def start_commission(self):
         Logger.log_debug("Starting commission.")
