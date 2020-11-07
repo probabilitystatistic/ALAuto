@@ -15,6 +15,7 @@ class ResearchModule(object):
         self.stats = stats
         self.neglect_series1 = True
         self.neglect_series2 = False
+        self.prioritize_30min = True
         self.region = {
             'lab_tab': Region(1004, 1013, 162, 39),
             'exit_button': Region(51, 52, 71, 60),
@@ -103,6 +104,9 @@ class ResearchModule(object):
             if not self.config.research['30Minutes'] and Utils.find("research/30m", 0.99):
                 Logger.log_msg("Neglecting 0.5-hour research.")
                 return False
+            if self.config.research['30Minutes'] and self.prioritize_30min and Utils.find("research/30m", 0.99):
+                Logger.log_warning("Prioritizing 0.5-hour research.")
+                return True
             if self.config.research['WithoutRequirements'] and not Utils.find("research/nothing", 0.99):
                 Logger.log_msg("Not research without requirement.")
                 return False
