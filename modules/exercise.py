@@ -114,36 +114,62 @@ class ExerciseModule(object):
 
         selected_daily_raid = None
         fleet_chosen = 6
-        for i in range(5):
+        mind_core_done = False
+        techbox_done = False
+        skillbook_done = False
+        material_done = False
+        count = 0
+        while not (mind_core_done and techbox_done and skillbook_done and material_done):
             Utils.update_screen()
+            count += 1
+            if count >= 100:
+                Logger.log_error("Too many loops in daily raid. Quitting...")
+                break
             # find a daily raid
-            if Utils.find_with_cropped("daily_raid/closed") or Utils.find_with_cropped("daily_raid/zero_ticket", similarity=0.9) or Utils.find_with_cropped("daily_raid/torpedo"):
+            if Utils.find_with_cropped("daily_raid/closed", similarity=0.9) or Utils.find_with_cropped("daily_raid/zero_ticket", similarity=0.9) or Utils.find_with_cropped("daily_raid/torpedo", similarity=0.9):
+                if Utils.find_with_cropped("daily_raid/mind_core", similarity=0.9):
+                    Logger.log_msg("Daily raid: cognitive chips closed or done")
+                    mind_core_done = True
+                if Utils.find_with_cropped("daily_raid/techbox", similarity=0.9):
+                    Logger.log_msg("Daily raid: techbox closed or done")
+                    techbox_done = True
+                if Utils.find_with_cropped("daily_raid/skillbook", similarity=0.9):
+                    Logger.log_msg("Daily raid: skillbook closed or done")
+                    skillbook_done = True
+                if Utils.find_with_cropped("daily_raid/material", similarity=0.9):
+                    Logger.log_msg("Daily raid: material closed or done")
+                    material_done = True
                 Utils.touch_randomly(self.region["daily_raid_right_arrow"])
                 Utils.script_sleep(0.5)
                 continue
-            if Utils.find_with_cropped("daily_raid/mind_core"):
+            if Utils.find_with_cropped("daily_raid/mind_core", similarity=0.9):
                 selected_daily_raid = "mind_core"
                 fleet_chosen = 5
-            if Utils.find_with_cropped("daily_raid/techbox"):
+                Logger.log_msg("Run for cognitive chips using fleet {}.".format(fleet_chosen))
+            if Utils.find_with_cropped("daily_raid/techbox", similarity=0.9):
                 selected_daily_raid = "techbox"
                 fleet_chosen = 6
-            if Utils.find_with_cropped("daily_raid/skillbook"):
+                Logger.log_msg("Run for techboxes using fleet {}.".format(fleet_chosen))
+            if Utils.find_with_cropped("daily_raid/skillbook", similarity=0.9):
                 selected_daily_raid = "skillbook"
                 fleet_chosen = 6
-            if Utils.find_with_cropped("daily_raid/material"):
+                Logger.log_msg("Run for skillbooks using fleet {}.".format(fleet_chosen))
+            if Utils.find_with_cropped("daily_raid/material", similarity=0.9):
                 selected_daily_raid = "material"
                 fleet_chosen = 5
+                Logger.log_msg("Run for materials using fleet {}.".format(fleet_chosen))
             # enter the chosen daily raid
-            Utils.touch_randomly_ensured(self.region["choose_current_daily_raid"], "", ["daily_raid/gold"], response_time=1, stable_check_frame=1)
-            # run the daily raid at most 3 times
-            for j in range(3):
-                if Utils.find_with_cropped("daily_raid/zero_ticket_green"):
-                    Utils.touch_randomly('menu_nav_back')
-                    Utils.script_sleep(1)
-                    break
-                # choose the mission of the daily raid
-                Utils.touch_randomly_ensured(self.region["daily_raid_top_mission"], "daily_raid/gold", ["combat/menu_formation"], response_time=1, stable_check_frame=1)
-                self.daily_battle_handler(mode='daily_raid', use_this_fleet=fleet_chosen)
+            if selected_daily_raid:
+                Utils.touch_randomly_ensured(self.region["choose_current_daily_raid"], "", ["daily_raid/gold"], response_time=1, stable_check_frame=1)
+                # run the daily raid at most 3 times(even if defeated and tickets available)
+                for j in range(3):
+                    if Utils.find_with_cropped("daily_raid/zero_ticket_green", similarity=0.95, print_info=True):
+                        Utils.touch_randomly(self.region['menu_nav_back'])
+                        Utils.script_sleep(1)
+                        break
+                    # choose the mission of the daily raid
+                    Utils.touch_randomly_ensured(self.region["daily_raid_top_mission"], "daily_raid/gold", ["combat/menu_formation"], response_time=1, stable_check_frame=1)
+                    self.daily_battle_handler(mode='daily_raid', use_this_fleet=fleet_chosen)
                 
         Logger.log_success("All daily raids are completed.")
         Utils.menu_navigate("menu/button_battle")
