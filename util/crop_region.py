@@ -14,6 +14,7 @@ data = {
     "combat/alert_morale_low": [520, 340, 1396, 696], # stardard info box size
     "combat/alert_unable_battle": [700, 450, 1250, 650], 
     "combat/alert_unable_reach": [743, 260, 1143, 521],
+    "combat/automation_disengage": [0, 25, 250, 115],
     "combat/button_confirm": [1480, 920, 1800, 1080],
     "combat/button_go": [1200, 700, 1800, 980],
     "combat/button_retreat": [1100, 950, 1400, 1080], 

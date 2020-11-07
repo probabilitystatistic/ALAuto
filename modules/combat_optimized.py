@@ -68,6 +68,7 @@ class CombatModule(object):
             'map_summary_go': Region(1289, 743, 280, 79),
             'fleet_menu_go': Region(1485, 872, 270, 74),
             'combat_ambush_evade': Region(1493, 682, 208, 56),
+            'combat_automation': Region(20, 50, 200, 35),
             'combat_com_confirm': Region(848, 740, 224, 56),
             'combat_end_confirm': Region(1613, 947, 30, 25), # x=1613~1643, y=947~972 for safe touch
             'combat_dismiss_surface_fleet_summary': Region(790, 950, 250, 65),
@@ -438,6 +439,9 @@ class CombatModule(object):
                 if Utils.find_with_cropped("combat/menu_touch2continue"):
                     Logger.log_debug("Battle finished.")
                     break
+            if not automation_corrected and Utils.find_with_cropped("combat/automation_disengage", similarity=0.9):
+                Utils.touch_randomly(self.region['combat_automation'])
+                automation_corrected = True
             Utils.script_sleep(1)
 
         # battle summary
@@ -781,16 +785,19 @@ class CombatModule(object):
             Utils.touch_randomly(self.region["combat_com_confirm"])
             Utils.wait_update_screen()
 
-        while Utils.find("combat/fleet_lock", 0.99):
+        
+        while self.config.combat['clearing_mode'] and not Utils.find("combat/fleet_lock", 0.99):
             Utils.touch_randomly(self.region["fleet_lock"])
-            Logger.log_warning("Fleet lock is not supported, disabling it.")
+            Logger.log_warning("Using fleet lock.")
             Utils.wait_update_screen()
+        
 
         if self.config.combat['fleet_switch_at_beinning']:
             Utils.touch_randomly(self.region['button_switch_fleet'])
             Utils.script_sleep(2)
             if self.chapter_map == 'E-C3':
                 self.reset_screen_by_anchor_point()
+            
 
         #swipe map to fit everything on screen
         swipes = {
@@ -998,10 +1005,12 @@ class CombatModule(object):
             Utils.touch_randomly(self.region["combat_com_confirm"])
             Utils.wait_update_screen()
 
-        while Utils.find("combat/fleet_lock", 0.99):
+        
+        while self.config.combat['clearing_mode'] and not Utils.find("combat/fleet_lock", 0.99):
             Utils.touch_randomly(self.region["fleet_lock"])
-            Logger.log_warning("Fleet lock is not supported, disabling it.")
+            Logger.log_warning("Using fleet lock.")
             Utils.wait_update_screen()
+        
 
         if self.config.combat['fleet_switch_at_beinning']:
             Utils.touch_randomly(self.region['button_switch_fleet'])
@@ -1286,9 +1295,9 @@ class CombatModule(object):
             Utils.touch_randomly(self.region["combat_com_confirm"])
             Utils.wait_update_screen()
 
-        while Utils.find("combat/fleet_lock", 0.99):
+        while self.config.combat['clearing_mode'] and not Utils.find("combat/fleet_lock", 0.99):
             Utils.touch_randomly(self.region["fleet_lock"])
-            Logger.log_warning("Fleet lock is not supported, disabling it.")
+            Logger.log_warning("Using fleet lock.")
             Utils.wait_update_screen()
 
         if self.config.combat['fleet_switch_at_beinning']:
