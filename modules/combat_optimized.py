@@ -397,6 +397,7 @@ class CombatModule(object):
         # enhancecement and retirement flags
         enhancement_failed = False
         retirement_failed = False
+        count = 0
         while not (Utils.find_with_cropped("combat/menu_loading", 0.8)):
             Utils.update_screen()
             if Utils.find_with_cropped("menu/button_sort"):
@@ -427,13 +428,25 @@ class CombatModule(object):
             elif Utils.find_with_cropped("combat/combat_pause", 0.7):
                 Logger.log_warning("Loading screen was not found but combat pause is present, assuming combat is initiated normally.")
                 break
+            elif Utils.find_with_cropped("combat/button_retreat"):
+                Logger.log_error('battle_handler called but somehow retreat button is detected.')
+                Logger.log_error('Forcing retreat...')
+                self.exit = 5
+                return False
             else:
                 Utils.touch_randomly(self.region["menu_combat_start"])
                 Utils.script_sleep(1)
+            count += 1
+            if count >= 100:
+                Logger.log_error('Too many loops in battle_handler for searching "combat/menu_loading".')
+                Logger.log_error('Forcing retreat...')
+                self.exit = 5
+                return False
 
         Utils.script_sleep(4)
 
         defeat = False
+        automation_corrected = False
         # in battle or not
         while True:
             Utils.update_screen()
