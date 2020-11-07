@@ -707,10 +707,11 @@ class CombatModule(object):
             else:
                 if count != 0 and count % 3 == 0 and not arrow_found:
                     Utils.touch(location)
-                if count > 31 and self.chapter_map == '2-1' and self.dedicated_map_strategy:
-                    Logger.log_error("Too many loops in movement_handler in 2-1. This should not occur.")
+                if count > 41 and self.chapter_map == '2-1' and self.dedicated_map_strategy:
+                    Logger.log_error("Too many loops in movement_handler in 2-1. Forcing retreating...")
                     self.targeting_2_1_D3 = False
-                    return 0
+                    self.exit = 5
+                    return 2
                 if (count > 41 and (self.chapter_map == '7-2' or self.chapter_map == '5-1') and self.config.combat['clearing_mode']):
                     # if the count is too small, bot would return 0(no fight needed) if the target is afar.
                     # if the count is too large, bot perform many meaningless touch and waste time if the 
@@ -719,7 +720,7 @@ class CombatModule(object):
                     #   when the this mystery node is very close to current fleet(unable to capture target arrow).
                     Logger.log_warning("Clicking on the destination for too many times. Assuming target reached.")
                     return 0
-                if count > 21 and not (self.chapter_map == '7-2' or self.chapter_map == '5-1'):
+                if count > 41 and not (self.chapter_map == '7-2' or self.chapter_map == '5-1' or self.chapter_map == '2-1'):
                     Logger.log_msg("Blacklisting location and searching for another enemy.")
                     self.blacklist.append(location[0:2])
                     self.fleet_location = None
