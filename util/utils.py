@@ -1203,15 +1203,17 @@ class Utils(object):
     @classmethod
     def get_region_for_fleet_arrival_detection(cls, coord):
         width = 170
-        height = 150
+        height = 140
         x = coord[0] - int(width/2)
         if x < 0:
             x = 0
         if x + width > 1920:
             width = 1920 - x
-        y = coord[1] - height
+        y = coord[1] - int(height/2)
         if y < 0:
             y = 0
+        if y + height > 1080:
+            height = 1080 -y
         return Region(x, y, width, height)
 
     @classmethod
