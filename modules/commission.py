@@ -46,10 +46,13 @@ class CommissionModule(object):
         Utils.touch_randomly(self.region["left_menu"])
 
         Utils.script_sleep(1)
-        Utils.touch_randomly(self.region["collect_oil"], sleep=0.1)
-        Utils.touch_randomly(self.region["collect_gold"], sleep=0.1)
+        Utils.touch_randomly(self.region["collect_oil"], sleep=0.3)
+        Utils.touch_randomly(self.region["collect_gold"], sleep=0.3)
 
         self.attempts_count = 0
+        force_one_daily_mission = True
+        forced_one_daily_mission_started = False
+        forced_one_daily_mission_failed = False
 
         loop = 0
 
@@ -80,8 +83,28 @@ class CommissionModule(object):
                     Utils.wait_update_screen(1)
                     if Utils.find_and_touch("menu/alert_close"):
                         Utils.script_sleep(1)
+                if force_one_daily_mission and not forced_one_daily_mission_started and not Utils.find_with_cropped("commission/running"):
+                    Logger.log_msg("No daily mission is running. Trying to start one.")
+                    while not forced_one_daily_mission_started:
+                        if not Utils.find_and_touch("commission/daily_resource_development"):
+                            Logger.log_msg("No daily resource development mission")
+                            break
+                        else:
+                            if not self.start_commission():
+                                if self.commission_start_attempts > 10:
+                                    Logger.log_warning("Going back to main menu and retrying.")
+                                    forced_one_daily_mission_failed = True
+                                    break
+                                break
+                            forced_one_daily_mission_started = True
+                            # swiping back to top is necessary to unsure scroll is on top when entering urgent menu
+                            Utils.swipe(960, 400, 960, 680, 300)
+                    if forced_one_daily_mission_failed or self.commission_is_full:
+                        Utils.touch_randomly(self.region["button_back"])
+                        continue
                 if self.urgent_handler_selective():
-                    self.daily_handler_selective()
+                    #self.daily_handler_selective()
+                    self.daily_handler()
                 Utils.touch_randomly(self.region["button_back"])
                 continue
             if Utils.find("commission/button_go") and (lambda x:x > 332 and x < 511)(Utils.find("commission/button_go").y):
@@ -135,7 +158,7 @@ class CommissionModule(object):
                 Utils.touch_randomly(self.region["last_commission"])
             else:
                 # touch the last filtered commission
-                Utils.touch_randomly(commission_list[len(commission_list)])
+                Utils.touch(commission_list[len(commission_list)-1])
             if not self.start_commission():
                 if self.commission_start_attempts > 10:
                     Logger.log_warning("Going back to main menu and retrying.")
