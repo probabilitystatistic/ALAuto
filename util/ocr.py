@@ -123,7 +123,11 @@ class OCR(object):
         #   specifying the index of matched phrase in the phrase_to_search list.
         if phrase_to_search == []:
             if mode == "number":
-                return re.sub("[^0-9]", "", parsed_text)
+                if re.sub("[^0-9]", "", parsed_text) == "":
+                    Logger.log_warning("No number read by OCR. Returning 99999.")
+                    return 99999
+                else:
+                    return re.sub("[^0-9]", "", parsed_text)
             else:
                 return parsed_text
         else:
