@@ -23,6 +23,7 @@ class ExerciseModule(object):
             'battle_handler_defeat_close_touch': Region(880, 900, 100, 40),
             'choose_current_daily_raid': Region(900, 500, 100, 100),
             'combat_end_confirm': Region(1504, 952, 38, 70), # safe
+            'combat_automation': Region(20, 50, 200, 35),
             'close_info_dialog': Region(1326, 274, 35, 35),
             'daily_raid_left_arrow': Region(40, 510, 40, 60), 
             'daily_raid_right_arrow': Region(1840, 510, 30, 60), 
@@ -73,10 +74,10 @@ class ExerciseModule(object):
 
         # beginning of temporary code for essex raid
         # switch on/off essex raid
-        if 1:
+        if 0:
             oil, gold = Utils.get_oil_and_gold()
             do_easy = False
-            do_normal = True
+            do_normal = False
             do_hard = True
             do_EX = False
             do_essex_exercise = [do_easy, do_normal, do_hard, do_EX]
@@ -268,6 +269,7 @@ class ExerciseModule(object):
                         Logger.log_warning('No more free rounds.')
                         Utils.update_screen()
                         return False
+                #elif Utils.find_with_cropped("menu/alert_close"):
                 else:
                     Utils.touch_randomly(self.region["menu_combat_start"])
                     Utils.script_sleep(1)
@@ -275,6 +277,7 @@ class ExerciseModule(object):
         Utils.script_sleep(4)
 
         defeat = False
+        automation_corrected = False
         # in battle or not
         while True:
             Utils.update_screen()
@@ -284,6 +287,9 @@ class ExerciseModule(object):
                 if Utils.find_with_cropped("combat/menu_touch2continue"):
                     Logger.log_debug("Battle finished.")
                     break
+            if not automation_corrected and Utils.find_with_cropped("combat/automation_disengage", similarity=0.9):
+                Utils.touch_randomly(self.region['combat_automation'])
+                automation_corrected = True
             Utils.script_sleep(1)
 
         # battle summary
