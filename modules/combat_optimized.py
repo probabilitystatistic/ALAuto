@@ -2065,7 +2065,7 @@ class CombatModule(object):
         # check 10 frames
         for i in range(10):
             Utils.update_screen()
-            if Utils.find_with_cropped('combat/alert_unable_reach'):
+            if Utils.find_with_cropped('combat/alert_unable_reach', similarity=0.9, print_info=True):
                 Logger.log_msg('Unable to reach the target.')
                 # wait for the 'unable to reach' dialog to disappear to avoid mis-determination for other algorithm after this call
                 Utils.script_sleep(3) 
