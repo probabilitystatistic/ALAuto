@@ -1551,6 +1551,39 @@ class CombatModule(object):
 
         swipe_reset = 0
         Utils.update_screen()
+
+        # this special treatment for 7-2 is to improve efficiency of screen reset
+        if self.chapter_map == "7-2":
+            # sometimes swipe will fail due to ADB not responding, so we try 3 times
+            for i in range(3):
+                if Utils.find_with_cropped("map_anchors/map_7-2_top_right", similarity=0.95):
+                    # fleet at top right
+                    #Utils.swipe(600, 800, 1456, 494, 300)
+                    #Utils.swipe(600, 800, 1449, 496, 300)
+                    #Utils.swipe(600, 800, 1415, 509, 300)
+                    Utils.swipe(600, 800, 1425, 500, 600)
+                else:
+                    # fleet at bottom left
+                    #Utils.swipe(1400, 400, 756, 700, 300)
+                    #Utils.swipe(1400, 400, 767, 693, 300)
+                    #Utils.swipe(1400, 400, 761, 697, 300)
+                    #Utils.swipe(1400, 400, 769, 692, 300)
+                    Utils.swipe(1400, 400, 765, 695, 600)
+                Utils.wait_update_screen()
+                anchor = Utils.find("map_anchors/map_7-2", similarity=0.95)
+                if anchor:
+                    break
+            # sometimes the swipe willl fail so 
+            if not anchor:
+                return False
+            #print(anchor_position[0] - anchor.x, anchor_position[1] - anchor.y)
+            if abs(anchor.x - anchor_position[0]) <= anchor_tolerance[0] and abs(anchor.y - anchor_position[1]) <= anchor_tolerance[1]:
+                Logger.log_msg("Screen successfully reset....")
+                screen_is_reset = True
+                return True
+                # if this special treatment fails, the general approach below still applies.
+
+        # this is a general approach for resetting screen        
         anchor = Utils.find_in_scaling_range("map_anchors/map_{}".format(self.chapter_map), similarity=0.95)
         while not screen_is_reset:
             s = 0
@@ -1567,7 +1600,7 @@ class CombatModule(object):
             if swipe_reset > 15:
                 Logger.log_error("Swipe too many times for resetting screen.")
                 return False
-            Utils.wait_update_screen(1)
+            Utils.wait_update_screen(0.5)
             # check if resetiing screen is really successful
             anchor = Utils.find_in_scaling_range("map_anchors/map_{}".format(self.chapter_map), similarity=0.95)
             if not anchor:
