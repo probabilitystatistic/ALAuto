@@ -1008,7 +1008,8 @@ class CombatModule(object):
 # It's just moving one grid left(it's two to avoid further possible block).
 # The width of one grid is roughly 180 pixels.
 # Note that this will fail if the boss is hidden by the other fleet.
-            elif self.kills_count >= self.kills_before_boss[self.chapter_map] and self.config.combat['kills_before_boss'] == 0 and self.config.combat['clearing_mode']:
+            #elif self.kills_count >= self.kills_before_boss[self.chapter_map] and self.config.combat['kills_before_boss'] == 0 and self.config.combat['clearing_mode']:
+            elif self.kills_count >= self.kills_before_boss[self.chapter_map] and self.config.combat['clearing_mode']:
                 Logger.log_warning("Boss fleet is not found. Trying to uncover the boss.")
                 self.fleet_location = None
                 single_fleet_location = self.get_fleet_location()
