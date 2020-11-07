@@ -549,7 +549,7 @@ class Utils(object):
         return None
 
     @classmethod
-    def find_with_cropped(cls, image, similarity=DEFAULT_SIMILARITY, color=False, dynamical_region=None):
+    def find_with_cropped(cls, image, similarity=DEFAULT_SIMILARITY, color=False, dynamical_region=None, print_info=False):
         """Finds the specified image on the cropped screen. This function takes exactly the same input as the function find.
         Therefore updating "find" to "find_with_cropped" is straightforward. This funtion utilizes the specified region written
         in crop_region.py to crop the captured screen. Cropping a screen before search generally make search much faster. For 
@@ -605,7 +605,9 @@ class Utils(object):
 
         height, width = template.shape[:2]
         value, location = cv2.minMaxLoc(match)[1], cv2.minMaxLoc(match)[3]
-        #print("find with crop value:", value, '; image:', image)
+        if print_info:
+            if value < 0.95 and value > similarity:
+                print("find_with_crop value/sim:", value, '/', similarity, '; image:', image)
         if value >= similarity:
             elapsed_time = time.perf_counter() - start_time
             Logger.log_debug("Find_with_cropped took {} ms to search {}. Match.".format('%.2f' % (elapsed_time * 1000), image))
