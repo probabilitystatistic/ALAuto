@@ -78,7 +78,8 @@ class RetirementModule(object):
                         in_dock = True
                         break
                 # called from main menu
-                if Utils.find_with_cropped("menu/button_battle"):
+                #if Utils.find_with_cropped("menu/button_battle"):
+                else:
                     Logger.log_debug("Retirement called from main menu.")
                     self.called_from_menu = True
                     oil, gold = Utils.get_oil_and_gold()
