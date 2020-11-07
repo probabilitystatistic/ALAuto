@@ -51,6 +51,7 @@ data = {
     "event/raid_ticket": [1200, 720, 1280, 820],
     "exercise/start_exercise": [800, 800, 1140, 940], 
     "exercise/zero_turn_left": [1720, 202, 1820, 256],
+    "map_anchors/map_7-2_top_right": [670, 970, 1050, 1080],
     "menu/alert_info": [0, 0, 960, 540], # Just a rough estimation!
     "menu/alert_close": [960, 0, 1920, 540], # Just a rough estimation!
     "menu/attack": [140, 0, 420, 100],

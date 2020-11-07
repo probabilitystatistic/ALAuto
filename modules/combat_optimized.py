@@ -115,6 +115,10 @@ class CombatModule(object):
                    'F2': Region(1436, 409, 169, 131),
                    'F3': Region(1461, 540, 171, 140)
             },
+            'E-C1':{'C6': Region(559, 762, 200, 156),
+                    'D6': Region(764, 760, 210, 160),
+                    'F5': Region(1187, 613, 185, 140)
+            },
             'E-C3':{'C1': Region(960, 273, 170, 114),
                     'D1': Region(1142, 274, 170, 114),
                     'F2': Region(1532, 391, 135, 125)
@@ -484,11 +488,33 @@ class CombatModule(object):
 
         """
         #Logger.enable_debugging(Logger)
-        response = Utils.touch_randomly_ensured(self.region["combat_end_confirm"], "", 
-                                                ["menu/button_confirm", "combat/button_retreat", 
-                                                 "menu/attack", "combat/defeat_close_button"], 
-                                                response_time=3, similarity_after=0.9,
-                                                stable_check_frame=2)
+        if not self.chapter_map[0].isdigit() and boss:
+            """
+            Special treatment for event map giving items after clearing the map
+                note that when item is given retreat button can generally be detected(similarity~0.94) so here we 
+                ignore the retreat button. This is fine as it is a boss fight.
+            Also note that the response is carefully alligned such that the they match up with conventional cases.
+            """
+            response = Utils.touch_randomly_ensured(self.region["combat_end_confirm"], "", 
+                                                    ["menu/item_found","menu/button_confirm", 
+                                                     "menu/attack", "combat/defeat_close_button"], 
+                                                    response_time=3, similarity_after=0.9,
+                                                    stable_check_frame=2)
+            # extra click to handle the item found case
+            if response == 1:
+                response = Utils.touch_randomly_ensured(self.region['battle_handler_safe_touch'], "", 
+                                                        ["menu/button_confirm", "menu/attack"], 
+                                                        response_time=3, similarity_after=0.95,
+                                                        stable_check_frame=2)
+                # to match up the response with the conventional cases
+                if response == 2:
+                    response = 3
+        else:
+            response = Utils.touch_randomly_ensured(self.region["combat_end_confirm"], "", 
+                                                    ["menu/button_confirm", "combat/button_retreat", 
+                                                     "menu/attack", "combat/defeat_close_button"], 
+                                                    response_time=3, similarity_after=0.9,
+                                                    stable_check_frame=2)
         #Logger.disable_debugging(Logger)
 
         if response == 4:
@@ -795,6 +821,10 @@ class CombatModule(object):
         if self.config.combat['fleet_switch_at_beinning']:
             Utils.touch_randomly(self.region['button_switch_fleet'])
             Utils.script_sleep(2)
+            # for ashen simulation
+            if self.chapter_map == 'E-C1':
+                self.reset_screen_by_anchor_point()
+            # for scherzo of iron and blood
             if self.chapter_map == 'E-C3':
                 self.reset_screen_by_anchor_point()
             
@@ -842,7 +872,7 @@ class CombatModule(object):
             Utils.script_sleep(2)
             Utils.update_screen()
         
-        # dedicated for scherzo of iron and blood event
+        # dedicated for scherzo of iron and blood event(farming points and torpedo fighter)
         if self.chapter_map == "E-C3":
             Utils.touch(self.key_map_region['E-C3']['C1'].get_center())
             Utils.script_sleep(2)
@@ -858,6 +888,29 @@ class CombatModule(object):
             Utils.update_screen()
             #fleet_switched_for_E_C3 = False
 
+        # dedicated for ashen simulation(farming points and gun)
+        if self.chapter_map == "E-C1":
+            for i in range(3):
+                Utils.update_screen()
+                # kill possible D6 enemy to clear path to C6
+                if i == 0:
+                    if self.enemy_exist_here(self.key_map_region['E-C1']['D6']):
+                        coord = self.key_map_region['E-C1']['D6'].get_center()
+                        Logger.log_msg("D6 enemy exists")
+                    else:
+                        Logger.log_msg("No D6 enemy")
+                        continue
+                if i == 1:
+                    coord = self.key_map_region['E-C1']['C6'].get_center()
+                    Logger.log_msg("Targetting C6 elite")
+                if i == 2:
+                    coord = self.key_map_region['E-C1']['F5'].get_center()
+                    Logger.log_msg("Targetting F5 elite")
+                target_info = [coord[0], coord[1], 'enemy']
+                Utils.touch(coord)
+                movement_result = self.movement_handler(target_info)
+                if movement_result == 1:
+                    self.battle_handler()
 
 
 #By me:
@@ -1479,12 +1532,15 @@ class CombatModule(object):
                 }
         if self.chapter_map == "7-2":
             anchor_position = [1564, 677]
-            anchor_tolerance = [10, 10]
+            anchor_tolerance = [30, 30]
         elif self.chapter_map == "6-1":
             anchor_position = [423, 688]
             anchor_tolerance = [10, 10]
         elif self.chapter_map == "2-1":
             anchor_position = [500, 557]
+            anchor_tolerance = [30, 30]
+        elif self.chapter_map == "E-C1":
+            anchor_position = [1410, 252]
             anchor_tolerance = [30, 30]
         elif self.chapter_map == "E-C3":
             anchor_position = [1748, 406]
