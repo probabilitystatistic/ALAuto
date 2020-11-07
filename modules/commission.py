@@ -197,7 +197,7 @@ class CommissionModule(object):
         scroll_bottom_reached = True
 
         Utils.update_screen()
-        if Utils.find("commission/scroll_bar_exist"):
+        if Utils.find_with_cropped("commission/scroll_bar_exist"):
             scroll_bottom_reached = False
             Logger.log_debug("Scroll bar detected.")
         else:
@@ -214,9 +214,9 @@ class CommissionModule(object):
                 Utils.update_screen() 
                 commission_list = self.find_filtered_commission(mode="urgent")
                 if not commission_list:
-                    Logger.log_msg("Found no non-driller commissions on current screen.")
+                    Logger.log_msg("Found no filtered commissions on current screen.")
                 if commission_list:
-                    Logger.log_msg("Found {} non-driller commission(s).".format(len(commission_list)))
+                    Logger.log_msg("Found {} filtered commission(s).".format(len(commission_list)))
                     # Only touch the first commission in the list because the game resets the screen after clicking on one, rendering the position in the list wrong.
                     i = 0
                     Utils.touch(commission_list[i])
@@ -235,7 +235,7 @@ class CommissionModule(object):
                 else:
                     Utils.swipe_commission_slot(4)
                     Utils.update_screen()
-                    if Utils.find("commission/scroll_bar_reaching_end"):
+                    if Utils.find_with_cropped("commission/scroll_bar_reaching_end"):
                         scroll_bottom_reached = True
                         Logger.log_debug("Scroll bottom reached.")
             else:
@@ -285,6 +285,9 @@ class CommissionModule(object):
         return commission_list_filtered
 
     def start_commission(self):
+        """
+        Return: False if no need to continue doing commissions or too many attemps made. Otherwise True.
+        """
         Logger.log_debug("Starting commission.")
         tapped_recommend = False
 
