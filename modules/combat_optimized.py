@@ -1267,8 +1267,9 @@ class CombatModule(object):
         while True:
             count += 1
             if count >= 10:
-                Logger.log_error("Too many loops in kill_the_specific_enemy. Terminating...")
-                exit()
+                Logger.log_error("Too many loops in kill_the_specific_enemy. Force retreating...")
+                self.exit = 5
+                return 
             Utils.touch(target_info[0:2])
             Utils.update_screen()
             movement_result = self.movement_handler(target_info)
@@ -1276,6 +1277,8 @@ class CombatModule(object):
                 self.battle_handler()
                 target_info = None
                 self.blacklist.clear()
+                return
+            if movement_result == 2:
                 return
 
     def kill_specific_number_of_mob(self, number):
@@ -1316,7 +1319,19 @@ class CombatModule(object):
     def kill_boss(self):
         Utils.update_screen()
         boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
+        if boss_region == None:
+            Logger.log_warning("Cannot find boss. Retrying...")
+            Utils.script_sleep(2)
+            Utils.update_screen()
+            boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
+            if not boss_region:
+                Logger.log_msg("Boss is found successfully")
+            else:
+                Logger.log_error("Cannot find boss! Force retreating...")
+                self.exit = 5
+                return
         boss_info = [boss_region.x + 50, boss_region.y + 25, "boss"]
+        #self.kill_the_specific_enemy([boss_])
         self.clear_boss(boss_info)
 
     def clear_map_special_7_2(self):
@@ -1756,7 +1771,8 @@ class CombatModule(object):
                 boss_info = [boss_region.x + 50, boss_region.y + 25, "boss"]
                 continue
             else:
-                self.movement_handler(boss_info)
+                if self.movement_handler(boss_info) == 2:
+                    return
                 if self.battle_handler(boss=True):
                     self.exit = 1
                     Logger.log_msg("Boss successfully defeated.")
@@ -1795,7 +1811,12 @@ class CombatModule(object):
             if len(blacklist) > 2:
                 self.enemies_list.clear()
 
+        count = 0
         while not self.enemies_list:
+            count += 1
+            if count >= 100:
+                Logger.log_error("Too many loops in searching enemies. Terminating...")
+                exit()
             if (boss and len(blacklist) > 4) or (not boss and len(blacklist) > 3) or sim < 0.985:
                 if self.swipe_counter > 3: self.swipe_counter = 0
                 swipes = {
