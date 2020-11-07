@@ -595,7 +595,7 @@ class CombatModule(object):
         Args:
             target_info (list): coordinate_x, coordinate_y, type. Describes the selected target.
         Returns:
-            (int): 1 if a fight is needed, otherwise 0.
+            (int): 1 if a fight is needed, 2 if retreat is needed, otherwise 0.
         """
         """
         Known bug: In the case when target arrow is found, if a fleet passes a mystery node yielding ammo 
@@ -624,6 +624,19 @@ class CombatModule(object):
             if not arrow_found and Utils.find_with_cropped("combat/fleet_arrow", dynamical_region = target_arrow_search_region):
                 Logger.log_msg('Target arrow found.')
                 arrow_found = True
+            #if self.chapter_map[0].isdigit() and event["combat/alert_ammo_supplies"]:
+            if Utils.find_with_cropped("combat/alert_ammo_supplies", similarity=0.9):
+                # from time to time ammo supply similarity could go below 0.95
+                Logger.log_msg("Received ammo supplies")
+                if target_info[2] == 'enemy':
+                    arrow_found = False
+                # wait for the info box to disappear
+                Utils.script_sleep(2)
+                if target_info[2] == "mystery_node":
+                    Logger.log_msg("Target reached.")
+                    self.fleet_location = target_info[0:2]
+                    return 0
+                continue
             if self.targeting_2_1_D3 and self.key_map_region['2-1']['D3'].contains(self.get_fleet_location()):
                 """
                 FL = self.get_fleet_location()
@@ -651,17 +664,6 @@ class CombatModule(object):
                 Utils.touch_randomly(self.region["menu_combat_start"])
                 self.battle_handler()
                 continue
-            if self.chapter_map[0].isdigit() and event["combat/alert_ammo_supplies"]:
-                Logger.log_msg("Received ammo supplies")
-                if target_info[2] == 'enemy':
-                    arrow_found = False
-                # wait for the info box to disappear
-                Utils.script_sleep(2)
-                if target_info[2] == "mystery_node":
-                    Logger.log_msg("Target reached.")
-                    self.fleet_location = target_info[0:2]
-                    return 0
-                continue
             if self.chapter_map[0].isdigit() and event["menu/item_found"]:
                 Logger.log_msg("Item found on node.")
                 Utils.touch_randomly(self.region['tap_to_continue'])
@@ -675,18 +677,27 @@ class CombatModule(object):
                     self.fleet_location = target_info[0:2]
                     return 0
                 continue
-            if event["menu/alert_info"]:
-                Logger.log_debug("Found alert.")
-                Utils.find_and_touch("menu/alert_close")
-                arrow_found = False
-                #continue
+            if Utils.find_with_cropped("combat/alert_morale_low"):
+                if self.config.combat['ignore_morale']:
+                    Utils.find_and_touch("menu/button_confirm")
+                else:
+                    Utils.touch_randomly(self.region['close_info_dialog'])
+                    if self.config.combat['low_mood_rotation']:
+                        self.exit = 6
+                        self.fleet_switch_due_to_morale= True
+                        Logger.log_warning("Low morale detected. Will switch to a different fleet.")
+                        return 2
+                    # bot rests by default
+                    else:
+                        self.exit = 3
+                        return 2
             if target_info[2] == 'mystery_node' and fleet_arrival_detection_region.contains(self.get_fleet_location()):
                 count_fleet_at_target_location += 1
                 if count_fleet_at_target_location >= 3:
-                    Logger.log_warning('Fleet locates at the mystery node but no item is detected.')
+                    Logger.log_warning('Fleet locates at the target mystery node but nothing is detected.')
                     return 0
                 continue
-            if event["combat/menu_loading"]:
+            if Utils.find_with_cropped("combat/menu_loading", 0.8) or Utils.find_with_cropped("combat/combat_pause", 0.7):
                 self.fleet_location = target_info[0:2]
                 return 1
             elif event["combat/menu_formation"]:
