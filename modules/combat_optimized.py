@@ -1004,25 +1004,38 @@ class CombatModule(object):
                 self.clear_boss(boss_info)
                 continue
 # By me:
-# Solution when boss is hidden by player's fleet. This should work for map 4-2, 5-1 and 6-1(any map with left-bottom tile of a possibly blocked boss empty).
-# It's just moving one grid left(it's two to avoid further possible block).
+# Solution when boss is hidden by player's fleet. This should work for map 4-2, 5-1 and 6-1(any map with bottom left or right tile of a possibly blocked boss empty).
+# It's just moving one grid left, and two-times one grid right if boss still not found.
 # The width of one grid is roughly 180 pixels.
 # Note that this will fail if the boss is hidden by the other fleet.
             #elif self.kills_count >= self.kills_before_boss[self.chapter_map] and self.config.combat['kills_before_boss'] == 0 and self.config.combat['clearing_mode']:
             elif self.kills_count >= self.kills_before_boss[self.chapter_map] and self.config.combat['clearing_mode']:
                 Logger.log_warning("Boss fleet is not found. Trying to uncover the boss.")
+                #if boss_swipe == 3:
+                #    Logger.log_warning("Boss might be hidden by another fleet. Switch to the other fleet and retry.")
+                #    Utils.touch_randomly(self.region['button_switch_fleet'])
+                #    Utils.wait_update_screen(2)
                 self.fleet_location = None
                 single_fleet_location = self.get_fleet_location()
-                location_left_of_fleet = [0, 0]
-                location_left_of_fleet[0] = single_fleet_location[0] - 180
-                location_left_of_fleet[1] = single_fleet_location[1]
-                Utils.touch(location_left_of_fleet)
+                location_left_or_right_of_fleet = [0, 0]
+                if boss_swipe <= 0:
+                    # move to the left
+                    Logger.log_msg("Move to the left")
+                    location_left_or_right_of_fleet[0] = single_fleet_location[0] - 180
+                else:
+                    # move to the right 
+                    location_left_or_right_of_fleet[0] = single_fleet_location[0] + 180
+                    Logger.log_msg("Move to the right")
+                location_left_or_right_of_fleet[1] = single_fleet_location[1]
+                Utils.touch(location_left_or_right_of_fleet)
                 # We must give some time for the fleet to move, otherwise the screen update right after continue will still fail to see boss.
-                Utils.script_sleep(1.5)
+                Utils.wait_update_screen(2)
+                #if Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9):
+                #    Logger.log_msg("Boss uncovered")
                 boss_swipe += 1
                 if boss_swipe >= 3:
-                    Logger.log_error("Boss cannot be uncovered. Terminating...")
-                    exit()
+                    Logger.log_error("Boss cannot be uncovered. Force retreating...")
+                    self.exit = 5
                 continue
             if target_info == None:
                 target_info = self.get_closest_target(self.blacklist, mystery_node=(not self.config.combat["ignore_mystery_nodes"]))
