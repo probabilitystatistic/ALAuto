@@ -107,6 +107,9 @@ venv.bak/
 .vs/
 .vscode/
 
+# screen captures
+screencap/
+
 # own files
 start.bat
 config-local.ini
