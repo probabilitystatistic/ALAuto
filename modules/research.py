@@ -16,6 +16,7 @@ class ResearchModule(object):
         self.neglect_series1 = True
         self.neglect_series2 = False
         self.prioritize_30min = True
+        self.save_research_result_to_file = True
         self.region = {
             'lab_tab': Region(1004, 1013, 162, 39),
             'exit_button': Region(51, 52, 71, 60),
@@ -148,6 +149,8 @@ class ResearchModule(object):
         Utils.wait_update_screen(0.5)
         if Utils.find("research/item_found"):
             Logger.log_msg("Found completed research project.")
+            if self.save_research_result_to_file:
+                Utils.save_screen("research")
             Utils.touch_randomly(self.region['project_click'])
             Utils.script_sleep(1)
             Utils.touch_randomly(self.region['project_click'])
@@ -159,6 +162,8 @@ class ResearchModule(object):
                 Utils.wait_update_screen(0.5)
                 if Utils.find("research/item_found"):
                     Logger.log_msg("Found completed research project.")
+                    if self.save_research_result_to_file:
+                        Utils.save_screen("research")
                     Utils.script_sleep(1.5)
                     Utils.touch_randomly(self.region['project_click'])
                     Utils.script_sleep(1)
