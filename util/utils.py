@@ -200,6 +200,19 @@ class Utils(object):
             time.sleep(uniform(base, base + flex))
 
     @classmethod
+    def save_screen(cls, description=None, need_to_update_screen=False):
+        if need_to_update_screen:
+            cls.update_screen()
+        time_now = datetime.now()
+        path = "screencap"
+        if description:
+            file_name = description + "-" + time_now.strftime("[%Y,%m,%d-%H,%M,%S]")
+        else:
+            file_name = "screen-" + time_now.strftime("[%Y,%m,%d-%H,%M,%S]")
+        cv2.imwrite(os.path.join(path, '{}.jpg'.format(file_name)), cls.color_screen)
+        Logger.log_debug("Screen saved to: screencap/{}.png".format(file_name))
+
+    @classmethod
     def update_screen(cls):
         """Uses ADB to pull a screenshot of the device and then read it via CV2
         and then stores the images in grayscale and color to screen and color_screen, respectively.
@@ -976,12 +989,12 @@ class Utils(object):
                     number_of_stable_frame += 1
                     Logger.log_debug("  Stable {}th frame: Yes".format(stable_loop_count))
                     if Logger.debug and write_stable_check_frame_to_file_in_debug_mode:
-                        cv2.imwrite("stable_check_{}.png".format(stable_loop_count), cls.screen)
+                        cls.save_screen("stable_check_{}".format(stable_loop_count))
                 else:
                     number_of_stable_frame = 0
                     Logger.log_debug("  Stable {}th frame: No".format(stable_loop_count))
                     if Logger.debug and write_stable_check_frame_to_file_in_debug_mode:
-                        cv2.imwrite("stable_check_{}.png".format(stable_loop_count), cls.screen)
+                        cls.save_screen("stable_check_{}".format(stable_loop_count))
                 if number_of_stable_frame >= stable_check_frame:
                     Logger.log_debug("  Stablized after {} frame(s); {} requested; interval {}s".format(stable_loop_count, stable_check_frame, stable_check_interval))
                     break 
@@ -999,11 +1012,11 @@ class Utils(object):
                         return i+1
                 if touch_count > trial:
                     Logger.log_error("Ensured touch failed at [{}, {}] after {} trials".format(coords[0], coords[1], trial))
-                    cv2.imwrite("touch_ensured_failure.png", cls.screen) 
+                    cls.save_screen("touch_ensured_failure")
                     return 0
                 Logger.log_debug("  Ensured touch failed at [{},{}] for the {}th time, will try again.".format(coords[0], coords[1], touch_count))
                 if touch_count == 1 and Logger.debug: 
-                    cv2.imwrite("touch_ensured_after_first_click.png", cls.screen)
+                    cls.save_screen("touch_ensured_after_first_click.png")
             else:
                 Logger.log_debug("Reference check after touch is not requested.")
                 return -1
