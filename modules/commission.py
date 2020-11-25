@@ -63,10 +63,12 @@ class CommissionModule(object):
                 Logger.log_error("Too many loops in commission. Resume to other tasks.")
                 Utils.menu_navigate("menu/button_battle")
                 return True
-            if Utils.find("commission/button_completed") and (lambda x:x > 332 and x < 511)(Utils.find("commission/button_completed").y):
+            #if Utils.find("commission/button_completed") and (lambda x:x > 332 and x < 511)(Utils.find("commission/button_completed").y):
+            if Utils.find_with_cropped("commission/button_completed"):
                 Logger.log_debug("Found commission complete button.")
                 self.completed_handler()
-            if Utils.find("commission/alert_available", 0.9) and (lambda x:x > 332 and x < 511)(Utils.find("commission/alert_available", 0.9).y):
+            #if Utils.find("commission/alert_available", 0.9) and (lambda x:x > 332 and x < 511)(Utils.find("commission/alert_available", 0.9).y):
+            if Utils.find_with_cropped("commission/alert_available", similarity=0.9):
                 Logger.log_debug("Found commission available indicator.")
                 self.commission_is_full = False
                 if self.attempts_count > 2:
@@ -108,6 +110,7 @@ class CommissionModule(object):
                 Utils.touch_randomly(self.region["button_back"])
                 continue
             if Utils.find("commission/button_go") and (lambda x:x > 332 and x < 511)(Utils.find("commission/button_go").y):
+            #if Utils.find_with_cropped("commission/button_go"):
                 Logger.log_msg("All commissions are running.")
                 Utils.touch_randomly(self.region["dismiss_side_tab"])
                 break
@@ -257,7 +260,7 @@ class CommissionModule(object):
             commission_list = self.filter_out_specific_item(commission_list, neglected_item = 'skillbook_t2')
             commission_list = self.filter_out_specific_item(commission_list, neglected_item = 'material_t1')
             commission_list = self.filter_out_specific_item(commission_list, neglected_item = 'material_t2')
-            #commission_list = self.filter_out_specific_item(commission_list, neglected_item = 'ship_rare')
+            commission_list = self.filter_out_specific_item(commission_list, neglected_item = 'ship_rare')
             commission_list = self.filter_out_specific_item(commission_list, neglected_item = 'ship_elite')
             commission_list = self.filter_out_specific_item(commission_list, neglected_item = 'ship_ssr')
         return commission_list
