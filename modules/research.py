@@ -17,6 +17,7 @@ class ResearchModule(object):
         self.neglect_series2 = False
         self.prioritize_30min = True
         self.save_research_result_to_file = True
+        self.no_matched_project = False
         self.region = {
             'lab_tab': Region(1004, 1013, 162, 39),
             'exit_button': Region(51, 52, 71, 60),
@@ -29,7 +30,11 @@ class ResearchModule(object):
         }
 
     def research_logic_wrapper(self):
-        Logger.log_msg("Found lab alert.")
+        if self.no_matched_project:
+            Logger.log_warning("Neglect lab alert as no matched research project detected previously")
+            return True
+        else:
+            Logger.log_msg("Found lab alert.")
         Utils.touch_randomly(self.region["lab_tab"])
 
         while True:
@@ -60,8 +65,7 @@ class ResearchModule(object):
 
                 if started == False:
                     Logger.log_error("Unable to find project that matches current configuration.")
-                            
-             
+                    self.no_matched_project = True
                 Logger.log_msg("Going back to main menu.")       
             else:
                 Logger.log_msg("Shipyard or Fleet Tech alert detected, ignoring it.")
@@ -129,6 +133,8 @@ class ResearchModule(object):
                  return True
 
     def start_project(self):
+        if self.save_research_result_to_file:
+            Utils.save_screen("research")
         Utils.touch_randomly(self.region['commence_tab'])
         Utils.wait_update_screen(0.5)
         #solution for projects that don't require confirmation.
@@ -150,6 +156,7 @@ class ResearchModule(object):
         if Utils.find("research/item_found"):
             Logger.log_msg("Found completed research project.")
             if self.save_research_result_to_file:
+                Utils.script_sleep(3)
                 Utils.save_screen("research")
             Utils.touch_randomly(self.region['project_click'])
             Utils.script_sleep(1)
@@ -162,9 +169,9 @@ class ResearchModule(object):
                 Utils.wait_update_screen(0.5)
                 if Utils.find("research/item_found"):
                     Logger.log_msg("Found completed research project.")
+                    Utils.script_sleep(3)
                     if self.save_research_result_to_file:
                         Utils.save_screen("research")
-                    Utils.script_sleep(1.5)
                     Utils.touch_randomly(self.region['project_click'])
                     Utils.script_sleep(1)
                     Utils.touch_randomly(self.region['project_click'])
