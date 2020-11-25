@@ -2076,7 +2076,7 @@ class CombatModule(object):
         target_arrow_search_region = Utils.get_region_for_target_arrow_search(coord) 
         if self.key_map_region['2-1']['D3'].contains(coord):
             self.targeting_2_1_D3 = True
-        Logger.log_msg('Touch location {}.'.format(coord))
+        Logger.log_msg('Is {} reachable?'.format(coord))
         Utils.touch(coord, sleep=0.45)
         # check 10 frames
         for i in range(10):
