@@ -101,6 +101,9 @@ class Stats(object):
                 Logger.log_success("Gold, oil (retire): {}, {}".format(
                     self._pretty_perhour(self.gold_retire_accumulated, hours),
                     self._pretty_perhour(self.oil_retire_accumulated, hours)))
+                Logger.log_success("Gold, oil (total): {}, {}".format(
+                    self._pretty_perhour(self.gold_battle_accumulated + self.gold_retire_accumulated, hours),
+                    self._pretty_perhour(self.oil_battle_accumulated + self.oil_retire_accumulated, hours)))
                 # g/o from battle
                 if self.oil_battle_accumulated != 0:
                     Logger.log_success("Average gold/oil (battle): {number1:.{digit1}f} / {number2:.{digit2}f} = {number3:.{digit3}f}".format(
