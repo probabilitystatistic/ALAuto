@@ -562,6 +562,9 @@ class CombatModule(object):
                 if boss:
                     Logger.log_debug("Proceed to retreat.")
                     self.exit = 5
+                # resetting screen for special farming
+                if self.chapter_map == '7-2' or self.chapter_map == '2-1':
+                    self.reset_screen_by_anchor_point()
             elif response == 3:
                 Logger.log_debug("All fleets are destroyed. Back to chapter map.")
                 Utils.touch_randomly_ensured(self.region['close_info_dialog'], "", ["menu/attack"],
