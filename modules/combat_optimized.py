@@ -1367,7 +1367,7 @@ class CombatModule(object):
         targeting_block_right = False
         targeting_block_left = False
         targeting_block_A3 = False
-        three_fight_farming_fleet_switched = False
+        fleet_switched = False
 
         region_block_right = [[1230, 232, 1388, 543], [1432, 347, 1588, 468], [1449, 473, 1616, 603]] # corresponding to F1, G2, and G3 in [x1,y1,x2,y2] format.
         region_block_left = [[467, 610, 642, 754], [677, 474, 853, 603], [649, 760, 843, 917]] # B4, C3, and C5
@@ -1459,10 +1459,10 @@ class CombatModule(object):
                             targeting_block_A3 = True
                             break
                     continue
-            if self.kills_count == 2 and self.config.combat['retreat_after'] == 3 and not three_fight_farming_fleet_switched:
+            if (self.kills_count == 2 and self.config.combat['retreat_after'] == 3 and not fleet_switched) or (self.kills_count == 4 and self.config.combat['retreat_after'] == 0 and not fleet_switched):
                 # switch fleet after killing 2 enemies for 3-fight farming
                 # this makes farming easier by switching to a healthy fleet
-                Logger.log_msg("Fleet switching after 2 fights for easier 3-fight 7-2 farming.")
+                Logger.log_msg("Fleet switching after 2/4 fights for easier 3-fight/full 7-2 farming.")
                 Utils.touch_randomly(self.region['button_switch_fleet'])
                 Utils.script_sleep(2)
                 if not self.reset_screen_by_anchor_point():
@@ -1470,7 +1470,7 @@ class CombatModule(object):
                     self.exit = 5
                     self.retreat_handler()
                     return True
-                three_fight_farming_fleet_switched = True
+                fleet_switched = True
                 Utils.script_sleep(1)
                 continue  
             if self.kills_count >= self.kills_before_boss[self.chapter_map] and Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9):
