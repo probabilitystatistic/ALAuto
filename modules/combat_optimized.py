@@ -1129,10 +1129,10 @@ class CombatModule(object):
         # starting with boss fleet in control
         # is mystery node reachable?
         if self.is_reachable(self.key_map_region['2-1']['F2'].get_center()): # take mystery node
-            Logger.log_msg("Route B")
+            Logger.log_debug("Route B")
             # is D3 reachable?
             if self.is_reachable(self.key_map_region['2-1']['D3'].get_center()): # boss fleet moves to D3
-                Logger.log_msg("Route B2")
+                Logger.log_debug("Route B2")
                 # switch to mob fleet
                 Utils.touch_randomly(self.region['button_switch_fleet'])
                 self.reset_screen_by_anchor_point()
@@ -1147,7 +1147,7 @@ class CombatModule(object):
                 if self.exit != 0: self.retreat_handler(); return True
                 return True            
             else:
-                Logger.log_msg("Route B1")
+                Logger.log_debug("Route B1")
                 # kill E3 enemy
                 self.kill_the_specific_enemy(self.key_map_region['2-1']['E3'].get_center()); 
                 if self.exit != 0: self.retreat_handler(); return True
@@ -1162,10 +1162,10 @@ class CombatModule(object):
                 if self.exit != 0: self.retreat_handler(); return True
                 return True
         else:
-            Logger.log_msg("Route A")
+            Logger.log_debug("Route A")
             # is D3 reachable?
             if self.is_reachable(self.key_map_region['2-1']['D3'].get_center()): # boss fleet moves to D3
-                Logger.log_msg("Route A2")
+                Logger.log_debug("Route A2")
                 # switch to mob fleet
                 Utils.touch_randomly(self.region['button_switch_fleet'])
                 self.reset_screen_by_anchor_point()
@@ -1174,7 +1174,7 @@ class CombatModule(object):
                 if self.exit != 0: self.retreat_handler(); return True
                 # is mystery node reachable?
                 if self.is_reachable(self.key_map_region['2-1']['F2'].get_center()): # take mystery node
-                    Logger.log_msg("Route A2b")
+                    Logger.log_debug("Route A2b")
                     # kill 1 mob
                     self.kill_specific_number_of_mob(1)
                     if self.exit != 0: self.retreat_handler(); return True
@@ -1186,7 +1186,7 @@ class CombatModule(object):
                     if self.exit != 0: self.retreat_handler(); return True
                     return True
                 else:
-                    Logger.log_msg("Route A2a")
+                    Logger.log_debug("Route A2a")
                     # kill E2 enemy
                     self.kill_the_specific_enemy(self.key_map_region['2-1']['E2'].get_center())
                     if self.exit != 0: self.retreat_handler(); return True
@@ -1203,7 +1203,7 @@ class CombatModule(object):
                     if self.exit != 0: self.retreat_handler(); return True
                     return True
             else:
-                Logger.log_msg("Route A1")
+                Logger.log_debug("Route A1")
                 # switch to mob fleet
                 Utils.touch_randomly(self.region['button_switch_fleet'])
                 self.reset_screen_by_anchor_point()
@@ -1212,7 +1212,7 @@ class CombatModule(object):
                 if self.exit != 0: self.retreat_handler(); return True
                 # is mystery node reachable?
                 if self.is_reachable(self.key_map_region['2-1']['F2'].get_center()): # take mystery node
-                    Logger.log_msg("Route A1b")
+                    Logger.log_debug("Route A1b")
                     # kill C1 enemy
                     self.kill_the_specific_enemy(self.key_map_region['2-1']['C1'].get_center())
                     if self.exit != 0: self.retreat_handler(); return True
@@ -1221,15 +1221,15 @@ class CombatModule(object):
                     if self.exit != 0: self.retreat_handler(); return True
                     return True               
                 else:
-                    Logger.log_msg("Route A1a")
+                    Logger.log_debug("Route A1a")
                     # E3 enemy exist?
                     if self.enemy_exist_here(self.key_map_region['2-1']['E3']):
-                        Logger.log_msg("Route A1a2")
+                        Logger.log_debug("Route A1a2")
                         # move to D3 to avoid possible blocking of C1 enemy
                         Utils.touch(self.key_map_region['2-1']['D3'].get_center(), sleep=1)
                         # C1 enemy exist?
                         if self.enemy_exist_here(self.key_map_region['2-1']['C1'], print_info=True):
-                            Logger.log_msg("Route A1a2b")
+                            Logger.log_debug("Route A1a2b")
                             # kill E3 enemy
                             self.kill_the_specific_enemy(self.key_map_region['2-1']['E3'].get_center())
                             if self.exit != 0: self.retreat_handler(); return True
@@ -1245,7 +1245,7 @@ class CombatModule(object):
                             if self.exit != 0: self.retreat_handler(); return True
                             return True
                         else:
-                            Logger.log_msg("Route A1a2a")
+                            Logger.log_debug("Route A1a2a")
                             # kill E1 enemy
                             self.kill_the_specific_enemy(self.key_map_region['2-1']['E1'].get_center())
                             if self.exit != 0: self.retreat_handler(); return True
@@ -1261,7 +1261,7 @@ class CombatModule(object):
                             if self.exit != 0: self.retreat_handler(); return True
                             return True
                     else:
-                        Logger.log_msg("Route A1a1")
+                        Logger.log_debug("Route A1a1")
                         # kill E2 enemy
                         self.kill_the_specific_enemy(self.key_map_region['2-1']['E2'].get_center())
                         if self.exit != 0: self.retreat_handler(); return True
