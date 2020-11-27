@@ -13,25 +13,38 @@ from util.logger import Logger
 class OCR(object):
 
     def __init__(self):
+        # work best using legacy tesseract data from https://github.com/tesseract-ocr/tessdata
         # if tesseract is not set with system PATH
         #pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
         self.this_is_just_a_place_holder = 1
 
     @classmethod
-    def screen_to_string(self, region, language="eng+chi_tra"):
+    def screen_to_string(self, region, language="eng+chi_tra", mode="exercise", save_process_to_file=False):
 
-        save_process_to_file = True
         skip_enlarge = False
         skip_binary = False
-        skip_erosion_dilation = False
-        enlarge_factor = 10
+        skip_erosion_dilation = True
+        enlarge_factor = 1
+        threshold_binary = 150
+        if mode == "commission":
+            threshold_binary = 200
+        if mode == "research":
+            threshold_binary = 250
 
         x1 = region.x
         x2 = region.x + region.w
         y1 = region.y
         y2 = region.y + region.h
-        source = Utils.screen[y1:y2, x1:x2]
-        feed = source
+        # capture the color screen
+        source = Utils.color_screen[y1:y2, x1:x2]
+        if save_process_to_file:
+                cv2.imwrite("0_screen.png", source)
+
+        # turn the screen to gray scale
+        gray = cv2.cvtColor(source, cv2.COLOR_RGB2GRAY)
+        if save_process_to_file:
+            cv2.imwrite("1_gray.png", gray)
+        feed = gray
 
         # resize image
         if not skip_enlarge:
@@ -40,17 +53,16 @@ class OCR(object):
             NewHeight=source.shape[0]*enlarge_factor
             enlarged = cv2.resize(source,(int(NewWidth),int(NewHeight)))
             if save_process_to_file:
-                cv2.imwrite("1_enlarged.png", enlarged)
+                cv2.imwrite("2_enlarged.png", enlarged)
             feed = enlarged
 
 
         # to binary map(only black and white)
         if not skip_binary:
             source = feed
-            source, img_bin = cv2.threshold(source,128,255,cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-            binary = cv2.bitwise_not(img_bin)
+            dummy, binary = cv2.threshold(source, threshold_binary, 255, cv2.THRESH_BINARY)
             if save_process_to_file:
-                cv2.imwrite("2_binary.png", binary)
+                cv2.imwrite("3_binary.png", binary)
                 feed = binary
 
             # erosion and dilation to erase noise
@@ -60,12 +72,16 @@ class OCR(object):
                 eroded = cv2.erode(source, kernel, iterations=1)
                 dilated = cv2.dilate(eroded, kernel, iterations=1)
                 if save_process_to_file:
-                    cv2.imwrite("3_erode_dilate.png", dilated)
+                    cv2.imwrite("4_erode_dilate.png", dilated)
                 feed = dilated
 
         # detection with tesseract
         if language == "number":
-            result = pytesseract.image_to_string(feed, lang='eng', config="-c tessedit_char_whitelist=0123456789")
+            result = pytesseract.image_to_string(feed, config="-c tessedit_char_whitelist=0123456789")
+        elif language == "chinese":
+            result = pytesseract.image_to_string(feed, lang='chi_tra')
+        elif language == "english":
+            result = pytesseract.image_to_string(feed, lang='eng')      
         else:
             result = pytesseract.image_to_string(feed, lang=language)
         Logger.log_debug("OCR return:")

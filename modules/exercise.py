@@ -50,10 +50,10 @@ class ExerciseModule(object):
         }
         
         self.fleet_power_region = [
-            [Region(334, 392, 108, 36), Region(334, 438, 108, 34)],
-            [Region(700, 392, 108, 36), Region(700, 438, 108, 34)],
-            [Region(1066, 392, 108, 36), Region(1066, 438, 108, 34)],
-            [Region(1432, 392, 108, 36), Region(1432, 438, 108, 34)]
+            [Region(334, 382, 138, 56), Region(334, 428, 138, 54)],
+            [Region(700, 382, 138, 56), Region(700, 428, 138, 54)],
+            [Region(1066, 382, 138, 56), Region(1066, 428, 138, 54)],
+            [Region(1432, 382, 138, 56), Region(1432, 428, 138, 54)]
         ]
         
         self.opponent = [
@@ -102,7 +102,7 @@ class ExerciseModule(object):
             Logger.log_warning('End of Essex raid.')
         # end of temporary code for essex raid
 
-
+        
         #
         # beginning of temporary code for running daily raid
         #
@@ -176,7 +176,7 @@ class ExerciseModule(object):
         #
         # end of temporary code for running daily raid
         #
-
+        
 
 
 
@@ -207,25 +207,20 @@ class ExerciseModule(object):
         power = []
         chosen = -1
         for i in range(4):
-            # poor OCR accuracy
-            """
+            # screen_to_string has poor OCR accuracy
             try:
-                main = int(OCR.screen_to_string(self.fleet_power_region[i][0], language="number"))
+                #main = int(OCR.screen_to_string(self.fleet_power_region[i][0], language="number", mode="exercise"))
+                main = int(OCR.screen_to_string_by_OCRspace(self.fleet_power_region[i][0], mode="number"))
             except:
                 Logger.log_warning("OCR for {}th opponent's main failed.".format(i+1))
                 main = 99999
             try:
-                vanguard = int(OCR.screen_to_string(self.fleet_power_region[i][1], language="number"))
+                #vanguard = int(OCR.screen_to_string(self.fleet_power_region[i][1], language="number", mode="exercise"))
+                vanguard = int(OCR.screen_to_string_by_OCRspace(self.fleet_power_region[i][1], mode="number"))
             except:
                 Logger.log_warning("OCR for {}th opponent's vanguard failed.".format(i+1))
                 vanguard = 99999
-            """
-            main = int(OCR.screen_to_string_by_OCRspace(self.fleet_power_region[i][0], mode="number"))
-            vanguard = int(OCR.screen_to_string_by_OCRspace(self.fleet_power_region[i][1], mode="number"))
 
-            # not working, but can still roughly give number of digits
-            #main = Utils.read_numbers(self.fleet_power_region[i][0].x, self.fleet_power_region[i][0].y, self.fleet_power_region[i][0].w, self.fleet_power_region[i][0].h)
-            #vanguard = Utils.read_numbers(self.fleet_power_region[i][1].x, self.fleet_power_region[i][1].y, self.fleet_power_region[i][1].w, self.fleet_power_region[i][1].h)
             power.append([main, vanguard])
             if main <= self.opponent_threshold and vanguard <= self.opponent_threshold:
                 if (main + vanguard)/2 >= average_power_previous_opponent:
