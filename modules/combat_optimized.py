@@ -901,7 +901,7 @@ class CombatModule(object):
             Utils.update_screen()
         
         # dedicated for scherzo of iron and blood event(farming points and torpedo fighter)
-        if self.chapter_map == "E-C3":
+        if self.chapter_map == "E-C3" and False:
             Utils.touch(self.key_map_region['E-C3']['C1'].get_center())
             Utils.script_sleep(2)
             Utils.touch(self.key_map_region['E-C3']['D1'].get_center())
