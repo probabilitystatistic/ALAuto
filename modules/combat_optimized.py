@@ -1333,7 +1333,7 @@ class CombatModule(object):
                 continue
 
     def kill_boss(self):
-        Utils.update_screen()
+        Utils.wait_update_screen(0.5)
         boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
         if boss_region == None:
             Logger.log_warning("Cannot find boss. Retrying...")
