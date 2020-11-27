@@ -159,8 +159,8 @@ class ResearchModule(object):
         if Utils.find("research/item_found"):
             Logger.log_msg("Found completed research project.")
             if self.save_research_result_to_file:
-                Utils.script_sleep(3)
-                Utils.save_screen("research")
+                Utils.script_sleep(2)
+                Utils.save_screen("research", need_to_update_screen=True)
             Utils.touch_randomly(self.region['project_click'])
             Utils.script_sleep(1)
             Utils.touch_randomly(self.region['project_click'])
@@ -172,9 +172,9 @@ class ResearchModule(object):
                 Utils.wait_update_screen(0.5)
                 if Utils.find("research/item_found"):
                     Logger.log_msg("Found completed research project.")
-                    Utils.script_sleep(3)
                     if self.save_research_result_to_file:
-                        Utils.save_screen("research")
+                        Utils.script_sleep(2)
+                        Utils.save_screen("research", need_to_update_screen=True)
                     Utils.touch_randomly(self.region['project_click'])
                     Utils.script_sleep(1)
                     Utils.touch_randomly(self.region['project_click'])
