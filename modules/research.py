@@ -106,14 +106,17 @@ class ResearchModule(object):
             if not self.config.research['1Hour'] and Utils.find("research/1h", 0.99):
                 Logger.log_msg("Neglecting 1-hour research.")
                 return False
-            if not self.config.research['30Minutes'] and Utils.find("research/30m", 0.99):
-                Logger.log_msg("Neglecting 0.5-hour research.")
-                return False
             if self.config.research['30Minutes'] and self.prioritize_30min and Utils.find("research/30m", 0.99):
                 Logger.log_warning("Prioritizing 0.5-hour research.")
                 return True
+            if not self.config.research['30Minutes'] and Utils.find("research/30m", 0.99):
+                Logger.log_msg("Neglecting 0.5-hour research.")
+                return False
             if self.config.research['WithoutRequirements'] and not Utils.find("research/nothing", 0.99):
                 Logger.log_msg("Not research without requirement.")
+                return False
+            if not self.config.research['AllowConsumingCoins'] and Utils.find("research/coins", 0.95):
+                Logger.log_msg("Neglecting research requiring coins.")
                 return False
 # By me: sometimes bot consume cubes so I lower the similarity down
 #            if not self.config.research['AllowConsumingCubes'] and Utils.find("research/cubes", 0.99):
