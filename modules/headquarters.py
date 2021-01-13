@@ -257,7 +257,7 @@ class HeadquartersModule(object):
                 Logger.log_msg("Starting/ending skill levelling session.")
                 Utils.script_sleep(3.5)
                 continue
-            if Utils.find("headquarters/skill_exp_gain"):
+            if Utils.find("headquarters/skill_exp_gain", 0.9):
                 if Utils.find_and_touch(
                         "headquarters/t{}_offense_skillbook".format(self.config.academy["skill_book_tier"]), 0.99):
                     # levelling offesinve skill

@@ -18,6 +18,7 @@ data = {
     "combat/button_confirm": [1480, 920, 1800, 1080],
     "combat/button_go": [1200, 700, 1800, 980],
     "combat/button_retreat": [1100, 950, 1400, 1080], 
+    "combat/button_use_repair": [1000, 630, 1280, 720],
     "combat/combat_pause": [1600, 0, 1920, 150],
     "combat/commander": [100, 250, 1000, 400],
     "combat/defeat_close_button": [750, 850, 1150, 1000],
@@ -27,10 +28,12 @@ data = {
     "combat/fleet4": [780, 900, 860, 1000], 
     "combat/fleet5": [780, 900, 860, 1000], 
     "combat/fleet6": [780, 900, 860, 1000], 
-    "combat/menu_emergency": [520, 340, 1396, 696], # Just a rough estimation!
+    "combat/hardmode": [20, 940, 120, 1060],
+    "combat/normalmode": [20, 940, 120, 1060],
+    "combat/menu_emergency": [850, 420, 1050, 650], 
     "combat/menu_formation": [100, 0, 350, 100],
     "combat/menu_loading": [1560, 960, 1920, 1080],
-    "combat/menu_select_fleet": [160, 80, 600, 200],
+    "combat/menu_select_fleet": [100, 60, 600, 200],
     "combat/menu_touch2continue": [100, 900, 900, 1000],
     "commission/alert_available": [250, 330, 780, 510],
     "commission/alert_completed": [1660, 400, 1760, 500],
@@ -54,6 +57,7 @@ data = {
     "event/raid_ticket": [1200, 720, 1280, 820],
     "exercise/start_exercise": [800, 800, 1140, 940], 
     "exercise/zero_turn_left": [1720, 202, 1820, 256],
+    "map_anchors/map_6-1": [0, 0, 1920, 1080],
     "map_anchors/map_7-2_top_right": [670, 970, 1050, 1080],
     "menu/alert_info": [0, 0, 960, 540], # Just a rough estimation!
     "menu/alert_close": [960, 0, 1920, 540], # Just a rough estimation!
@@ -77,6 +81,7 @@ data = {
     "menu/exercise": [100, 0, 350, 100],
     "menu/item_found": [700, 150, 1200, 400],
     "menu/button_normal_mode": [0, 940, 250, 1080],
+    "menu/ship_obtained": [1050, 580, 1150, 660],
     "menu/special_event": [100, 0, 500, 100],
     "research/series1": [405, 140, 500, 230],
     "research/series2": [405, 140, 500, 230],

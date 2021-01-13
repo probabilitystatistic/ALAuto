@@ -23,13 +23,19 @@ class OCR(object):
 
         skip_enlarge = False
         skip_binary = False
+        skip_invert = False
         skip_erosion_dilation = True
         enlarge_factor = 1
-        threshold_binary = 150
+        threshold_binary = 160
+        if mode == "exercise":
+            threshold_binary = 160
+            enlarge_factor = 2
         if mode == "commission":
             threshold_binary = 200
+            enlarge_factor = 1
         if mode == "research":
             threshold_binary = 250
+            enlarge_factor = 2
 
         x1 = region.x
         x2 = region.x + region.w
@@ -63,7 +69,11 @@ class OCR(object):
             dummy, binary = cv2.threshold(source, threshold_binary, 255, cv2.THRESH_BINARY)
             if save_process_to_file:
                 cv2.imwrite("3_binary.png", binary)
-                feed = binary
+            if not skip_invert:
+                binary = cv2.bitwise_not(binary)
+                if save_process_to_file:
+                    cv2.imwrite("3_binary_invert.png", binary)
+            feed = binary
 
             # erosion and dilation to erase noise
             if not skip_erosion_dilation:
@@ -77,16 +87,22 @@ class OCR(object):
 
         # detection with tesseract
         if language == "number":
-            result = pytesseract.image_to_string(feed, config="-c tessedit_char_whitelist=0123456789")
+            if mode == "exercise":
+                result = pytesseract.image_to_string(feed, config="--psm 7 -c tessedit_char_whitelist=0123456789")
+            else:
+                result = pytesseract.image_to_string(feed, config="-c tessedit_char_whitelist=0123456789")
         elif language == "chinese":
             result = pytesseract.image_to_string(feed, lang='chi_tra')
         elif language == "english":
-            result = pytesseract.image_to_string(feed, lang='eng')      
+            if mode == 'research':
+                result = pytesseract.image_to_string(feed, lang='eng', config="--psm 13 -c tessedit_char_whitelist=0123456789BCDEGHQT-MIRFUL")
+            else:
+                result = pytesseract.image_to_string(feed, lang='eng')     
         else:
             result = pytesseract.image_to_string(feed, lang=language)
         Logger.log_debug("OCR return:")
         Logger.log_debug(str(result))
-        return str(result)
+        return str(result).strip()
 
 
     @classmethod
@@ -100,6 +116,22 @@ class OCR(object):
         y2 = region.y + region.h
 
         image = Utils.screen[y1:y2, x1:x2]
+
+        # to binary map(only black and white)
+        skip_binary = True
+        threshold_binary = 200
+        save_process_to_file = False
+        if mode == 'research':
+            skip_binary = False
+            threshold_binary = 250
+        if not skip_binary:
+            source = image
+            dummy, binary = cv2.threshold(source, threshold_binary, 255, cv2.THRESH_BINARY)
+            if save_process_to_file:
+                cv2.imwrite("3_binary.png", binary)
+            image = binary
+
+
         cv2.imwrite("ocrspace_temporary.png", image)
         filename = 'ocrspace_temporary.png'
 
@@ -110,7 +142,7 @@ class OCR(object):
                     'language': 'cht',
                     'OCRengine': 1,
                }
-        elif mode == "eng+number" or mode == "number":
+        elif mode == "eng+number" or mode == "number" or mode == "research":
             payload = {'isOverlayRequired': False,
                     'apikey': '7e9f7ffb3988957',
                     'scale': True,

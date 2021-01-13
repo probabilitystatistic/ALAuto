@@ -200,16 +200,26 @@ class Utils(object):
             time.sleep(uniform(base, base + flex))
 
     @classmethod
-    def save_screen(cls, description=None, need_to_update_screen=False):
+    def save_screen(cls, description=None, need_to_update_screen=False, crop_region=None):
         if need_to_update_screen:
             cls.update_screen()
+        if crop_region:
+            x1 = crop_region.x
+            y1 = crop_region.y
+            x2 = crop_region.x + crop_region.w
+            y2 = crop_region.y + crop_region.h
+        else:
+            x1 = 0
+            y1 = 0
+            x2 = 1920
+            y2 = 1080
         time_now = datetime.now()
         path = "screencap"
         if description:
             file_name = description + "-" + time_now.strftime("[%Y,%m,%d-%H,%M,%S]")
         else:
             file_name = "screen-" + time_now.strftime("[%Y,%m,%d-%H,%M,%S]")
-        cv2.imwrite(os.path.join(path, '{}.jpg'.format(file_name)), cls.color_screen)
+        cv2.imwrite(os.path.join(path, '{}.png'.format(file_name)), cls.color_screen[y1:y2, x1:x2])
         Logger.log_debug("Screen saved to: screencap/{}.png".format(file_name))
 
     @classmethod
@@ -536,7 +546,7 @@ class Utils(object):
         return
 
     @classmethod
-    def find(cls, image, similarity=DEFAULT_SIMILARITY, color=False):
+    def find(cls, image, similarity=DEFAULT_SIMILARITY, color=False, print_info=False):
         """Finds the specified image on the screen
 
         Args:
@@ -557,6 +567,8 @@ class Utils(object):
 
         height, width = template.shape[:2]
         value, location = cv2.minMaxLoc(match)[1], cv2.minMaxLoc(match)[3]
+        if print_info:
+            Logger.log_warning("Search: {}; value: {}; required: {}".format(image, value, similarity))
         if value >= similarity:
             return Region(location[0], location[1], width, height)
         return None
@@ -619,8 +631,8 @@ class Utils(object):
         height, width = template.shape[:2]
         value, location = cv2.minMaxLoc(match)[1], cv2.minMaxLoc(match)[3]
         if print_info:
-            if value < 0.95 and value > similarity:
-                print("find_with_crop value/sim:", value, '/', similarity, '; image:', image)
+            #if value < 0.95 and value > similarity:
+            print("find_with_crop value/sim:", value, '/', similarity, '; image:', image)
         if value >= similarity:
             elapsed_time = time.perf_counter() - start_time
             Logger.log_debug("Find_with_cropped took {} ms to search {}. Match.".format('%.2f' % (elapsed_time * 1000), image))
@@ -632,7 +644,7 @@ class Utils(object):
         return None
 
     @classmethod
-    def find_in_scaling_range(cls, image, similarity=DEFAULT_SIMILARITY, lowerEnd=0.8, upperEnd=1.2):
+    def find_in_scaling_range(cls, image, dynamical_region=None, similarity=DEFAULT_SIMILARITY, lowerEnd=0.8, upperEnd=1.2):
         """Finds the location of the image on the screen. First the image is searched at its default scale,
         and if it isn't found, it will be resized using values inside the range provided until a match that satisfy
         the similarity value is found. If the image isn't found even after it has been resized, the method returns None.
@@ -650,12 +662,27 @@ class Utils(object):
             Region: Coordinates or where the image appears.
         """
         template = cv2.imread('assets/{}/{}.png'.format(cls.assets, image), 0)
+
+        # set up dynamical region for searching the template
+        if dynamical_region:
+            search_region_x1 = dynamical_region.x
+            search_region_y1 = dynamical_region.y
+            search_region_x2 = dynamical_region.x + dynamical_region.w
+            search_region_y2 = dynamical_region.y + dynamical_region.h
+        else:
+            search_region_x1 = 0
+            search_region_y1 = 0
+            search_region_x2 = 1920
+            search_region_y2 = 1080
+
+        screen_tmp = cls.screen[search_region_y1:search_region_y2, search_region_x1:search_region_x2]
+
         # first try with default size
         width, height = template.shape[::-1]
-        match = cv2.matchTemplate(screen, template, cv2.TM_CCOEFF_NORMED)
+        match = cv2.matchTemplate(screen_tmp, template, cv2.TM_CCOEFF_NORMED)
         value, location = cv2.minMaxLoc(match)[1], cv2.minMaxLoc(match)[3]
         if (value >= similarity):
-            return Region(location[0], location[1], width, height)
+            return Region(location[0] + search_region_x1, location[1] +search_region_y1, width, height)
 
         # resize and match using threads
 
@@ -686,14 +713,20 @@ class Utils(object):
 
         thread_list = []
         while (upperEnd > lowerEnd) and (count < loop_limiter):
-            thread_list.append(Thread(target=cls.resize_and_match, args=(results_list, template, lowerEnd, similarity, l_interpolation)))
-            thread_list.append(Thread(target=cls.resize_and_match, args=(results_list, template, upperEnd, similarity, u_interpolation)))
+            thread_list.append(Thread(target=cls.resize_and_match, args=(results_list, template, lowerEnd, screen_tmp, similarity, l_interpolation)))
+            thread_list.append(Thread(target=cls.resize_and_match, args=(results_list, template, upperEnd, screen_tmp, similarity, u_interpolation)))
             lowerEnd+=0.02
             upperEnd-=0.02
             count +=1
         cls.multithreader(thread_list)
         if results_list:
-            return results_list[0]
+            if dynamical_region:
+                result_list_fixed_coordicate = []
+                for i in range(len(results_list)):
+                    result_list_fixed_coordicate.append(Region(results_list[i].x + search_region_x1, results_list[i].y + search_region_y1, results_list[i].w, results_list[i].h))
+                return result_list_fixed_coordicate[0]
+            else:
+                return results_list[0]
         else:
             return None
 
@@ -824,10 +857,13 @@ class Utils(object):
         results_list.append(numpy.where(match_resize >= similarity))
 
     @classmethod
-    def resize_and_match(cls, results_list, templateImage, scale, similarity=DEFAULT_SIMILARITY, interpolationMethod=cv2.INTER_NEAREST):
+    def resize_and_match(cls, results_list, templateImage, scale, screen_tmp=None, similarity=DEFAULT_SIMILARITY, interpolationMethod=cv2.INTER_NEAREST):
         template_resize = cv2.resize(templateImage, None, fx = scale, fy = scale, interpolation = interpolationMethod)
         width, height = template_resize.shape[::-1]
-        match = cv2.matchTemplate(screen, template_resize, cv2.TM_CCOEFF_NORMED)
+        if not screen_tmp.any():
+            match = cv2.matchTemplate(screen, template_resize, cv2.TM_CCOEFF_NORMED)
+        else:
+            match = cv2.matchTemplate(screen_tmp, template_resize, cv2.TM_CCOEFF_NORMED)
         value, location = cv2.minMaxLoc(match)[1], cv2.minMaxLoc(match)[3]
         if (value >= similarity):
             results_list.append(Region(location[0], location[1], width, height))
@@ -1215,6 +1251,22 @@ class Utils(object):
 
     @classmethod
     def get_region_for_fleet_arrival_detection(cls, coord):
+        width = 170
+        height = 140
+        x = coord[0] - int(width/2)
+        if x < 0:
+            x = 0
+        if x + width > 1920:
+            width = 1920 - x
+        y = coord[1] - int(height/2)
+        if y < 0:
+            y = 0
+        if y + height > 1080:
+            height = 1080 -y
+        return Region(x, y, width, height)
+
+    @classmethod
+    def get_region_for_enemy_fleet_distinction(cls, coord):
         width = 170
         height = 140
         x = coord[0] - int(width/2)

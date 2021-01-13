@@ -133,6 +133,10 @@ class CommissionModule(object):
                 Utils.touch_randomly(self.region["tap_to_continue"])
                 Utils.script_sleep(1)
                 continue
+            if Utils.find_with_cropped("menu/ship_obtained"):
+                Utils.touch_randomly(self.region["tap_to_continue"])
+                Utils.script_sleep(1)
+                continue
             if Utils.find("commission/alert_available", 0.9):
                 Logger.log_debug("Finished completing commissions.")
                 Utils.script_sleep(0.5)

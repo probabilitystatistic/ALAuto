@@ -1,10 +1,10 @@
 @ECHO OFF
 
 ::Setting default path
-SET ALPATH=Path to ALAuto.py
+SET ALPATH=d:\program\ALAuto
 
 ::Define the default map and mode
-SET PreviousMap=2-3
+SET PreviousMap=2-1
 SET PreviousMode=
 
 
@@ -13,13 +13,13 @@ SET PreviousMode=
 
 
 :: choosing map
-SET /P Map= Which map?(2-3;4-2;5-1;6-1;7-2;s;h;e)
+SET /P Map= Which map?(2-1;5-1;6-1;7-2;s;h;e)
 
-IF "%Map%"=="2" (SET MAP=2-3)
-IF "%Map%"=="4" (SET MAP=4-2)
+IF "%Map%"=="2" (SET MAP=2-1)
 IF "%Map%"=="5" (SET MAP=5-1)
 IF "%Map%"=="6" (SET MAP=6-1)
-IF "%Map%"=="7" (SET MAP=7-2)
+IF "%Map%"=="73" (SET MAP=7-2)
+IF "%Map%"=="77" (SET MAP=7-2full)
 IF "%Map%"=="s" (SET MAP=special)
 IF "%Map%"=="h" (SET MAP=hard)
 IF "%Map%"==""  (SET MAP=%PreviousMap%)

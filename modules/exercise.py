@@ -43,6 +43,7 @@ class ExerciseModule(object):
             'raid_without_ticket': Region(700, 750, 100, 50),
             'go_to_exercise': Region(1830, 980, 40, 70),
             'go_to_daily_raid': Region(1140, 980, 160, 60),
+            'main_battleline': Region(500, 500, 50, 50),
             'menu_button_battle': Region(1517, 442, 209, 206),
             'menu_combat_start': Region(1578, 921, 270, 70),
             'menu_nav_back': Region(54, 57, 67, 67),
@@ -110,6 +111,7 @@ class ExerciseModule(object):
         Logger.log_msg("Starting daily raid run.")
         Utils.wait_update_screen()
         Utils.touch_randomly_ensured(self.region["menu_button_battle"], "", ["menu/attack"], response_time=1, stable_check_frame=1)
+        Utils.touch_randomly(self.region["main_battleline"])
         Utils.touch_randomly_ensured(self.region["go_to_daily_raid"], "", ["menu/daily_raid"], response_time=1, stable_check_frame=1)
 
         selected_daily_raid = None
@@ -122,7 +124,7 @@ class ExerciseModule(object):
         while not (mind_core_done and techbox_done and skillbook_done and material_done):
             Utils.update_screen()
             count += 1
-            if count >= 100:
+            if count >= 30:
                 Logger.log_error("Too many loops in daily raid. Quitting...")
                 break
             # find a daily raid
@@ -140,11 +142,11 @@ class ExerciseModule(object):
                     Logger.log_msg("Daily raid: material closed or done")
                     material_done = True
                 Utils.touch_randomly(self.region["daily_raid_right_arrow"])
-                Utils.script_sleep(0.5)
+                Utils.script_sleep(1.5)
                 continue
             if Utils.find_with_cropped("daily_raid/mind_core", similarity=0.9):
                 selected_daily_raid = "mind_core"
-                fleet_chosen = 5
+                fleet_chosen = 6
                 Logger.log_msg("Run for cognitive chips using fleet {}.".format(fleet_chosen))
             if Utils.find_with_cropped("daily_raid/techbox", similarity=0.9):
                 selected_daily_raid = "techbox"
@@ -156,14 +158,14 @@ class ExerciseModule(object):
                 Logger.log_msg("Run for skillbooks using fleet {}.".format(fleet_chosen))
             if Utils.find_with_cropped("daily_raid/material", similarity=0.9):
                 selected_daily_raid = "material"
-                fleet_chosen = 5
+                fleet_chosen = 6
                 Logger.log_msg("Run for materials using fleet {}.".format(fleet_chosen))
             # enter the chosen daily raid
             if selected_daily_raid:
                 Utils.touch_randomly_ensured(self.region["choose_current_daily_raid"], "", ["daily_raid/gold"], response_time=1, stable_check_frame=1)
                 # run the daily raid at most 3 times(even if defeated and tickets available)
                 for j in range(3):
-                    if Utils.find_with_cropped("daily_raid/zero_ticket_green", similarity=0.95, print_info=True):
+                    if Utils.find_with_cropped("daily_raid/zero_ticket_green", similarity=0.95):
                         Utils.touch_randomly(self.region['menu_nav_back'])
                         Utils.script_sleep(1)
                         break
@@ -183,12 +185,13 @@ class ExerciseModule(object):
         # move to exercise menu
         Utils.wait_update_screen()
         Utils.touch_randomly_ensured(self.region["menu_button_battle"], "", ["menu/attack"], response_time=1, stable_check_frame=1)
+        Utils.touch_randomly(self.region["main_battleline"])
         Utils.touch_randomly_ensured(self.region["go_to_exercise"], "", ["menu/exercise"], response_time=1, stable_check_frame=1)
 
         Logger.log_msg("Threshold for fleet power: {}".format(self.opponent_threshold))
 
         # exercise combat loop
-        while True:
+        while False:
             if Utils.find_with_cropped("exercise/zero_turn_left", similarity=0.99):
                 Logger.log_msg("No more exercise turn left")
                 break
@@ -202,24 +205,32 @@ class ExerciseModule(object):
         return
 
     def choose_opponent(self):
-        # for now just choose the first opponent
+        use_tesseract = True
         average_power_previous_opponent = 0
         power = []
         chosen = -1
         for i in range(4):
             # screen_to_string has poor OCR accuracy
             try:
-                #main = int(OCR.screen_to_string(self.fleet_power_region[i][0], language="number", mode="exercise"))
-                main = int(OCR.screen_to_string_by_OCRspace(self.fleet_power_region[i][0], mode="number"))
+                if use_tesseract:
+                    raw = OCR.screen_to_string(self.fleet_power_region[i][0], language="number", mode="exercise", save_process_to_file=False)
+                else:
+                    raw = OCR.screen_to_string_by_OCRspace(self.fleet_power_region[i][0], mode="number")
+                main = int(raw)
             except:
                 Logger.log_warning("OCR for {}th opponent's main failed.".format(i+1))
                 main = 99999
+            #print("OCR raw read for main: {}".format(raw)); raw=None
             try:
-                #vanguard = int(OCR.screen_to_string(self.fleet_power_region[i][1], language="number", mode="exercise"))
-                vanguard = int(OCR.screen_to_string_by_OCRspace(self.fleet_power_region[i][1], mode="number"))
+                if use_tesseract:
+                    raw = OCR.screen_to_string(self.fleet_power_region[i][1], language="number", mode="exercise", save_process_to_file=False)
+                else:
+                    raw = OCR.screen_to_string_by_OCRspace(self.fleet_power_region[i][1], mode="number")
+                vanguard = int(raw)
             except:
                 Logger.log_warning("OCR for {}th opponent's vanguard failed.".format(i+1))
                 vanguard = 99999
+            #print("OCR raw read for vanguard: {}".format(raw))
 
             power.append([main, vanguard])
             if main <= self.opponent_threshold and vanguard <= self.opponent_threshold:

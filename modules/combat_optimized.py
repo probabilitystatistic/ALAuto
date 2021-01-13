@@ -1,5 +1,6 @@
 import math
 import string
+import cv2
 from datetime import datetime, timedelta
 from util.logger import Logger
 from util.utils import Region, Utils
@@ -32,7 +33,7 @@ class CombatModule(object):
         self.movement_event = {}
         self.sleep_short = 0.5
         self.sleep_long = 1
-        self.map_similarity = 0.99
+        self.map_similarity = 0.85
 
         self.kills_count = 0
         self.dedicated_map_strategy = False
@@ -66,12 +67,13 @@ class CombatModule(object):
             'close_strategy_menu': Region(1590, 615, 40, 105),
             'menu_button_battle': Region(1517, 442, 209, 206),
             'map_summary_go': Region(1289, 743, 280, 79),
-            'fleet_menu_go': Region(1485, 872, 270, 74),
+            'fleet_menu_go': Region(1485, 872, 200, 74),
             'combat_ambush_evade': Region(1493, 682, 208, 56),
             'combat_automation': Region(20, 50, 200, 35),
             'combat_com_confirm': Region(848, 740, 224, 56),
             'combat_end_confirm': Region(1613, 947, 30, 25), # x=1613~1643, y=947~972 for safe touch
             'combat_dismiss_surface_fleet_summary': Region(790, 950, 250, 65),
+            'emergency_repair_in_map': Region(1800, 620, 80, 100),
             'menu_combat_start': Region(1578, 921, 270, 70),
             'tap_to_continue': Region(661, 840, 598, 203),
             'close_info_dialog': Region(1326, 274, 35, 35),
@@ -80,6 +82,7 @@ class CombatModule(object):
             'retreat_button': Region(1130, 985, 243, 60),
             'dismiss_commission_dialog': Region(1065, 732, 235, 68),
             'normal_mode_button': Region(88, 990, 80, 40),
+            'main_battleline': Region(500, 500, 50, 50),
             'map_nav_right': Region(1831, 547, 26, 26),
             'map_nav_left': Region(65, 547, 26, 26),
             'event_button': Region(1770, 250, 75, 75),
@@ -122,6 +125,10 @@ class CombatModule(object):
             'E-C3':{'C1': Region(960, 273, 170, 114),
                     'D1': Region(1142, 274, 170, 114),
                     'F2': Region(1532, 391, 135, 125)
+            },
+            'E-D3':{'C1': Region(930, 110, 100, 60),
+                    'D2': Region(1100, 200, 110, 80),
+                    'F7': Region(1560, 870, 140, 60)
             }
         }
 
@@ -157,15 +164,16 @@ class CombatModule(object):
 
         # get to map
         map_region = self.reach_map()
-        oil, gold = Utils.get_oil_and_gold()
-        Utils.touch_randomly_ensured(map_region, "menu/attack", ["combat/button_go"] , need_initial_screen=True, stable_check_frame=1)
+        
+        Utils.touch_randomly_ensured(map_region, "menu/attack", ["combat/button_go"] , need_initial_screen=True, response_time=0.5, stable_check_frame=2)
 
         while True:
             #Utils.wait_update_screen()
             Utils.update_screen()
 
             if self.exit == 1 or self.exit == 2 or self.exit == 6:
-                self.stats.increment_combat_done()
+                if not self.exit == 6:
+                    self.stats.increment_combat_done()
                 time_passed = datetime.now() - self.start_time
                 if self.stats.combat_done % self.config.combat['retire_cycle'] == 0 or ((self.config.commissions['enabled'] or \
                     self.config.dorm['enabled'] or self.config.academy['enabled']) and time_passed.total_seconds() > 3600) or \
@@ -174,7 +182,7 @@ class CombatModule(object):
                 else:
                     self.exit = 0
                     Logger.log_msg("Repeating map {}.".format(self.chapter_map))
-                    Utils.touch_randomly_ensured(map_region, "menu/attack", ["combat/button_go"] , stable_check_frame=1)
+                    Utils.touch_randomly_ensured(map_region, "menu/attack", ["combat/button_go"], response_time=0.5, stable_check_frame=2)
                     """
                     while True:
                         Utils.touch_randomly(map_region)
@@ -219,25 +227,29 @@ class CombatModule(object):
                 Utils.touch_randomly_ensured(self.region["fleet_menu_go"], "combat/menu_select_fleet", ["combat/button_retreat", "combat/alert_morale_low", "menu/button_confirm"], response_time=2)
             if Utils.find_with_cropped("combat/button_retreat"):
                 Logger.log_debug("Found retreat button, starting clear function.")
+                oil, gold = Utils.get_oil_and_gold()
+                oil = oil + 10 # admission fee
                 if (self.chapter_map[0] == '7' and self.chapter_map[2] == '2' and self.config.combat['clearing_mode'] and self.config.combat['focus_on_mystery_nodes']):
                     Logger.log_debug("Started special 7-2 farming.")
                     self.dedicated_map_strategy = True
                     if not self.clear_map_special_7_2():
                    	    self.stats.increment_combat_attempted()
                    	    break
-                    Utils.wait_update_screen()
                 elif self.chapter_map == '2-1' and self.config.combat['clearing_mode'] and self.config.combat['focus_on_mystery_nodes']:
                     Logger.log_debug("Started special 2-1 farming.")
                     self.dedicated_map_strategy = True
                     if not self.clear_map_special_2_1():
                         self.stats.increment_combat_attempted()
                         break
-                    Utils.wait_update_screen()
                 else:
                     if not self.clear_map():
                         self.stats.increment_combat_attempted()
                         break
-                    Utils.wait_update_screen()
+                Utils.wait_update_screen()
+                # excluding the data from terms for fleet rotation due to moral
+                if not self.exit == 6: 
+                    oil_delta, gold_delta = Utils.get_oil_and_gold()
+                    self.stats.read_oil_and_gold_change_from_battle(oil_delta - oil, gold_delta - gold)
             if Utils.find_with_cropped("menu/button_sort"):
                 if self.config.enhancement['enabled'] and not enhancement_failed:
                     if not self.enhancement_module.enhancement_logic_wrapper(forced=True):
@@ -287,8 +299,7 @@ class CombatModule(object):
         #Utils.script_sleep(1)
         Utils.menu_navigate("menu/button_battle")
 
-        oil_delta, gold_delta = Utils.get_oil_and_gold()
-        self.stats.read_oil_and_gold_change_from_battle(oil_delta - oil, gold_delta - gold)
+        
 
         return self.exit
 
@@ -326,7 +337,8 @@ class CombatModule(object):
         if Utils.find_with_cropped("menu/button_battle"):
             Logger.log_debug("Found menu battle button.")
             Utils.touch_randomly_ensured(self.region["menu_button_battle"], "", ["menu/attack"], response_time=1, stable_check_frame=1)
-            #Utils.wait_update_screen(2)
+            Utils.touch_randomly_ensured(self.region["main_battleline"], "", ["combat/hardmode", "combat/normalmode"], response_time=1)
+            Utils.wait_update_screen(1)
 
         # correct map mode
         if not self.chapter_map[0].isdigit():
@@ -364,7 +376,7 @@ class CombatModule(object):
             else:
                 _map = 0
                 for x in range(1, 14):
-                    if Utils.find("maps/map_{}-1".format(x), self.map_similarity):
+                    if Utils.find("maps/map_{}-1".format(x), self.map_similarity, print_info=True):
                         _map = x
                         break
                 if _map != 0:
@@ -380,12 +392,17 @@ class CombatModule(object):
                             #Utils.script_sleep()
 
         Utils.wait_update_screen()
-        map_region = Utils.find('maps/map_{}'.format(self.chapter_map), self.map_similarity)
+        map_region = Utils.find('maps/map_{}'.format(self.chapter_map), self.map_similarity, print_info=True)
         if map_region == None:
             Logger.log_error("Cannot find the specified map, please move to the world where it's located.")
+        count = 0
         while map_region == None:
-            map_region = Utils.find('maps/map_{}'.format(self.chapter_map), self.map_similarity)
+            map_region = Utils.find('maps/map_{}'.format(self.chapter_map), self.map_similarity, print_info=True)
             Utils.wait_update_screen(1)
+            count += 1
+            if count >= 600:
+                Logger.log_error("Wait for correct map for too long. Terminating...")
+                exit()
 
         Logger.log_msg("Found specified map.")
         return map_region
@@ -523,6 +540,7 @@ class CombatModule(object):
                 if response == 2:
                     response = 3
         else:
+            # it seems that defeat is sometimes not detected in 7-2
             response = Utils.touch_randomly_ensured(self.region["combat_end_confirm"], "", 
                                                     ["menu/button_confirm", "combat/button_retreat", 
                                                      "menu/attack", "combat/defeat_close_button"], 
@@ -562,9 +580,6 @@ class CombatModule(object):
                 if boss:
                     Logger.log_debug("Proceed to retreat.")
                     self.exit = 5
-                # resetting screen for special farming
-                if self.chapter_map == '7-2' or self.chapter_map == '2-1':
-                    self.reset_screen_by_anchor_point()
             elif response == 3:
                 Logger.log_debug("All fleets are destroyed. Back to chapter map.")
                 Utils.touch_randomly_ensured(self.region['close_info_dialog'], "", ["menu/attack"],
@@ -604,6 +619,9 @@ class CombatModule(object):
         Known bug: In the case when target arrow is found, if a fleet passes a mystery node yielding ammo 
         but not detected, the fleet will just stopped. This results in blacklisting the reachable target.
         """
+        stationary_screen_check = True
+        stationary_screen_check_frame = 20
+        stationary_screen_check_similarity = 0.9
         Logger.log_msg("Moving towards objective.")
         count = 0
         location = [target_info[0], target_info[1]]
@@ -618,20 +636,48 @@ class CombatModule(object):
         fleet_arrival_detection_region = Utils.get_region_for_fleet_arrival_detection(location)
         #print("fleet_arrival_detection_region:", fleet_arrival_detection_region.x, fleet_arrival_detection_region.y, fleet_arrival_detection_region.w, fleet_arrival_detection_region.h)
         count_fleet_at_target_location = 0
+        use_emergency_repair = False
+        if self.chapter_map == '7-2' and self.config.combat['retreat_after'] != 3:
+            use_emergency_repair = True
         #Utils.script_sleep(1)
+        stationary_screen_counter = 0 
+        stationary_screen_stable_frame_counter = 0
 
         while True:
             Utils.update_screen()
+            if stationary_screen_check:
+                if stationary_screen_counter == 0:
+                    previous_screen = Utils.screen
+                else:
+                    match = cv2.matchTemplate(previous_screen, Utils.screen, cv2.TM_CCOEFF_NORMED)
+                    value = cv2.minMaxLoc(match)[1]
+                    if value >= stationary_screen_check_similarity:
+                        stationary_screen_stable_frame_counter += 1
+                    else:
+                        stationary_screen_stable_frame_counter = 0
+                    if stationary_screen_stable_frame_counter >= stationary_screen_check_frame:
+                        Logger.log_msg('Stationary screen detected. Re-issuing the command...')
+                        arrow_found = False
+                        stationary_screen_stable_frame_counter = 0
+                        #Utils.save_screen('stationary_screen')
+                    previous_screen = Utils.screen
+                stationary_screen_counter += 1
+                if stationary_screen_counter >= 1000:
+                    Logger.log_error('Too many loops in cheching stationary screen in movement_handler. Exiting...')
+
             event = self.check_movement_threads()
 
             if not arrow_found and Utils.find_with_cropped("combat/fleet_arrow", dynamical_region = target_arrow_search_region):
                 Logger.log_msg('Target arrow found.')
                 arrow_found = True
             #if self.chapter_map[0].isdigit() and event["combat/alert_ammo_supplies"]:
+            if self.chapter_map == '6-1' and Utils.find_with_cropped('combat/alert_unable_reach', similarity=0.9):
+                Logger.log_msg("Cannot reach the target")
+                return -1
             if Utils.find_with_cropped("combat/alert_ammo_supplies", similarity=0.9):
                 # from time to time ammo supply similarity could go below 0.95
                 Logger.log_msg("Received ammo supplies")
-                if target_info[2] == 'enemy':
+                if target_info[2] == 'enemy' or target_info[2] == 'empty':
                     arrow_found = False
                 # wait for the info box to disappear
                 Utils.script_sleep(2)
@@ -670,10 +716,15 @@ class CombatModule(object):
             if self.chapter_map[0].isdigit() and event["menu/item_found"]:
                 Logger.log_msg("Item found on node.")
                 Utils.touch_randomly(self.region['tap_to_continue'])
-                if target_info[2] == 'enemy':
+                if target_info[2] == 'enemy' or target_info[2] == 'boss' or target_info[2] == 'empty':
                     arrow_found = False
-                if Utils.find("combat/menu_emergency"):
+                if Utils.find_with_cropped("combat/menu_emergency"): # note that current screen saved is still the old screen receiving an item
                     Utils.script_sleep(1)
+                    if use_emergency_repair:
+                        Utils.touch_randomly_ensured(self.region['emergency_repair_in_map'], "", ["combat/button_use_repair"], response_time=1)
+                        Utils.find_and_touch_with_cropped("combat/button_use_repair")
+                        Logger.log_msg("Use emergency repair")
+                        Utils.script_sleep(2)
                     Utils.touch_randomly(self.region["close_strategy_menu"])
                 if target_info[2] == "mystery_node":
                     Logger.log_msg("Target reached.")
@@ -694,10 +745,13 @@ class CombatModule(object):
                     else:
                         self.exit = 3
                         return 2
-            if target_info[2] == 'mystery_node' and fleet_arrival_detection_region.contains(self.get_fleet_location()):
+            if (target_info[2] == 'mystery_node' or target_info[2] == 'empty') and fleet_arrival_detection_region.contains(self.get_fleet_location()):
                 count_fleet_at_target_location += 1
                 if count_fleet_at_target_location >= 3:
-                    Logger.log_warning('Fleet locates at the target mystery node but nothing is detected.')
+                    if target_info[2] == 'mystery_node':
+                        Logger.log_warning('Fleet locates at the target mystery node but nothing is detected.')
+                    else:
+                        Logger.log_msg("Target empty tile reached")
                     return 0
                 continue
             if Utils.find_with_cropped("combat/menu_loading", 0.8) or Utils.find_with_cropped("combat/combat_pause", 0.7):
@@ -715,7 +769,7 @@ class CombatModule(object):
                     self.targeting_2_1_D3 = False
                     self.exit = 5
                     return 2
-                if (count > 41 and (self.chapter_map == '7-2' or self.chapter_map == '5-1') and self.config.combat['clearing_mode']):
+                if (count > 41 and (self.chapter_map == '7-2' or self.chapter_map == '6-1' or self.chapter_map == '5-1') and self.config.combat['clearing_mode']):
                     # if the count is too small, bot would return 0(no fight needed) if the target is afar.
                     # if the count is too large, bot perform many meaningless touch and waste time if the 
                     #   target arrow is not found and the info for reaching the target is not captured.
@@ -723,7 +777,7 @@ class CombatModule(object):
                     #   when the this mystery node is very close to current fleet(unable to capture target arrow).
                     Logger.log_warning("Clicking on the destination for too many times. Assuming target reached.")
                     return 0
-                if count > 41 and not (self.chapter_map == '7-2' or self.chapter_map == '5-1' or self.chapter_map == '2-1'):
+                if count > 41 and not (self.chapter_map == '7-2' or self.chapter_map == '6-1' or self.chapter_map == '5-1' or self.chapter_map == '2-1'):
                     Logger.log_msg("Blacklisting location and searching for another enemy.")
                     self.blacklist.append(location[0:2])
                     self.fleet_location = None
@@ -802,7 +856,7 @@ class CombatModule(object):
                 continue
             if force_retreat and (not pressed_retreat_button) and Utils.find("combat/button_retreat"):
                 Logger.log_msg("Retreating...")
-                if Utils.touch_randomly_ensured(self.region['retreat_button'], "combat/button_retreat", ["menu/button_confirm"]):
+                if Utils.touch_randomly_ensured(self.region['retreat_button'], "combat/button_retreat", ["menu/button_confirm"], response_time=0.5, stable_check_frame=2):
                     pressed_retreat_button = True
                 Utils.script_sleep(1)
                 continue
@@ -850,10 +904,13 @@ class CombatModule(object):
             Utils.touch_randomly(self.region['button_switch_fleet'])
             Utils.script_sleep(2)
             # for ashen simulation
-            if self.chapter_map == 'E-C1':
+            if self.chapter_map == 'E-C1' and False:
                 self.reset_screen_by_anchor_point()
             # for scherzo of iron and blood
-            if self.chapter_map == 'E-C3':
+            if self.chapter_map == 'E-C3' and False:
+                self.reset_screen_by_anchor_point()
+            # for cherry blossom
+            if self.chapter_map == 'E-D3' and True:
                 self.reset_screen_by_anchor_point()
             
 
@@ -861,12 +918,12 @@ class CombatModule(object):
         swipes = {
             'E-B3': lambda: Utils.swipe(960, 540, 1060, 670, 300),
             'E-C3': lambda: Utils.swipe(1200, 540, 800, 540, 300),
-            'E-D3': lambda: Utils.swipe(960, 540, 1060, 670, 300),
+            #'E-D3': lambda: Utils.swipe(960, 540, 1060, 670, 300),
             # needs to be updated
             '4-2': lambda: Utils.swipe(1000, 700, 1000, 400, 300), #to focus on enemies in the lower part of the map
             '5-1': lambda: Utils.swipe(1000, 400, 1000, 700, 300), #to fit the question mark of 5-1 on the screen
             #'6-1': lambda: Utils.swipe(1200, 550, 800, 450, 300), #to focus on enemies in the left part of the map(C5 mystery mark seems to be undetectable by bot)
-            '6-1': lambda: Utils.swipe(700, 500, 1300, 500, 300), #temporary solution to avoid bug related to blocking boss 
+            #'6-1': lambda: Utils.swipe(700, 500, 1300, 500, 300), #temporary solution to avoid bug related to blocking boss 
             '12-2': lambda: Utils.swipe(1000, 570, 1300, 540, 300),
             '12-3': lambda: Utils.swipe(1250, 530, 1300, 540, 300),
             '12-4': lambda: Utils.swipe(960, 300, 960, 540, 300),
@@ -916,8 +973,26 @@ class CombatModule(object):
             Utils.update_screen()
             #fleet_switched_for_E_C3 = False
 
+        # dedicated for cherry blossom event(farming points)
+        if self.chapter_map == "E-D3" and True:
+            Utils.touch(self.key_map_region['E-D3']['C1'].get_center())
+            Utils.script_sleep(6)
+            Utils.update_screen()
+            self.battle_handler()
+            Utils.touch(self.key_map_region['E-D3']['D2'].get_center())
+            Utils.script_sleep(3)
+            Utils.update_screen()
+            self.battle_handler()
+            Utils.touch(self.key_map_region['E-D3']['F7'].get_center())
+            Utils.script_sleep(8)
+            Utils.update_screen()
+            self.battle_handler()
+            Utils.update_screen()
+            self.exit = 0
+            #fleet_switched_for_E_C3 = False
+
         # dedicated for ashen simulation(farming points and gun)
-        if self.chapter_map == "E-C1":
+        if self.chapter_map == "E-C1" and False:
             for i in range(3):
                 Utils.update_screen()
                 # kill possible D6 enemy to clear path to C6
@@ -941,11 +1016,20 @@ class CombatModule(object):
                     self.battle_handler()
 
 
+        fleet_switched = False
+        # setting specific to 6-1
+        if self.chapter_map == '6-1':
+            self.reset_screen_by_anchor_point()
 #By me:
 # allow the bot to collect question node at the first turn
         #target_info = self.get_closest_target(self.blacklist)
         if not (self.config.exercise['enabled'] and self.config.combat['clearing_mode']):
-            target_info = self.get_closest_target(self.blacklist, mystery_node=(not self.config.combat["ignore_mystery_nodes"]))
+            if self.chapter_map == '6-1':
+                target_info = self.get_closest_target(self.blacklist, mystery_node=(not self.config.combat["ignore_mystery_nodes"]), focus_main_fleet=True)
+            elif self.chapter_map == '1-3':
+                target_info = self.get_closest_target(self.blacklist, mystery_node=False)
+            else:
+                target_info = self.get_closest_target(self.blacklist, mystery_node=(not self.config.combat["ignore_mystery_nodes"]))
 
         while True:
             Utils.update_screen()
@@ -960,8 +1044,55 @@ class CombatModule(object):
             if self.exit != 0:
                 self.retreat_handler()
                 return True
+            if (self.kills_count == 2 and self.chapter_map == "6-1" and not fleet_switched):
+                # this makes farming easier by switching to a healthy fleet
+                Logger.log_msg("Go to B3")
+                coord = [475, 575] #B3 in 6-1
+                Utils.touch(coord)
+                movement_result = self.movement_handler([coord[0], coord[1], 'empty']) 
+                if movement_result == -1:
+                    Logger.log_msg('Current fleet is not blocking the boss spawn point')
+                elif movement_result == 1:
+                    Logger.log_warning('Somehow there is an enemy at B3')
+                    if not self.battle_handler() and self.chapter_map == '6-1':
+                        # reset screen if defeated
+                        self.reset_screen_by_anchor_point()
+                    Utils.save_screen('somehow-B3-enemy')
+                Utils.script_sleep(1)
+                Logger.log_msg("Fleet switching after 2 fights for easier 6-1 farming.")
+                Utils.touch_randomly(self.region['button_switch_fleet'])
+                if not self.reset_screen_by_anchor_point():
+                    Logger.log_warning("Fail to reset the screen by anchor. Force retreat and try again.")
+                    self.exit = 5
+                    self.retreat_handler()
+                    return True
+                fleet_switched = True
+                Utils.script_sleep(1)
+                continue 
             if ((self.kills_count >= self.kills_before_boss[self.chapter_map] or (self.config.exercise['enabled'] and self.config.combat['clearing_mode'])) and Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)):
                 Logger.log_msg("Boss fleet was found.")
+
+                # get mystery node before attacking boss
+                # make sure the boss is visible after screen reset
+                if self.chapter_map == '6-1':
+                    self.reset_screen_by_anchor_point()
+                    mystery_nodes_list = self.get_mystery_nodes()
+                    if mystery_nodes_list:
+                        target_info = [mystery_nodes_list[0][0], mystery_nodes_list[0][1], 'mystery_node']
+                        Utils.touch(target_info[0:2])
+                        movement_result = self.movement_handler(target_info)
+                        if movement_result == -1:
+                            Logger.log_msg('Mystery node is blocked. Skip this collection and proceed to kill boss.')
+                        if movement_result == 1:
+                            Logger.log_msg('Somehow a fight is needed for collecting mystery node.')
+                            if not self.battle_handler():
+                                #retreat if lose
+                                continue
+                            Utils.save_screen('somehow-mystery-enemy')
+
+                    else:
+                        Logger.log_msg('No mystery node detected. Proceed to kill boss.')
+
 
                 if self.config.combat['boss_fleet']:
                     if self.chapter_map == 'E-B3' or self.chapter_map == 'E-D3':
@@ -1041,7 +1172,10 @@ class CombatModule(object):
                     self.exit = 5
                 continue
             if target_info == None:
-                target_info = self.get_closest_target(self.blacklist, mystery_node=(not self.config.combat["ignore_mystery_nodes"]))
+                if self.chapter_map == '6-1':
+                    target_info = self.get_closest_target(self.blacklist, mystery_node=(not self.config.combat["ignore_mystery_nodes"]), focus_main_fleet=True)
+                else:
+                    target_info = self.get_closest_target(self.blacklist, mystery_node=(not self.config.combat["ignore_mystery_nodes"]))
                 continue
             if target_info:
                 #tap at target's coordinates
@@ -1056,6 +1190,7 @@ class CombatModule(object):
 #            if Utils.find("combat/alert_unable_reach", 0.8):
             if Utils.find("combat/alert_unable_reach"):
                 Logger.log_warning("Unable to reach the target.")
+                Utils.script_sleep(1)
                 if self.config.combat['focus_on_mystery_nodes'] and target_info[2] == "mystery_node":
                     self.enemies_list.clear()
                     self.unable_handler(target_info[0:2])
@@ -1067,7 +1202,9 @@ class CombatModule(object):
                 target_info_tmp = target_info
                 movement_result = self.movement_handler(target_info)
                 if movement_result == 1:
-                    self.battle_handler()
+                    if not self.battle_handler() and self.chapter_map == '6-1' and False:
+                        # reset screen if defeated
+                        self.reset_screen_by_anchor_point()
                 # This swipe for map 2-3 makes bot more likely to target key enemies blocking the boss
                 if self.chapter_map == '2-3' and target_info_tmp[2] == 'mystery_node':
                     Logger.log_msg("Relocating screen of 2-3 after picking the mystery node.")
@@ -1090,6 +1227,7 @@ class CombatModule(object):
         self.mystery_nodes_list.clear()
         self.blacklist.clear()
         self.swipe_counter = 0
+        kill_all = True
         boss_swipe = 0
         Logger.log_msg("Started special map clear for 2-1.")
         Utils.script_sleep(2.5)
@@ -1111,12 +1249,6 @@ class CombatModule(object):
             Utils.touch_randomly(self.region['button_switch_fleet'])
             Utils.script_sleep(2)
 
-        #swipe map to fit everything on screen
-        swipes = {
-            'E-B3': lambda: Utils.swipe(960, 540, 1060, 670, 300)
-        }
-        swipes.get(self.chapter_map, lambda: None)()
-
         # disable subs' hunting range
         if self.config.combat["hide_subs_hunting_range"]:
             Utils.script_sleep(0.5)
@@ -1125,6 +1257,34 @@ class CombatModule(object):
             Utils.touch_randomly(self.region["disable_subs_hunting_radius"])
             Utils.script_sleep()
             Utils.touch_randomly(self.region["close_strategy_menu"])
+
+
+
+        # kill all case
+        # starting with mob fleet in control
+        if kill_all:
+            # kill 2 mobs
+            self.kill_specific_number_of_mob(2, mystery_node_as_target=False)
+            if self.exit != 0: self.retreat_handler(); return True
+            # reset screen due to boss appearance
+            self.reset_screen_by_anchor_point()
+            # kill 3 mobs
+            self.kill_specific_number_of_mob(3, mystery_node_as_target=False)
+            if self.exit != 0: self.retreat_handler(); return True
+            # move to D3 to avoid possible blocking on the final enemy
+            self.is_reachable(self.key_map_region['2-1']['D3'].get_center())
+            # kill 1 mobs
+            self.kill_specific_number_of_mob(1, mystery_node_as_target=True)
+            if self.exit != 0: self.retreat_handler(); return True
+            # switch to boss fleet, reset screen, and kill boss
+            Utils.touch_randomly(self.region['button_switch_fleet'])
+            self.reset_screen_by_anchor_point()
+            self.kill_boss()
+            if self.exit != 0: self.retreat_handler(); return True
+            return True 
+
+
+
 
         # starting with boss fleet in control
         # is mystery node reachable?
@@ -1228,7 +1388,7 @@ class CombatModule(object):
                         # move to D3 to avoid possible blocking of C1 enemy
                         Utils.touch(self.key_map_region['2-1']['D3'].get_center(), sleep=1)
                         # C1 enemy exist?
-                        if self.enemy_exist_here(self.key_map_region['2-1']['C1'], print_info=True):
+                        if self.enemy_exist_here(self.key_map_region['2-1']['C1']):
                             Logger.log_debug("Route A1a2b")
                             # kill E3 enemy
                             self.kill_the_specific_enemy(self.key_map_region['2-1']['E3'].get_center())
@@ -1297,7 +1457,7 @@ class CombatModule(object):
             if movement_result == 2:
                 return
 
-    def kill_specific_number_of_mob(self, number):
+    def kill_specific_number_of_mob(self, number, mystery_node_as_target=False):
         present_kill_count = self.kills_count
         target_info = None
         count = 0
@@ -1312,7 +1472,10 @@ class CombatModule(object):
                 return
             Utils.update_screen()
             if target_info == None:
-                target_info = self.get_closest_target(self.blacklist, mystery_node=False)
+                target_info = self.get_closest_target(self.blacklist, mystery_node=mystery_node_as_target)
+                if target_info == None:
+                    Logger.log_warning("No enemy detected(reqest kill: {}; actual kill: {})".format(number, self.kills_count - present_kill_count))
+                    return
                 continue
             if target_info:
                 Utils.touch(target_info[0:2])
@@ -1368,6 +1531,7 @@ class CombatModule(object):
         targeting_block_left = False
         targeting_block_A3 = False
         fleet_switched = False
+        A3_enemy_exist_at_beginning = False
 
         region_block_right = [[1230, 232, 1388, 543], [1432, 347, 1588, 468], [1449, 473, 1616, 603]] # corresponding to F1, G2, and G3 in [x1,y1,x2,y2] format.
         region_block_left = [[467, 610, 642, 754], [677, 474, 853, 603], [649, 760, 843, 917]] # B4, C3, and C5
@@ -1445,6 +1609,7 @@ class CombatModule(object):
                 if target_info[2] == 'enemy': 
                     Logger.log_msg("No more question marks.")
                     question_mark_all_obtained = True
+                    target_info = None
                     continue
                 # When blocked by A3 enemy, sometime the unable_handler fail to attack A3. Therefore we explicitely do attacking A3 here.
                 if target_info[2] == 'mystery_node' and not block_A3_clear and self.is_within_zone([target_info[0], target_info[1]], region_question_mark_A2):
@@ -1459,7 +1624,7 @@ class CombatModule(object):
                             targeting_block_A3 = True
                             break
                     continue
-            if (self.kills_count == 2 and self.config.combat['retreat_after'] == 3 and not fleet_switched) or (self.kills_count == 4 and self.config.combat['retreat_after'] == 0 and not fleet_switched):
+            if (self.kills_count == 999 and self.config.combat['retreat_after'] == 3 and not fleet_switched) or (self.kills_count >= 5 and self.config.combat['retreat_after'] == 0 and not fleet_switched and question_mark_all_obtained):
                 # switch fleet after killing 2 enemies for 3-fight farming
                 # this makes farming easier by switching to a healthy fleet
                 Logger.log_msg("Fleet switching after 2/4 fights for easier 3-fight/full 7-2 farming.")
@@ -1489,7 +1654,13 @@ class CombatModule(object):
                     }
 
                     Utils.touch_randomly(self.region['button_switch_fleet'])
-                    Utils.wait_update_screen(2)
+                    Utils.wait_update_screen(3)
+                    if not self.reset_screen_by_anchor_point():
+                        Logger.log_warning("Fail to reset the screen by anchor. Force retreat and try again.")
+                        self.exit = 5
+                        self.retreat_handler()
+                        return True
+                    
                     boss_region = Utils.find_in_scaling_range("enemy/fleet_boss", similarity=0.9)
 
                     while not boss_region:
@@ -1520,6 +1691,7 @@ class CombatModule(object):
                 self.clear_boss(boss_info)
                 continue
             if target_info == None:
+                Utils.update_screen() # just to ensure screenis updated when detecting enemies
                 targeting_block_right, targeting_block_left, targeting_block_A3, target_info = \
                 self.get_special_target_for_7_2(block_right_clear, block_left_clear, block_A3_clear, region_block_right, region_block_left, region_block_A3, targeting_block_right, targeting_block_left, targeting_block_A3)
                 location_tmp = [target_info[0], target_info[1]]
@@ -1545,14 +1717,16 @@ class CombatModule(object):
             else:
                 movement_result = self.movement_handler(target_info)
                 if movement_result == 1:
-                    self.battle_handler()
-                    if self.exit == 0:
+                    if self.battle_handler():
                         if targeting_block_right:
                             block_right_clear = True 
                         if targeting_block_left:
                             block_left_clear = True 
                         if targeting_block_A3:
                             block_A3_clear = True  
+                    else:
+                        # reset screen when lost
+                        self.reset_screen_by_anchor_point()
                     Utils.script_sleep(3)
                 """    
                 if targeting_block_right:
@@ -1582,16 +1756,16 @@ class CombatModule(object):
     def reset_screen_by_anchor_point(self):
         screen_is_reset = False
         swipes = {
-                    2: lambda: Utils.swipe(960, 240, 960, 940, 300), # swipe up
-                    0: lambda: Utils.swipe(1560, 540, 260, 540, 300), # swipe left
-                    1: lambda: Utils.swipe(960, 940, 960, 240, 300), # swipe down
-                    3: lambda: Utils.swipe(260, 540, 1560, 540, 300) # swipe right
+                    3: lambda: Utils.swipe(960, 240, 960, 940, 500), # swipe down
+                    2: lambda: Utils.swipe(1560, 540, 260, 540, 500), # swipe left
+                    1: lambda: Utils.swipe(960, 940, 960, 240, 500), # swipe up
+                    0: lambda: Utils.swipe(260, 540, 1560, 540, 500) # swipe right
                 }
         if self.chapter_map == "7-2":
             anchor_position = [1564, 677]
             anchor_tolerance = [30, 30]
         elif self.chapter_map == "6-1":
-            anchor_position = [423, 688]
+            anchor_position = [313, 738]
             anchor_tolerance = [10, 10]
         elif self.chapter_map == "2-1":
             anchor_position = [500, 557]
@@ -1601,6 +1775,9 @@ class CombatModule(object):
             anchor_tolerance = [30, 30]
         elif self.chapter_map == "E-C3":
             anchor_position = [1748, 406]
+            anchor_tolerance = [30, 30]
+        elif self.chapter_map == "E-D3":
+            anchor_position = [818, 748]
             anchor_tolerance = [30, 30]
         else:
             Logger.log_error('No anchor point is set for map {}.'.format(self.chapter_map))
@@ -1612,33 +1789,27 @@ class CombatModule(object):
         # this special treatment for 7-2 is to improve efficiency of screen reset
         if self.chapter_map == "7-2":
             # sometimes swipe will fail due to ADB not responding, so we try 3 times
-            for i in range(3):
-                if Utils.find_with_cropped("map_anchors/map_7-2_top_right", similarity=0.95):
+            if Utils.find_with_cropped("map_anchors/map_7-2_top_right", similarity=0.95):
                     # fleet at top right
                     #Utils.swipe(600, 800, 1456, 494, 300)
                     #Utils.swipe(600, 800, 1449, 496, 300)
                     #Utils.swipe(600, 800, 1415, 509, 300)
-                    Utils.swipe(600, 800, 1425, 500, 600)
-                else:
+                Utils.swipe(600, 800, 1425, 500, 600)
+            else:
                     # fleet at bottom left
                     #Utils.swipe(1400, 400, 756, 700, 300)
                     #Utils.swipe(1400, 400, 767, 693, 300)
                     #Utils.swipe(1400, 400, 761, 697, 300)
                     #Utils.swipe(1400, 400, 769, 692, 300)
-                    Utils.swipe(1400, 400, 765, 695, 600)
-                Utils.wait_update_screen()
-                anchor = Utils.find("map_anchors/map_7-2", similarity=0.95)
-                if anchor:
-                    break
-            # sometimes the swipe willl fail so 
-            if not anchor:
-                return False
-            #print(anchor_position[0] - anchor.x, anchor_position[1] - anchor.y)
-            if abs(anchor.x - anchor_position[0]) <= anchor_tolerance[0] and abs(anchor.y - anchor_position[1]) <= anchor_tolerance[1]:
-                Logger.log_msg("Screen successfully reset....")
-                screen_is_reset = True
-                return True
-                # if this special treatment fails, the general approach below still applies.
+                Utils.swipe(1400, 400, 765, 695, 600)
+            Utils.wait_update_screen()
+            anchor = Utils.find("map_anchors/map_7-2", similarity=0.95)
+            if anchor:
+                if abs(anchor.x - anchor_position[0]) <= anchor_tolerance[0] and abs(anchor.y - anchor_position[1]) <= anchor_tolerance[1]:
+                    Logger.log_msg("Screen successfully reset....")
+                    screen_is_reset = True
+                    return True           
+        # if this special treatment fails, the general approach below still applies.
 
         # this is a general approach for resetting screen        
         anchor = Utils.find_in_scaling_range("map_anchors/map_{}".format(self.chapter_map), similarity=0.95)
@@ -1652,7 +1823,7 @@ class CombatModule(object):
                 if s > 15:
                     Logger.log_error("Swipe too many times for searching anchor point.")
                     return False
-            Utils.swipe(1920/2, 1080/2, 1920/2 + anchor_position[0] - anchor.x, 1080/2 + anchor_position[1] - anchor.y, 300)
+            Utils.swipe(1920/2, 1080/2, 1920/2 + anchor_position[0] - anchor.x, 1080/2 + anchor_position[1] - anchor.y, 800)
             swipe_reset += 1
             if swipe_reset > 15:
                 Logger.log_error("Swipe too many times for resetting screen.")
@@ -1668,10 +1839,6 @@ class CombatModule(object):
                 screen_is_reset = True
         return True
         
-
-
-
-
     def is_within_zone(self, location, zone):
         # Determine if the location is within the zone
         # location: the array [x, y] for the position 
@@ -1935,7 +2102,8 @@ class CombatModule(object):
             self.mystery_nodes_list.clear()
 
 
-        if len(self.mystery_nodes_list) == 0 and not Utils.find('combat/question_mark', 0.9):
+        #if len(self.mystery_nodes_list) == 0 and not Utils.find('combat/question_mark', 0.9):
+        if len(self.mystery_nodes_list) == 0 and not Utils.find('combat/question_mark', 0.75):
             # if list is empty and a question mark is NOT found
             return self.mystery_nodes_list
         else:
@@ -1946,7 +2114,11 @@ class CombatModule(object):
             while not self.mystery_nodes_list and sim > 0.93:
                 Utils.update_screen()
 
-                l1 = list(map(lambda x:[x[0], x[1] + 140], Utils.find_all_with_resize('combat/question_mark', sim)))
+                if self.chapter_map == '6-1':
+                    sim = 0.75
+                    l1 = list(map(lambda x:[x[0], x[1] + 140], Utils.find_all_with_resize('combat/question_mark', sim)))
+                else:
+                    l1 = list(map(lambda x:[x[0], x[1] + 140], Utils.find_all_with_resize('combat/question_mark', sim)))
 
                 # filter coordinates inside prohibited regions
                 for p_region in self.prohibited_region.values():
@@ -2008,7 +2180,7 @@ class CombatModule(object):
 
         return self.fleet_location
 
-    def get_closest_target(self, blacklist=[], location=[], mystery_node=False, boss=False):
+    def get_closest_target(self, blacklist=[], location=[], mystery_node=False, boss=False, focus_main_fleet=False):
         """Method to get the enemy closest to the specified location. Note
         this will not always be the enemy that is actually closest due to the
         asset used to find enemies and when enemies are obstructed by terrain
@@ -2039,10 +2211,25 @@ class CombatModule(object):
             else:
                 # mystery nodes are valid targets, same as enemies
                 enemies = self.get_enemies(blacklist, boss)
-                targets = enemies + mystery_nodes
+                if focus_main_fleet:
+                    focused_enemy = self.get_focused_enemies(enemies)
+                    if not focused_enemy:
+                        targets = enemies + mystery_nodes
+                    else:
+                        targets = focused_enemy + mystery_nodes
+                else:
+                    targets = enemies + mystery_nodes
         else:
             # target only enemy mobs
-            targets = self.get_enemies(blacklist, boss)
+            enemies = self.get_enemies(blacklist, boss)
+            if focus_main_fleet:
+                focused_enemy = self.get_focused_enemies(enemies)
+                if not focused_enemy:
+                    targets = enemies
+                else:
+                    targets = focused_enemy
+            else:
+                targets = enemies
 
         closest = targets[Utils.find_closest(targets, location)[1]]
         
@@ -2067,6 +2254,16 @@ class CombatModule(object):
 
         return [closest[0], closest[1], target_type]
 
+    def get_focused_enemies(self, enemies):
+        focused_enemy = []
+        for i in range(len(enemies)):
+            region_to_search = Utils.get_region_for_enemy_fleet_distinction(enemies[i])
+            #if Utils.find_with_cropped('enemy/main_fleet', similarity=0.8, dynamical_region=region_to_search, print_info=True):
+            if Utils.find_in_scaling_range('enemy/main_fleet', dynamical_region=region_to_search, similarity=0.8, lowerEnd=0.8, upperEnd=1.2):
+                Logger.log_info('Enemy at [{}, {}] is a main fleet'.format(enemies[i][0], enemies[i][1]))
+                focused_enemy.append(enemies[i])
+        return focused_enemy
+
     def is_reachable(self, coord):
         # dedicated for 2-1
         # set up region to search the green arrow at destination
@@ -2081,7 +2278,7 @@ class CombatModule(object):
         # check 10 frames
         for i in range(10):
             Utils.update_screen()
-            if Utils.find_with_cropped('combat/alert_unable_reach', similarity=0.9, print_info=True):
+            if Utils.find_with_cropped('combat/alert_unable_reach', similarity=0.9):
                 Logger.log_msg('Unable to reach the target.')
                 # wait for the 'unable to reach' dialog to disappear to avoid mis-determination for other algorithm after this call
                 Utils.script_sleep(3) 
