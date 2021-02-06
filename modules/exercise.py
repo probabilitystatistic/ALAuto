@@ -36,13 +36,13 @@ class ExerciseModule(object):
             'raid_essex': Region(910, 390, 70, 70),
             'raid_essex_EX': Region(1650, 250, 50, 50),
             'raid_essex_hard': Region(1650, 410, 50, 50),
-            'raid_essex_normal': Region(1650, 580, 50, 50),
+            'raid_essex_normal': Region(1650, 530, 50, 50), #Region(1650, 580, 50, 50),
             'raid_essex_easy': Region(1650, 750, 50, 50),
             'raid_repeat': Region(1300, 960, 100, 60),
             'raid_with_ticket': Region(1150, 750, 100, 50),
             'raid_without_ticket': Region(700, 750, 100, 50),
-            'go_to_exercise': Region(1830, 980, 40, 70),
-            'go_to_daily_raid': Region(1140, 980, 160, 60),
+            'go_to_exercise': Region(1500, 900, 100, 50),
+            'go_to_daily_raid': Region(1000, 900, 150, 50),
             'main_battleline': Region(500, 500, 50, 50),
             'menu_button_battle': Region(1517, 442, 209, 206),
             'menu_combat_start': Region(1578, 921, 270, 70),
@@ -75,10 +75,10 @@ class ExerciseModule(object):
 
         # beginning of temporary code for essex raid
         # switch on/off essex raid
-        if 0:
+        if 1:
             oil, gold = Utils.get_oil_and_gold()
             do_easy = False
-            do_normal = False
+            do_normal = True
             do_hard = True
             do_EX = False
             do_essex_exercise = [do_easy, do_normal, do_hard, do_EX]
@@ -111,7 +111,6 @@ class ExerciseModule(object):
         Logger.log_msg("Starting daily raid run.")
         Utils.wait_update_screen()
         Utils.touch_randomly_ensured(self.region["menu_button_battle"], "", ["menu/attack"], response_time=1, stable_check_frame=1)
-        Utils.touch_randomly(self.region["main_battleline"])
         Utils.touch_randomly_ensured(self.region["go_to_daily_raid"], "", ["menu/daily_raid"], response_time=1, stable_check_frame=1)
 
         selected_daily_raid = None
@@ -185,13 +184,12 @@ class ExerciseModule(object):
         # move to exercise menu
         Utils.wait_update_screen()
         Utils.touch_randomly_ensured(self.region["menu_button_battle"], "", ["menu/attack"], response_time=1, stable_check_frame=1)
-        Utils.touch_randomly(self.region["main_battleline"])
         Utils.touch_randomly_ensured(self.region["go_to_exercise"], "", ["menu/exercise"], response_time=1, stable_check_frame=1)
 
         Logger.log_msg("Threshold for fleet power: {}".format(self.opponent_threshold))
 
         # exercise combat loop
-        while False:
+        while True:
             if Utils.find_with_cropped("exercise/zero_turn_left", similarity=0.99):
                 Logger.log_msg("No more exercise turn left")
                 break

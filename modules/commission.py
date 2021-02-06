@@ -137,6 +137,10 @@ class CommissionModule(object):
                 Utils.touch_randomly(self.region["tap_to_continue"])
                 Utils.script_sleep(1)
                 continue
+            if Utils.find_with_cropped("menu/drop_common") or Utils.find_with_cropped("menu/drop_elite") or Utils.find_with_cropped("menu/drop_rare") or Utils.find_with_cropped("menu/drop_ssr"):
+                Utils.touch_randomly(self.region["tap_to_continue"])
+                Utils.script_sleep(1)
+                continue
             if Utils.find("commission/alert_available", 0.9):
                 Logger.log_debug("Finished completing commissions.")
                 Utils.script_sleep(0.5)

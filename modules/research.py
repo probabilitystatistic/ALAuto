@@ -160,7 +160,7 @@ class ResearchModule(object):
             Utils.touch_randomly(self.region['right_arrow'])
         return project
 
-    def sort_project(self, project_read, criterion='URII'):
+    def sort_project(self, project_read, criterion='URII-free'):
         Logger.log_msg('Project priority strategy: {}'.format(criterion))
         if criterion == 'URII':
             # note that specific project should have higher priority than non-specific project of the same kind
@@ -171,9 +171,7 @@ class ResearchModule(object):
                              #'2H387', #'2H339', '2H207', # cube-consuming
                              '2D757', '2D779', # 2.5h directional for UR
                              '2D457', '2D479', # 8h directional for UR
-                             '2D4XX', # 8h directional
                              '2D357', '2D379', # 5h directional for UR
-                             '2D7XX', # 2.5h directional
                              '2Q3XX', '1Q3XX', # 1h equip for refresh
                              '2Q2XX', '1Q2XX', # 2h equip for refresh        
                              '2E031', '2E315', '1E031', '1E315', # equip scrape for refresh                   
@@ -182,6 +180,8 @@ class ResearchModule(object):
                              '2D3XX', # 5h directional
                              '2G236', # 2.5h money
                              '2C038'  # 12h free
+                             '2D7XX', # 2.5h directional
+                             '2D4XX', # 8h directional
                              ]
         elif criterion == 'URII-free':
             priority_list = ['2D0XX', # 30min directional
@@ -190,12 +190,19 @@ class ResearchModule(object):
                              #'2H387', #'2H339', '2H207', # cube-consuming
                              '2D757', '2D779', # 2.5h directional for UR
                              '2D457', '2D479', # 8h directional for UR
+                             '2D357', '2D379', # 5h directional for UR
                              '2C038', '1C038', # 12h free
                              '2C185', '1C185', # 8h free
                              '2C153', '1C153', # 6h free
                              '2Q3XX', '1Q3XX', # 1h equip for refresh
                              '2Q2XX', '1Q2XX', # 2h equip for refresh        
-                             '2E031', '2E315', '1E031', '1E315' # equip scrape for refresh                   
+                             '2E031', '2E315', '1E031', '1E315' # equip scrape for refresh   
+                             '2G412', # 1.5h money
+                             '2D7XX', # 2.5h directional
+                             '2G236', # 2.5h money 
+                             '2D4XX', # 8h directional                
+                             '2G531', # 4h money
+                             '2D3XX', # 5h directional  
                              ]
         elif criterion == 'free':
             priority_list = ['2D0XX', # 30min directional
@@ -206,7 +213,16 @@ class ResearchModule(object):
                              '2C153', '1C153', # 6h free
                              '2Q3XX', '1Q3XX', # 1h equip for refresh
                              '2Q2XX', '1Q2XX', # 2h equip for refresh        
-                             '2E031', '2E315', '1E031', '1E315' # equip scrape for refresh                   
+                             '2E031', '2E315', '1E031', '1E315' # equip scrape for refresh
+                             '2D757', '2D779', # 2.5h directional for UR
+                             '2D457', '2D479', # 8h directional for UR
+                             '2D357', '2D379', # 5h directional for UR
+                             '2D7XX', # 2.5h directional
+                             '2D4XX', # 8h directional
+                             '2G412', # 1.5h money
+                             '2G531', # 4h money
+                             '2D3XX', # 5h directional
+                             '2G236', # 2.5h money
                              ]
         elif criterion == 'exact-free':
             priority_list = ['2C038', '1C038', # 12h free
@@ -214,7 +230,16 @@ class ResearchModule(object):
                              '2C153', '1C153', # 6h free
                              '2Q3XX', '1Q3XX', # 1h equip for refresh
                              '2Q2XX', '1Q2XX', # 2h equip for refresh        
-                             '2E031', '2E315', '1E031', '1E315' # equip scrape for refresh                   
+                             '2E031', '2E315', '1E031', '1E315' # equip scrape for refresh
+                             '2D757', '2D779', # 2.5h directional for UR
+                             '2D457', '2D479', # 8h directional for UR
+                             '2D357', '2D379', # 5h directional for UR
+                             '2D7XX', # 2.5h directional
+                             '2D4XX', # 8h directional
+                             '2G412', # 1.5h money
+                             '2G531', # 4h money
+                             '2D3XX', # 5h directional
+                             '2G236', # 2.5h money                   
                              ]
         else:
             Logger.log_error('Invalid research strategy. Quitting...')

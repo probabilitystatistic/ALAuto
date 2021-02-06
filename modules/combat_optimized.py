@@ -37,6 +37,8 @@ class CombatModule(object):
 
         self.kills_count = 0
         self.dedicated_map_strategy = False
+        self.automatic_sortie = True
+        self.enter_automatic_battle = False
         self.kills_before_boss = {
             '1-1': 1, '1-2': 2, '1-3': 2, '1-4': 3,
             '2-1': 2, '2-2': 3, '2-3': 3, '2-4': 3,
@@ -61,6 +63,8 @@ class CombatModule(object):
             self.kills_before_boss[self.chapter_map] = self.config.combat['kills_before_boss']
 
         self.region = {
+            'automation_repeat_button': Region(1300, 820, 100, 50),
+            'automation_search_enemy_switch': Region(1800, 820, 100, 30),
             'fleet_lock': Region(1790, 750, 130, 30),
             'open_strategy_menu': Region(1797, 617, 105, 90),
             'disable_subs_hunting_radius': Region(1655, 615, 108, 108),
@@ -224,8 +228,11 @@ class CombatModule(object):
                     target_fleet_vertical_position = fleet_slot_position[slot_to_switch_fleet - 1][1] + fleet_slot_separation*(fleet_to_switch_to - 1)
                     Utils.touch([fleet_slot_position[slot_to_switch_fleet - 1][0], target_fleet_vertical_position])
                     Utils.script_sleep(0.1)
-                Utils.touch_randomly_ensured(self.region["fleet_menu_go"], "combat/menu_select_fleet", ["combat/button_retreat", "combat/alert_morale_low", "menu/button_confirm"], response_time=2)
-            if Utils.find_with_cropped("combat/button_retreat"):
+                if self.automatic_sortie:
+                    Utils.touch_randomly_ensured(self.region["fleet_menu_go"], "combat/menu_select_fleet", ["combat/automation_search_enemy", "combat/alert_morale_low", "menu/button_confirm"], response_time=1)
+                else:
+                    Utils.touch_randomly_ensured(self.region["fleet_menu_go"], "combat/menu_select_fleet", ["combat/button_retreat", "combat/alert_morale_low", "menu/button_confirm"], response_time=2)
+            if Utils.find_with_cropped("combat/button_retreat") or (self.automatic_sortie and Utils.find_with_cropped("combat/automation_search_enemy")):
                 Logger.log_debug("Found retreat button, starting clear function.")
                 oil, gold = Utils.get_oil_and_gold()
                 oil = oil + 10 # admission fee
@@ -464,19 +471,24 @@ class CombatModule(object):
 
         defeat = False
         automation_corrected = False
+        count = 0
         # in battle or not
         while True:
             Utils.update_screen()
             if Utils.find_with_cropped("combat/combat_pause", 0.7):
                 Logger.log_debug("In battle.")
             else:
-                if Utils.find_with_cropped("combat/menu_touch2continue"):
+                if Utils.find_with_cropped("combat/menu_touch2continue", 0.9):
                     Logger.log_debug("Battle finished.")
                     break
             if not automation_corrected and Utils.find_with_cropped("combat/automation_disengage", similarity=0.9):
                 Utils.touch_randomly(self.region['combat_automation'])
                 automation_corrected = True
-            Utils.script_sleep(1)
+            count += 1
+            if count >= 300:
+                Logger.log_error("Battle time is too long. Assume battle finished")
+                break
+            Utils.script_sleep(1,0)
 
         # battle summary
         # this will keep clicking the screen until the end of battle summary(where the orange "confirm" button resides) or lock screen for new ships.
@@ -883,9 +895,76 @@ class CombatModule(object):
         self.mystery_nodes_list.clear()
         self.blacklist.clear()
         self.swipe_counter = 0
+        self.enter_automatic_battle = False
         boss_swipe = 0
         Logger.log_msg("Started map clear.")
         Utils.script_sleep(2.5)
+
+        screen_update_period = 3
+        while self.automatic_sortie:
+            Utils.script_sleep(screen_update_period, 0)
+            Utils.update_screen()
+            if Utils.find_with_cropped("combat/repeat"):
+                #if self.enter_automatic_battle:
+                #   self.combats_done += 1
+                #    Logger.log_msg("One battle finished")
+                #    self.enter_automatic_battle = False
+                Logger.log_msg("One automatic sortie completed")
+                if (self.stats.combat_done + 1) % self.config.combat['retire_cycle'] == 0:
+                    Logger.log_msg("Return to main")
+                    Utils.touch_randomly_ensured(self.region['battle_handler_safe_touch'], "combat/repeat", ["menu/attack"], response_time=0.5)
+                    self.exit = 1
+                    return True
+                else:
+                    self.stats.increment_combat_done()
+                    Utils.touch_randomly_ensured(self.region['automation_repeat_button'], "", ["combat/automation_search_enemy", "combat/combat_pause"], response_time=1)
+                    Logger.log_msg("Repeating automatic sortie")
+            if Utils.find_with_cropped("menu/attack"):
+                # wait to ensure stable screen
+                Utils.wait_update_screen(3)
+                if Utils.find_with_cropped("menu/attack"):
+                    Logger.log_warning("Somehow still in attack menu. Assume defeated and retrying...")
+                    self.exit = 5
+                    return False
+            if (not self.enter_automatic_battle) and Utils.find_with_cropped("combat/combat_pause"):
+                self.enter_automatic_battle = True
+                battle_screen_update_period = screen_update_period
+                enter_battle_summary = False
+                count = 0
+                while True:
+                    Utils.script_sleep(battle_screen_update_period, 0)
+                    Utils.update_screen()
+                    count += 1
+                    if not enter_battle_summary and not Utils.find_with_cropped("combat/combat_pause"):
+                        battle_screen_update_period = 0.1
+                        enter_battle_summary = True
+                    if enter_battle_summary and (Utils.find_with_cropped("combat/automation_search_enemy") or Utils.find_with_cropped("combat/repeat")):
+                        self.combats_done += 1
+                        Logger.log_msg("One battle finished")
+                        self.enter_automatic_battle = False
+                        if False and self.chapter_map == "6-1" and (self.combats_done == 2 or self.combats_done == 4):
+                            if Utils.touch_randomly_ensured(self.region['automation_search_enemy_switch'], "combat/automation_search_enemy", ["combat/button_retreat"], response_time=0.5):
+                                Logger.log_msg("Automation sortie halted")
+                                self.reset_screen_by_anchor_point()
+                                Logger.log_msg("Collect mystery nodes")
+                                mystery_nodes_list = self.get_mystery_nodes()
+                                if mystery_nodes_list:
+                                    target_info = [mystery_nodes_list[0][0], mystery_nodes_list[0][1], 'mystery_node']
+                                    Utils.touch(target_info[0:2])
+                                    movement_result = self.movement_handler(target_info)
+                                    if movement_result == -1:
+                                        Logger.log_msg('Mystery node is blocked. Skip this mystery_node.')
+                                else:
+                                    Logger.log_msg('No mystery node is found')
+                                Logger.log_msg('Resume automation sortie')
+                                Utils.update_screen()
+                                Utils.touch_randomly_ensured(self.region['automation_search_enemy_switch'], "combat/button_retreat", ["combat/automation_search_enemy"], response_time=0.05)
+                            else:
+                                Logger.log_warning("Fail to halt automation sortie")
+                        break
+                    if count >= 300:
+                        Logger.log_warning("Too many loops in detecting a fight in automation sortie")
+                        break
 
         while Utils.find_with_cropped("menu/button_confirm"):
             Logger.log_msg("Found commission info message.")
