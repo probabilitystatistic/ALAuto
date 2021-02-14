@@ -232,17 +232,18 @@ class CombatModule(object):
                     Utils.touch_randomly_ensured(self.region["fleet_menu_go"], "combat/menu_select_fleet", ["combat/automation_search_enemy", "combat/alert_morale_low", "menu/button_confirm"], response_time=1)
                 else:
                     Utils.touch_randomly_ensured(self.region["fleet_menu_go"], "combat/menu_select_fleet", ["combat/button_retreat", "combat/alert_morale_low", "menu/button_confirm"], response_time=2)
-            if Utils.find_with_cropped("combat/button_retreat") or (self.automatic_sortie and Utils.find_with_cropped("combat/automation_search_enemy")):
+            if Utils.find_with_cropped("combat/button_retreat") or Utils.find_with_cropped("combat/automation_search_enemy"):
                 Logger.log_debug("Found retreat button, starting clear function.")
                 oil, gold = Utils.get_oil_and_gold()
                 oil = oil + 10 # admission fee
-                if (self.chapter_map[0] == '7' and self.chapter_map[2] == '2' and self.config.combat['clearing_mode'] and self.config.combat['focus_on_mystery_nodes']):
+                if False and (self.chapter_map == '7-2' and self.config.combat['clearing_mode'] and self.config.combat['focus_on_mystery_nodes']):
                     Logger.log_debug("Started special 7-2 farming.")
                     self.dedicated_map_strategy = True
-                    if not self.clear_map_special_7_2():
+                    #if not self.clear_map_special_7_2():
+                    if not self.clear_map():
                    	    self.stats.increment_combat_attempted()
                    	    break
-                elif self.chapter_map == '2-1' and self.config.combat['clearing_mode'] and self.config.combat['focus_on_mystery_nodes']:
+                elif False and self.chapter_map == '2-1' and self.config.combat['clearing_mode'] and self.config.combat['focus_on_mystery_nodes']:
                     Logger.log_debug("Started special 2-1 farming.")
                     self.dedicated_map_strategy = True
                     if not self.clear_map_special_2_1():
@@ -253,10 +254,8 @@ class CombatModule(object):
                         self.stats.increment_combat_attempted()
                         break
                 Utils.wait_update_screen()
-                # excluding the data from terms for fleet rotation due to moral
-                if not self.exit == 6: 
-                    oil_delta, gold_delta = Utils.get_oil_and_gold()
-                    self.stats.read_oil_and_gold_change_from_battle(oil_delta - oil, gold_delta - gold)
+                oil_delta, gold_delta = Utils.get_oil_and_gold()
+                self.stats.read_oil_and_gold_change_from_battle(oil_delta - oil, gold_delta - gold)
             if Utils.find_with_cropped("menu/button_sort"):
                 if self.config.enhancement['enabled'] and not enhancement_failed:
                     if not self.enhancement_module.enhancement_logic_wrapper(forced=True):
@@ -409,7 +408,7 @@ class CombatModule(object):
             count += 1
             if count >= 600:
                 Logger.log_error("Wait for correct map for too long. Terminating...")
-                exit()
+                Utils.hibernate_windows(True); exit()
 
         Logger.log_msg("Found specified map.")
         return map_region
@@ -649,7 +648,7 @@ class CombatModule(object):
         #print("fleet_arrival_detection_region:", fleet_arrival_detection_region.x, fleet_arrival_detection_region.y, fleet_arrival_detection_region.w, fleet_arrival_detection_region.h)
         count_fleet_at_target_location = 0
         use_emergency_repair = False
-        if self.chapter_map == '7-2' and self.config.combat['retreat_after'] != 3:
+        if False and self.chapter_map == '7-2' and self.config.combat['retreat_after'] != 3:
             use_emergency_repair = True
         #Utils.script_sleep(1)
         stationary_screen_counter = 0 
@@ -683,8 +682,14 @@ class CombatModule(object):
                 Logger.log_msg('Target arrow found.')
                 arrow_found = True
             #if self.chapter_map[0].isdigit() and event["combat/alert_ammo_supplies"]:
-            if self.chapter_map == '6-1' and Utils.find_with_cropped('combat/alert_unable_reach', similarity=0.9):
+            if target_info[2] == "mystery_node" and (self.chapter_map == '2-1' or self.chapter_map == '2-2' or self.chapter_map == '6-1' or self.chapter_map == '7-2') and Utils.find_with_cropped('combat/alert_unable_reach', similarity=0.9):
                 Logger.log_msg("Cannot reach the target")
+                # wait for the info box to disappear
+                while True:
+                    Utils.script_sleep(1,0)
+                    Utils.update_screen()
+                    if not Utils.find_with_cropped('combat/alert_unable_reach', similarity=0.9):
+                        break
                 return -1
             if Utils.find_with_cropped("combat/alert_ammo_supplies", similarity=0.9):
                 # from time to time ammo supply similarity could go below 0.95
@@ -692,9 +697,12 @@ class CombatModule(object):
                 if target_info[2] == 'enemy' or target_info[2] == 'empty':
                     arrow_found = False
                 # wait for the info box to disappear
-                Utils.script_sleep(2)
+                while True:
+                    Utils.script_sleep(1,0)
+                    Utils.update_screen()
+                    if not Utils.find_with_cropped("combat/alert_ammo_supplies", similarity=0.9):
+                        break
                 if target_info[2] == "mystery_node":
-                    Logger.log_msg("Target reached.")
                     self.fleet_location = target_info[0:2]
                     return 0
                 continue
@@ -739,7 +747,6 @@ class CombatModule(object):
                         Utils.script_sleep(2)
                     Utils.touch_randomly(self.region["close_strategy_menu"])
                 if target_info[2] == "mystery_node":
-                    Logger.log_msg("Target reached.")
                     self.fleet_location = target_info[0:2]
                     return 0
                 continue
@@ -861,27 +868,27 @@ class CombatModule(object):
             if count > 100:
                 # ensurance policy to avoid infinite loops
                 Logger.log_error("Stuck in retreat_handler! Quitting the program...")
-                exit()
-            if Utils.find("combat/menu_formation"):
+                Utils.hibernate_windows(True); exit()
+            if Utils.find_with_cropped("combat/menu_formation"):
                 Utils.touch_randomly(self.region["menu_nav_back"])
                 Utils.script_sleep(1)
                 continue
-            if force_retreat and (not pressed_retreat_button) and Utils.find("combat/button_retreat"):
+            if force_retreat and (not pressed_retreat_button) and Utils.find_with_cropped("combat/button_retreat"):
                 Logger.log_msg("Retreating...")
                 if Utils.touch_randomly_ensured(self.region['retreat_button'], "combat/button_retreat", ["menu/button_confirm"], response_time=0.5, stable_check_frame=2):
                     pressed_retreat_button = True
                 Utils.script_sleep(1)
                 continue
-            if Utils.find_and_touch("menu/button_confirm"):
+            if Utils.find_and_touch_with_cropped("menu/button_confirm"):
                 # confirm either the retreat or an urgent commission alert
                 Utils.script_sleep(1)
                 continue
-            if Utils.find_and_touch("combat/button_confirm"):
-                # ensurance policy if the touch in the end of boss combat fails
-                Logger.log_error("The touch in the end of a boss battle fails!")
-                Utils.script_sleep(10)
-                continue
-            if Utils.find("menu/attack"):
+            #if Utils.find_and_touch_with_cropped("combat/button_confirm"):
+            #    # ensurance policy if the touch in the end of boss combat fails
+            #    Logger.log_error("The touch in the end of a boss battle fails!")
+            #    Utils.script_sleep(10)
+            #    continue
+            if Utils.find_with_cropped("menu/attack") or Utils.find_with_cropped("combat/repeat"):
                 return
             count += 1
 
@@ -895,76 +902,171 @@ class CombatModule(object):
         self.mystery_nodes_list.clear()
         self.blacklist.clear()
         self.swipe_counter = 0
-        self.enter_automatic_battle = False
+        
         boss_swipe = 0
-        Logger.log_msg("Started map clear.")
-        Utils.script_sleep(2.5)
+        
+        if self.automatic_sortie:
+            Logger.log_msg("=== Started automation sortie ===")
+            screen_update_period = 3
+            preparation_done = False
+            automation_sortie_interuption = True # global switch for automation interuption
+            time_start = datetime.now()
+        else:
+            Logger.log_msg("=== Started map clear ===")
+            Utils.script_sleep(2.5)
 
-        screen_update_period = 3
         while self.automatic_sortie:
+
+            # operation before first fight
+            if not preparation_done:
+                #if self.config.combat['retreat_after'] != 0:
+                if automation_sortie_interuption and (self.chapter_map == "2-1" or self.chapter_map == "2-2") and self.switch_automation_search_enemy("off"):
+                    # wait until fleet and nodes to appear
+                    Utils.script_sleep(2,0)
+                    Utils.update_screen()
+                    # verify if still in map(attack order might have been issued)
+                    if Utils.find_with_cropped("combat/button_retreat"):
+                        self.collect_mystery_node()
+                        self.switch_automation_search_enemy(choice='on')
+                    elif Utils.find_with_cropped("combat/combat_pause", 0.7) or Utils.find_with_cropped("combat/menu_loading", 0.8):
+                        Logger.log_warning("Attack order has been issued")
+                        # automation sortie is resume by the battle detection below
+                else:
+                    self.switch_automation_search_enemy(choice='on')
+                preparation_done = True
+
             Utils.script_sleep(screen_update_period, 0)
             Utils.update_screen()
+
             if Utils.find_with_cropped("combat/repeat"):
-                #if self.enter_automatic_battle:
-                #   self.combats_done += 1
-                #    Logger.log_msg("One battle finished")
-                #    self.enter_automatic_battle = False
                 Logger.log_msg("One automatic sortie completed")
-                if (self.stats.combat_done + 1) % self.config.combat['retire_cycle'] == 0:
+                time_start = datetime.now()
+                if (self.stats.combat_done + 1) % self.config.combat['retire_cycle'] == 0 and self.exit == 0:
                     Logger.log_msg("Return to main")
                     Utils.touch_randomly_ensured(self.region['battle_handler_safe_touch'], "combat/repeat", ["menu/attack"], response_time=0.5)
-                    self.exit = 1
+                    if self.exit == 0:
+                        self.exit = 1
                     return True
                 else:
                     self.stats.increment_combat_done()
                     Utils.touch_randomly_ensured(self.region['automation_repeat_button'], "", ["combat/automation_search_enemy", "combat/combat_pause"], response_time=1)
-                    Logger.log_msg("Repeating automatic sortie")
+                    Logger.log_msg("== Repeating automatic sortie ==")
+                    self.combats_done = 0
+                    preparation_done = False
+
+            # dealing with the bug for missing automation-sortie summary
             if Utils.find_with_cropped("menu/attack"):
                 # wait to ensure stable screen
                 Utils.wait_update_screen(3)
                 if Utils.find_with_cropped("menu/attack"):
-                    Logger.log_warning("Somehow still in attack menu. Assume defeated and retrying...")
-                    self.exit = 5
-                    return False
-            if (not self.enter_automatic_battle) and Utils.find_with_cropped("combat/combat_pause"):
-                self.enter_automatic_battle = True
+                    Logger.log_warning("Somehow in attack menu. Assume victory and retry...")
+                    self.exit = 1
+                    return True
+
+            if Utils.find_with_cropped("combat/combat_pause", 0.7):
                 battle_screen_update_period = screen_update_period
                 enter_battle_summary = False
                 count = 0
+
                 while True:
                     Utils.script_sleep(battle_screen_update_period, 0)
                     Utils.update_screen()
                     count += 1
-                    if not enter_battle_summary and not Utils.find_with_cropped("combat/combat_pause"):
-                        battle_screen_update_period = 0.1
-                        enter_battle_summary = True
-                    if enter_battle_summary and (Utils.find_with_cropped("combat/automation_search_enemy") or Utils.find_with_cropped("combat/repeat")):
-                        self.combats_done += 1
+
+                    if not enter_battle_summary and not Utils.find_with_cropped("combat/combat_pause", 0.7):
                         Logger.log_msg("One battle finished")
-                        self.enter_automatic_battle = False
-                        if False and self.chapter_map == "6-1" and (self.combats_done == 2 or self.combats_done == 4):
-                            if Utils.touch_randomly_ensured(self.region['automation_search_enemy_switch'], "combat/automation_search_enemy", ["combat/button_retreat"], response_time=0.5):
-                                Logger.log_msg("Automation sortie halted")
-                                self.reset_screen_by_anchor_point()
-                                Logger.log_msg("Collect mystery nodes")
-                                mystery_nodes_list = self.get_mystery_nodes()
-                                if mystery_nodes_list:
-                                    target_info = [mystery_nodes_list[0][0], mystery_nodes_list[0][1], 'mystery_node']
-                                    Utils.touch(target_info[0:2])
-                                    movement_result = self.movement_handler(target_info)
-                                    if movement_result == -1:
-                                        Logger.log_msg('Mystery node is blocked. Skip this mystery_node.')
+                        enter_battle_summary = True
+                        self.combats_done += 1
+                        time_start = datetime.now()
+                        # issue fast screen update for halting auto sortie
+                        if automation_sortie_interuption and \
+                            ( (self.chapter_map == "6-1" and (self.combats_done ==  2 or self.combats_done == 99)) or
+                              (self.chapter_map == "2-9" and (self.combats_done ==  2 or self.combats_done == 99)) or
+                              (self.chapter_map == "7-2" and (self.combats_done ==  3 or self.combats_done == 99))    ):
+                            battle_screen_update_period = 0.1     
+                        else:
+                            break     
+
+                    # break automation sortie for special moves
+                    if automation_sortie_interuption and enter_battle_summary and \
+                       (Utils.find_with_cropped("combat/automation_search_enemy") or 
+                        Utils.find_with_cropped("combat/repeat")):
+                        
+                        # turn off automation
+                        if self.switch_automation_search_enemy(choice='off'):
+                            # wait for screen to stablize
+                            Utils.script_sleep(3,0)
+
+                            # special moves for each map
+                            if (self.chapter_map == "7-2") and self.reset_screen_by_anchor_point():
+                                # note that the attack fleet must be in the first slot!
+                                if self.config.combat['retreat_after'] == 0:
+                                    self.collect_mystery_node(allow_clear_blocking=True)
                                 else:
-                                    Logger.log_msg('No mystery node is found')
-                                Logger.log_msg('Resume automation sortie')
-                                Utils.update_screen()
-                                Utils.touch_randomly_ensured(self.region['automation_search_enemy_switch'], "combat/button_retreat", ["combat/automation_search_enemy"], response_time=0.05)
+                                    self.collect_mystery_node()
+
+                            if self.chapter_map == "6-1" and self.combats_done ==  2:
+                                # 5-oil fleet: 2 fights(3,4); 7-oil fleet: 3 fight(1,2,5)
+                                Utils.touch_randomly(self.region['button_switch_fleet'])
+                                if self.reset_screen_by_anchor_point():
+                                    self.collect_mystery_node()
+                                self.kill_specific_number_of_mob(2,focus_main_fleet=True)
+                                if self.reset_screen_by_anchor_point():
+                                    self.collect_mystery_node()
+
+                            if (self.chapter_map == "6-9" or 
+                                self.chapter_map == "2-1") and self.reset_screen_by_anchor_point():                                   
+                                self.collect_mystery_node()
+
+                            # retreat or resume automation sorite
+                            if self.config.combat['retreat_after'] != 0 and self.combats_done >= self.config.combat['retreat_after']: 
+                                Logger.log_msg("Retreating after defeating {} enemies".format(self.config.combat['retreat_after']))
+                                self.retreat_handler()
                             else:
-                                Logger.log_warning("Fail to halt automation sortie")
+                                if not self.switch_automation_search_enemy(choice='on'):
+                                    continue
                         break
-                    if count >= 300:
+
+                    if count >= 150:
                         Logger.log_warning("Too many loops in detecting a fight in automation sortie")
+                        # Dealing with the case that automation sortie is switch off but an attack order has already been issued
+                        if enter_battle_summary and Utils.find_with_cropped("combat/menu_touch2continue", 0.9):
+                            self.resume_automation_sortie_from_battle_summary()
                         break
+
+            if Utils.find_with_cropped("combat/alert_morale_low"):
+                if self.config.combat['ignore_morale']:
+                    Utils.find_and_touch("menu/button_confirm")
+                else:
+                    Utils.touch_randomly(self.region['close_info_dialog'])
+                    if self.config.combat['low_mood_rotation']:
+                        self.exit = 6
+                        self.fleet_switch_due_to_morale= True
+                        Logger.log_warning("Low morale detected. Will switch to a different fleet.")
+                    else:
+                        self.exit = 3
+            
+            #if Utils.find_with_cropped("combat/menu_touch2continue", 0.9):
+            #    Utils.script_sleep(5,0)
+            #    if Utils.find_with_cropped("combat/menu_touch2continue", 0.9):
+            #        self.resume_automation_sortie_from_battle_summary()
+
+            if not self.exit == 0:
+                Logger.log_msg("Retreating...")
+                self.retreat_handler()
+                Utils.touch_randomly_ensured(self.region['battle_handler_safe_touch'], "combat/repeat", ["menu/attack"], response_time=0.5)
+                if self.exit == 3 or self.exit == 6:
+                    return True
+                else:
+                    return False
+
+            #if not self.enter_automatic_battle = False and Utils.find_with_cropped("")
+
+            time_passed = datetime.now() - time_start
+            if time_passed.total_seconds() >= 600:
+                Logger.log_warning("The time between one battle is too long! Assume defeat and retry...")
+                self.exit = 2
+
 
         while Utils.find_with_cropped("menu/button_confirm"):
             Logger.log_msg("Found commission info message.")
@@ -982,27 +1084,14 @@ class CombatModule(object):
         if self.config.combat['fleet_switch_at_beinning']:
             Utils.touch_randomly(self.region['button_switch_fleet'])
             Utils.script_sleep(2)
-            # for ashen simulation
-            if self.chapter_map == 'E-C1' and False:
-                self.reset_screen_by_anchor_point()
-            # for scherzo of iron and blood
-            if self.chapter_map == 'E-C3' and False:
-                self.reset_screen_by_anchor_point()
-            # for cherry blossom
-            if self.chapter_map == 'E-D3' and True:
-                self.reset_screen_by_anchor_point()
             
 
         #swipe map to fit everything on screen
         swipes = {
             'E-B3': lambda: Utils.swipe(960, 540, 1060, 670, 300),
             'E-C3': lambda: Utils.swipe(1200, 540, 800, 540, 300),
-            #'E-D3': lambda: Utils.swipe(960, 540, 1060, 670, 300),
-            # needs to be updated
             '4-2': lambda: Utils.swipe(1000, 700, 1000, 400, 300), #to focus on enemies in the lower part of the map
             '5-1': lambda: Utils.swipe(1000, 400, 1000, 700, 300), #to fit the question mark of 5-1 on the screen
-            #'6-1': lambda: Utils.swipe(1200, 550, 800, 450, 300), #to focus on enemies in the left part of the map(C5 mystery mark seems to be undetectable by bot)
-            #'6-1': lambda: Utils.swipe(700, 500, 1300, 500, 300), #temporary solution to avoid bug related to blocking boss 
             '12-2': lambda: Utils.swipe(1000, 570, 1300, 540, 300),
             '12-3': lambda: Utils.swipe(1250, 530, 1300, 540, 300),
             '12-4': lambda: Utils.swipe(960, 300, 960, 540, 300),
@@ -1021,78 +1110,6 @@ class CombatModule(object):
             Utils.touch_randomly(self.region["disable_subs_hunting_radius"])
             Utils.script_sleep()
             Utils.touch_randomly(self.region["close_strategy_menu"])
-
-        # special initial move/switch for easier farming in some specific maps
-        if self.chapter_map == "5-1":
-            # Special farming for 5-1:
-            # Setup: fleet 1 = boss fleet; another fleet = mob fleet; enable boss fleet = True; prioritize mystery node = True
-            # 1. boss fleet move to obtain the mystery node at the beginning(this also ensures no boss blocking by boss fleet)
-            # 2. switch to mob fleet, and let it clear 4 enemies(boss block by mob fleet can be handled by the default left disclosing)
-            # 3. switch back to boss fleet, and clear the boss
-            target_info = self.get_closest_target(self.blacklist, mystery_node=True)
-            Utils.touch(target_info[0:2])
-            self.movement_handler(target_info)
-            Utils.touch_randomly(self.region['button_switch_fleet'])
-            Utils.script_sleep(2)
-            Utils.update_screen()
-        
-        # dedicated for scherzo of iron and blood event(farming points and torpedo fighter)
-        if self.chapter_map == "E-C3" and False:
-            Utils.touch(self.key_map_region['E-C3']['C1'].get_center())
-            Utils.script_sleep(2)
-            Utils.touch(self.key_map_region['E-C3']['D1'].get_center())
-            Utils.script_sleep(1)
-            Utils.update_screen()
-            self.battle_handler()
-            Utils.touch(self.key_map_region['E-C3']['F2'].get_center())
-            Utils.script_sleep(2)
-            Utils.update_screen()
-            self.battle_handler()
-            #Utils.touch_randomly(self.region['button_switch_fleet'])
-            Utils.update_screen()
-            #fleet_switched_for_E_C3 = False
-
-        # dedicated for cherry blossom event(farming points)
-        if self.chapter_map == "E-D3" and True:
-            Utils.touch(self.key_map_region['E-D3']['C1'].get_center())
-            Utils.script_sleep(6)
-            Utils.update_screen()
-            self.battle_handler()
-            Utils.touch(self.key_map_region['E-D3']['D2'].get_center())
-            Utils.script_sleep(3)
-            Utils.update_screen()
-            self.battle_handler()
-            Utils.touch(self.key_map_region['E-D3']['F7'].get_center())
-            Utils.script_sleep(8)
-            Utils.update_screen()
-            self.battle_handler()
-            Utils.update_screen()
-            self.exit = 0
-            #fleet_switched_for_E_C3 = False
-
-        # dedicated for ashen simulation(farming points and gun)
-        if self.chapter_map == "E-C1" and False:
-            for i in range(3):
-                Utils.update_screen()
-                # kill possible D6 enemy to clear path to C6
-                if i == 0:
-                    if self.enemy_exist_here(self.key_map_region['E-C1']['D6']):
-                        coord = self.key_map_region['E-C1']['D6'].get_center()
-                        Logger.log_msg("D6 enemy exists")
-                    else:
-                        Logger.log_msg("No D6 enemy")
-                        continue
-                if i == 1:
-                    coord = self.key_map_region['E-C1']['C6'].get_center()
-                    Logger.log_msg("Targetting C6 elite")
-                if i == 2:
-                    coord = self.key_map_region['E-C1']['F5'].get_center()
-                    Logger.log_msg("Targetting F5 elite")
-                target_info = [coord[0], coord[1], 'enemy']
-                Utils.touch(coord)
-                movement_result = self.movement_handler(target_info)
-                if movement_result == 1:
-                    self.battle_handler()
 
 
         fleet_switched = False
@@ -1296,6 +1313,126 @@ class CombatModule(object):
                 #Utils.script_sleep(3)
                 continue
 
+    def resume_automation_sortie_from_battle_summary(self):
+        Logger.log_warning("Stuck in battle summary. Trying to resume automation sortie...")
+        # clicks until confirm button appears
+        # if new ship appear, this will get stucked
+        Utils.touch_randomly_ensured(self.region['battle_handler_safe_touch'], "", 
+                                    ["combat/button_confirm", "combat/alert_lock"], 
+                                    similarity_after=0.9, response_time=0.1)
+        # click confirm
+        response = Utils.touch_randomly_ensured(self.region["combat_end_confirm"], "", 
+                                                ["menu/button_confirm", "combat/button_retreat", 
+                                                 "combat/repeat", "combat/defeat_close_button"], 
+                                                response_time=3, similarity_after=0.9,
+                                                stable_check_frame=2)
+        # resume automation sortie if still in map
+        if Utils.find_with_cropped("combat/repeat"):
+            Logger.log_msg("Automation sortie resumed")
+        elif Utils.find_with_cropped("combat/button_retreat"):
+            self.switch_automation_search_enemy(choice='on')
+            Logger.log_msg("Automation sortie resumed")
+        else:
+            Logger.log_warning("Fail to resume automation sortie")
+            Utils.hibernate_windows(True)
+            exit()
+
+    def switch_automation_search_enemy(self, choice='off'):
+        if choice == 'off' and Utils.find_with_cropped("combat/automation_search_enemy_off", color=True, similarity=0.99):
+            Logger.log_msg("Automation sortie already off")
+            return True
+        if choice == 'on' and Utils.find_with_cropped("combat/automation_search_enemy", color=True, similarity=0.99):
+            Logger.log_msg("Automation sortie already on")
+            return True
+        count = 0
+        while True:
+            Utils.touch_randomly(self.region['automation_search_enemy_switch'])
+            Utils.script_sleep(0.1, 0)
+            Utils.update_screen()
+            #Utils.find_with_cropped("combat/automation_search_enemy_off", color=True, print_info=True)
+            #Utils.find_with_cropped("combat/automation_search_enemy", color=True, print_info=True)
+            if choice == 'off' and Utils.find_with_cropped("combat/automation_search_enemy_off", color=True, similarity=0.99):
+                Logger.log_msg("Automation sortie off")
+                return True
+            if choice == 'on' and (Utils.find_with_cropped("combat/automation_search_enemy", color=True, similarity=0.99) or 
+                                   Utils.find_with_cropped('combat/menu_loading', 0.8) or 
+                                   Utils.find_with_cropped('combat/combat_pause', 0.7)  
+                                   ):
+                Logger.log_msg('Automation sortie on')
+                return True
+            count += 1
+            if count >= 100:
+                Logger.log_warning("  Fail to switch {} automation sortie".format(choice))
+                self.exit = 2
+                #if choice == 'on':
+                #    Utils.save_screen("automation_sortie_off_fail")
+                #    Logger.log_error("Terminating...")
+                #    Utils.hibernate_windows(True)
+                #    exit()
+                return False
+
+    def collect_mystery_node(self, allow_clear_blocking=False):
+        number_of_node_collected = 0
+        blacklist = []
+        Utils.update_screen()
+        while True:
+            self.mystery_nodes_list = self.get_mystery_nodes(blacklist)
+
+            if len(self.mystery_nodes_list) == 0:
+                break
+
+            target_info = [self.mystery_nodes_list[0][0], self.mystery_nodes_list[0][1], 'mystery_node']
+
+            Utils.touch(target_info[0:2])
+            if self.movement_handler(target_info) == -1:
+                if allow_clear_blocking:
+                    target_info_blocked_mystery = target_info
+                    Logger.log_msg('Mystery node is blocked. Trying to clear the blocking enemy.')
+                    #target_info = self.get_closest_target(location=array(target_info_blocked_mystery[0], target_info_blocked_mystery[1])) 
+                    target_info = self.get_closest_target(location=target_info_blocked_mystery[0:2])  
+                    if not target_info == None:
+                        Utils.touch(target_info[0:2]) 
+                        if self.movement_handler(target_info) == -1:
+                            Logger.log_msg('The blocking enemy is also blocked. Skip this mystery node')
+                            blacklist.append(target_info[0:2])
+                        else:
+                            self.battle_handler()
+                            target_info = target_info_blocked_mystery
+                            Utils.touch(target_info[0:2]) 
+                            if self.movement_handler(target_info) == -1:
+                                Logger.log_msg('The mystery node is still blocked. Skip this mystery node')
+                                blacklist.append(target_info[0:2])
+                            number_of_node_collected += 1
+                    else:
+                        Logger.log_msg('Cannot find an enemy. Skip this collection.')
+                        blacklist.append(target_info[0:2])
+                        Utils.script_sleep(3,0)
+                else:
+                    Logger.log_msg('Cannot reach the mystery node. Skip this collection.')
+                    blacklist.append(target_info[0:2])
+            else:
+                number_of_node_collected += 1
+
+            self.mystery_nodes_list.clear()
+            
+        """
+        if not len(self.mystery_nodes_list) == 0:
+            for i in range(len(self.mystery_nodes_list)):
+                target_info = [self.mystery_nodes_list[i][0], self.mystery_nodes_list[i][1], 'mystery_node']
+                Utils.touch(target_info[0:2])
+                if self.movement_handler(target_info) == -1:
+                    Logger.log_msg('Mystery node is blocked. Skip this mystery_node.')
+                    Utils.script_sleep(3,0)
+                else:
+                    number_of_node_collected += 1
+        else:
+            Logger.log_msg('No mystery node is found')
+        """
+        self.mystery_nodes_list.clear()
+        if number_of_node_collected > 1:
+            Logger.log_msg('{} mystery node collected'.format(number_of_node_collected))
+        return
+
     def clear_map_special_2_1(self):
         """ Clears map.
         """
@@ -1308,7 +1445,7 @@ class CombatModule(object):
         self.swipe_counter = 0
         kill_all = True
         boss_swipe = 0
-        Logger.log_msg("Started special map clear for 2-1.")
+        Logger.log_msg("=== Started special map clear for 2-1 ===")
         Utils.script_sleep(2.5)
 
         while Utils.find_with_cropped("menu/button_confirm"):
@@ -1536,7 +1673,7 @@ class CombatModule(object):
             if movement_result == 2:
                 return
 
-    def kill_specific_number_of_mob(self, number, mystery_node_as_target=False):
+    def kill_specific_number_of_mob(self, number, mystery_node_as_target=False, focus_main_fleet=False):
         present_kill_count = self.kills_count
         target_info = None
         count = 0
@@ -1544,6 +1681,7 @@ class CombatModule(object):
             count += 1
             if count >= 100:
                 Logger.log_error("Too many loops in kill_specific_number_of_mob. Terminating...")
+                Utils.hibernate_windows(True)
                 exit()
             if self.exit != 0:
                 return
@@ -1551,28 +1689,23 @@ class CombatModule(object):
                 return
             Utils.update_screen()
             if target_info == None:
-                target_info = self.get_closest_target(self.blacklist, mystery_node=mystery_node_as_target)
+                target_info = self.get_closest_target(self.blacklist, mystery_node=mystery_node_as_target, focus_main_fleet=focus_main_fleet)
                 if target_info == None:
                     Logger.log_warning("No enemy detected(reqest kill: {}; actual kill: {})".format(number, self.kills_count - present_kill_count))
                     return
                 continue
             if target_info:
                 Utils.touch(target_info[0:2])
-                Utils.update_screen()
-            else:
-                continue
-            if Utils.find_with_cropped("combat/alert_unable_reach"):
-                Logger.log_warning("Unable to reach the target.")
-                self.blacklist.append(target_info[0:2])
-                target_info = None
-                continue
-            else:
                 movement_result = self.movement_handler(target_info)
                 if movement_result == 1:
                     self.battle_handler()
+                    self.blacklist.clear()
+                elif movement_result == -1:
+                    self.blacklist.append(target_info[0:2])
                 target_info = None
-                self.blacklist.clear()
+            else:
                 continue
+            
 
     def kill_boss(self):
         Utils.wait_update_screen(0.5)
@@ -1639,7 +1772,7 @@ class CombatModule(object):
         self.mystery_nodes_list.clear()
         self.blacklist.clear()
         self.swipe_counter = 0
-        Logger.log_msg("Started special map clear for 7-2.")
+        Logger.log_msg("=== Started special map clear for 7-2 ===")
         Utils.script_sleep(2.5)
 
         while Utils.find_with_cropped("menu/button_confirm"):
@@ -1866,21 +1999,21 @@ class CombatModule(object):
         Utils.update_screen()
 
         # this special treatment for 7-2 is to improve efficiency of screen reset
-        if self.chapter_map == "7-2":
+        if self.chapter_map == "7-2" and not self.automatic_sortie:
             # sometimes swipe will fail due to ADB not responding, so we try 3 times
             if Utils.find_with_cropped("map_anchors/map_7-2_top_right", similarity=0.95):
                     # fleet at top right
                     #Utils.swipe(600, 800, 1456, 494, 300)
                     #Utils.swipe(600, 800, 1449, 496, 300)
                     #Utils.swipe(600, 800, 1415, 509, 300)
-                Utils.swipe(600, 800, 1425, 500, 600)
+                Utils.swipe(600, 800, 1425, 500, 300)
             else:
                     # fleet at bottom left
                     #Utils.swipe(1400, 400, 756, 700, 300)
                     #Utils.swipe(1400, 400, 767, 693, 300)
                     #Utils.swipe(1400, 400, 761, 697, 300)
                     #Utils.swipe(1400, 400, 769, 692, 300)
-                Utils.swipe(1400, 400, 765, 695, 600)
+                Utils.swipe(1400, 400, 765, 695, 300)
             Utils.wait_update_screen()
             anchor = Utils.find("map_anchors/map_7-2", similarity=0.95)
             if anchor:
@@ -1892,6 +2025,9 @@ class CombatModule(object):
 
         # this is a general approach for resetting screen        
         anchor = Utils.find_in_scaling_range("map_anchors/map_{}".format(self.chapter_map), similarity=0.95)
+        if not anchor == None and abs(anchor.x - anchor_position[0]) <= anchor_tolerance[0] and abs(anchor.y - anchor_position[1]) <= anchor_tolerance[1]:
+            Logger.log_msg("Screen is already reset.")
+            screen_is_reset = True
         while not screen_is_reset:
             s = 0
             while not anchor:
@@ -2078,6 +2214,7 @@ class CombatModule(object):
             count += 1
             if count >= 100:
                 Logger.log_error("Too many loops in searching enemies. Terminating...")
+                Utils.hibernate_windows(True)
                 exit()
             if (boss and len(blacklist) > 4) or (not boss and len(blacklist) > 3) or sim < 0.985:
                 if self.swipe_counter > 3: self.swipe_counter = 0
@@ -2180,9 +2317,9 @@ class CombatModule(object):
         if len(blacklist) > 2:
             self.mystery_nodes_list.clear()
 
-
+        Utils.update_screen()
         #if len(self.mystery_nodes_list) == 0 and not Utils.find('combat/question_mark', 0.9):
-        if len(self.mystery_nodes_list) == 0 and not Utils.find('combat/question_mark', 0.75):
+        if len(self.mystery_nodes_list) == 0 and not Utils.find('combat/question_mark', 0.8): # in 6-1 a lower mystery node is detected to be 0.84
             # if list is empty and a question mark is NOT found
             return self.mystery_nodes_list
         else:
@@ -2191,13 +2328,10 @@ class CombatModule(object):
             sim = 0.95
 
             while not self.mystery_nodes_list and sim > 0.93:
+
                 Utils.update_screen()
 
-                if self.chapter_map == '6-1':
-                    sim = 0.75
-                    l1 = list(map(lambda x:[x[0], x[1] + 140], Utils.find_all_with_resize('combat/question_mark', sim)))
-                else:
-                    l1 = list(map(lambda x:[x[0], x[1] + 140], Utils.find_all_with_resize('combat/question_mark', sim)))
+                l1 = list(map(lambda x:[x[0], x[1] + 140], Utils.find_all_with_resize('combat/question_mark', sim)))
 
                 # filter coordinates inside prohibited regions
                 for p_region in self.prohibited_region.values():

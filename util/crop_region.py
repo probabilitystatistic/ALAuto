@@ -16,6 +16,7 @@ data = {
     "combat/alert_unable_reach": [743, 260, 1143, 521],
     "combat/automation_disengage": [0, 25, 250, 115],
     "combat/automation_search_enemy": [1750, 800, 1920, 880],
+    "combat/automation_search_enemy_off": [1750, 800, 1920, 880],
     "combat/button_confirm": [1480, 920, 1800, 1080],
     "combat/button_go": [1200, 700, 1800, 980],
     "combat/button_retreat": [1100, 950, 1400, 1080], 

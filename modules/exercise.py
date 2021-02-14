@@ -78,7 +78,7 @@ class ExerciseModule(object):
         if 1:
             oil, gold = Utils.get_oil_and_gold()
             do_easy = False
-            do_normal = True
+            do_normal = False
             do_hard = True
             do_EX = False
             do_essex_exercise = [do_easy, do_normal, do_hard, do_EX]

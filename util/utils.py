@@ -200,6 +200,19 @@ class Utils(object):
             time.sleep(uniform(base, base + flex))
 
     @classmethod
+    def hibernate_windows(cls, wait_for_key=False):
+        app_name = 'com.hkmanjuu.azurlane.gp'
+        Logger.log_msg("Prepare to enter hibernation mode to save power")
+        cls.save_screen("Hibernation", True)
+        # Bluestacks will wake pc up if not killed
+        Adb.shell('am force-stop {}'.format(app_name))
+        Logger.log_msg("Enter hibernation mode in 10 seconds...")
+        cls.script_sleep(10,0)
+        os.system("c:\Windows\System32\shutdown.exe /h")
+        if wait_for_key:
+            input("Bot paused due to hibernatation. Press any key to continue...")
+
+    @classmethod
     def save_screen(cls, description=None, need_to_update_screen=False, crop_region=None):
         if need_to_update_screen:
             cls.update_screen()
